@@ -1,0 +1,11 @@
+# LIFT QLoRA reranker on Qwen2.5-7B-Instruct. Consumed by `emg2text.rerank.train --config`
+# (training hyperparameters) and run.sh (topk / tag for data + inference).
+model: Qwen/Qwen2.5-7B-Instruct
+epochs: 3.0
+bs: 2
+accum: 8
+lr: 0.0002
+r: 16
+max_len: 320
+topk: 10        # n-best candidates shown to the LLM (data assembly + inference)
+tag: liftx

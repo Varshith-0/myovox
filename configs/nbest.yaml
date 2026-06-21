@@ -1,0 +1,14 @@
+# Multi-scale n-best extraction on the ensemble logits, then union -> ensU (oracle 9.30).
+# Read by run.sh (it extracts these values, no hyperparameters live in the script).
+blank_pen: 2.0
+search_beam: 20.0
+nbest_scales: "0.5"
+nproc: 12
+# The union is over these (nbset, acoustic scale, num_paths, output_beam) operating points:
+variants:
+  - {nbset: ens,    scale: 0.50, num_paths: 50, output_beam: 5}
+  - {nbset: ens04,  scale: 0.40, num_paths: 60, output_beam: 6}
+  - {nbset: ens065, scale: 0.65, num_paths: 60, output_beam: 6}
+union_out: ensU
+# Leak-free TRAIN n-best (from the 2-fold cross-decode logits) for LIFT training:
+train_nbest: {nbset: enstrain, scale: 0.50, num_paths: 50, output_beam: 5}

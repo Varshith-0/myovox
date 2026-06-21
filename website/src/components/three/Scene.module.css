@@ -1,0 +1,13 @@
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-canvas);
+  pointer-events: none;
+  transition: opacity 0.8s var(--ease-out);
+  background: var(--bg-sink);
+}
+
+/* Reading pages: keep the head as a faint ambient presence behind text. */
+.dimmed {
+  opacity: 0.22;
+}

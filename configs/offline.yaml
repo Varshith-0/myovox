@@ -1,0 +1,9 @@
+# Offline WFST-decode configuration (used by emg2text-decode / inference.run).
+decode:
+  acoustic_scale: 0.25           # headline Conformer + WavLM-L9 operating point (val-tuned)
+  blank_penalty: 2.0
+  search_beam: 50.0
+  output_beam: 50.0
+
+paths:
+  root: null                     # null -> repo root (or $EMG2TEXT_ROOT)

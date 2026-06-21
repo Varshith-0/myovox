@@ -1,0 +1,3 @@
+_assets/
+# Local-only screenshot/dev scratch scripts (per-scene shots).
+_*.mjs

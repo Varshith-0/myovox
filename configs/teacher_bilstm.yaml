@@ -1,0 +1,5 @@
+# Strong 3-layer BiLSTM WavLM-L9 -> phoneme teacher for the frame-level KL term in the
+# augmented run. Consumed by `emg2text.teacher_bilstm --config`.
+epochs: 40
+batch: 24
+lr: 0.0006

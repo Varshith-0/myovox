@@ -1,0 +1,87 @@
+/* Muscle callout labels (drei Html overlay). Anchored at the muscle point with
+   a short leader line out to the name. Monochrome, soft glow, fade in. */
+
+.label {
+  position: relative;
+  font-family: var(--font-mono);
+  animation: fadeIn 0.6s var(--ease-out) both;
+}
+
+.dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 10px 1px rgba(245, 244, 241, 0.6);
+  transform: translate(-50%, -50%);
+}
+
+.tag {
+  position: absolute;
+  top: -0.55em;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  white-space: nowrap;
+}
+
+/* Leader line from the dot to the tag. */
+.tag::before {
+  content: '';
+  position: absolute;
+  top: 0.6em;
+  width: 22px;
+  height: 1px;
+  background: var(--line-bright);
+}
+
+.right .tag {
+  left: 48px;
+  text-align: left;
+  align-items: flex-start;
+}
+.right .tag::before {
+  left: -44px;
+  width: 40px;
+}
+
+.left .tag {
+  right: 48px;
+  text-align: right;
+  align-items: flex-end;
+}
+.left .tag::before {
+  right: -44px;
+  width: 40px;
+}
+
+.name {
+  font-size: var(--t-label);
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-shadow: var(--glow-text);
+}
+
+.sub {
+  font-size: 0.62rem;
+  font-style: normal;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

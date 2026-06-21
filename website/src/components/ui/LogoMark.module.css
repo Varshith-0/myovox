@@ -1,0 +1,49 @@
+.logo {
+  display: block;
+  overflow: visible;
+}
+
+.ring {
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.thread {
+  stroke: var(--ink);
+  stroke-width: 1;
+  stroke-linecap: round;
+  opacity: 0.3;
+}
+
+.satellite {
+  fill: var(--ink);
+  filter: drop-shadow(0 0 3px rgba(245, 244, 241, 0.55));
+}
+
+.core {
+  fill: var(--ink);
+  filter: drop-shadow(0 0 5px rgba(245, 244, 241, 0.45));
+}
+
+/* The pendant (line + satellite) rotates clockwise about the viewBox centre. */
+.orbiter {
+  transform-box: view-box;
+  transform-origin: 16px 16px;
+  animation: logo-orbit var(--spin, 7s) linear infinite;
+}
+
+@keyframes logo-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbiter {
+    animation: none;
+  }
+}

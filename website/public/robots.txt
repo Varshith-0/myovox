@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://varshith-0.github.io/emg2text/sitemap.xml

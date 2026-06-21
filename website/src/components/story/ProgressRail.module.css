@@ -1,0 +1,75 @@
+.rail {
+  position: fixed;
+  right: clamp(1rem, 3vw, 2rem);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: var(--z-rail);
+}
+
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  /* 25 stages must fit the viewport height — keep the ticks tight. */
+  gap: clamp(0.18rem, 0.9vh, 0.4rem);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  padding: 0.05rem 0;
+}
+
+.tick {
+  display: block;
+  width: 18px;
+  height: 1px;
+  background: var(--line-strong);
+  transition:
+    width var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.name {
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  opacity: 0;
+  transform: translateX(6px);
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.item:hover .tick {
+  width: 28px;
+  background: var(--ink-dim);
+}
+.item:hover .name {
+  opacity: 1;
+  transform: none;
+  color: var(--ink-dim);
+}
+
+.active .tick {
+  width: 34px;
+  background: var(--ink);
+  box-shadow: var(--glow-soft);
+}
+.active .name {
+  opacity: 1;
+  transform: none;
+  color: var(--ink);
+}
+
+@media (max-width: 820px) {
+  .rail {
+    display: none;
+  }
+}

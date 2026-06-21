@@ -1,0 +1,35 @@
+import { useRef } from 'react'
+import { StorySections } from '@/components/story/StorySections'
+import { Caption } from '@/components/story/Caption'
+import { ProgressRail } from '@/components/story/ProgressRail'
+import { SpokenSentence } from '@/components/story/SpokenSentence'
+import { MediaLayer } from '@/components/three/MediaLayer'
+import { PlayButton } from '@/components/story/PlayButton'
+import { useScrollProgress } from '@/hooks/useScrollProgress'
+
+/**
+ * The scroll experience. The scroller (one section per stage) feeds a single
+ * ScrollTrigger that publishes `progress`; the fixed Caption and ProgressRail
+ * overlays react to the active stage, and the global 3D scene reads progress
+ * imperatively. Scrolling is free (no mandatory snap) so the Act-2 clips can be
+ * scrubbed through at the reader's own pace. No 3D lives here — only scroll
+ * height and text.
+ */
+export function StoryPage() {
+  const scroller = useRef<HTMLDivElement>(null)
+  useScrollProgress(scroller)
+
+  return (
+    <>
+      <h1 className="sr-only">EMG to Text — reading speech from the muscles of the face</h1>
+      <MediaLayer />
+      <div ref={scroller}>
+        <StorySections />
+      </div>
+      <Caption />
+      <ProgressRail />
+      <SpokenSentence />
+      <PlayButton />
+    </>
+  )
+}

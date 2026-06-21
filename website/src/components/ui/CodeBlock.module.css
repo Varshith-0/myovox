@@ -1,0 +1,37 @@
+.wrap {
+  position: relative;
+}
+
+/* Copy control, parked top-right of the block. Faint until the block is hovered,
+   so it never competes with the code; always reachable by keyboard. */
+.copy {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  padding: 0.3em 0.7em;
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 0.2s var(--ease-out),
+    color 0.2s var(--ease-out),
+    border-color 0.2s var(--ease-out);
+}
+
+.wrap:hover .copy,
+.copy:focus-visible {
+  opacity: 1;
+}
+
+.copy:hover {
+  color: var(--ink);
+  border-color: var(--line-strong);
+}

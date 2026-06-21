@@ -1,0 +1,14 @@
+# Headline acoustic member: bidirectional Conformer + WavLM-L9 4-term distillation.
+# Reproduces 26.14 % test WER / 22.34 % test PER. Consumed by `emg2text.train --config`.
+# Run-specific routing (--name, --warm_start, --ssl_pt, --recog_ckpt) is passed by run.sh.
+epochs: 50
+batch: 8
+lr: 0.0003
+warmup: 5
+workers: 6
+seed: 0
+conf_layers: 4
+lam_distill: 0.5      # cross-modal term i  (masked L2 vs WavLM-L9)
+lam_crosscon: 0.5     # cross-modal term ii (frame-synchronous InfoNCE)
+lam_recog: 1.0        # cross-modal term iv (frozen WavLM->phone recognizer CTC)
+tau: 0.1              # InfoNCE temperature

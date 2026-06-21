@@ -1,0 +1,204 @@
+.page {
+  position: relative;
+  z-index: var(--z-content);
+  display: grid;
+  grid-template-columns: 220px minmax(0, 760px);
+  gap: clamp(2rem, 5vw, 4rem);
+  justify-content: center;
+  align-items: start;
+  padding: calc(var(--nav-h) + var(--space-12)) clamp(1.25rem, 4vw, 2.5rem) var(--space-24);
+}
+
+/* ---- Sticky table of contents ------------------------------------ */
+.toc {
+  position: sticky;
+  top: calc(var(--nav-h) + var(--space-8));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.tocList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-left: 1px solid var(--line);
+}
+
+.tocLink {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+  line-height: 1.4;
+  color: var(--ink-faint);
+  padding: 0.4rem 0 0.4rem var(--space-4);
+  margin-left: -1px;
+  border-left: 1px solid transparent;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+.tocLink:hover {
+  color: var(--ink);
+  border-left-color: var(--line-bright);
+}
+
+/* ---- Article (reading column) ------------------------------------ */
+.article {
+  background: rgba(5, 5, 5, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: clamp(1.5rem, 4vw, 3.25rem);
+}
+
+.article > :first-child {
+  margin-top: 0;
+}
+
+.h1 {
+  font-size: var(--t-h1);
+  color: var(--ink);
+  text-shadow: var(--glow-text);
+  line-height: 1.05;
+  margin-bottom: var(--space-6);
+}
+
+.h2 {
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 60, 'wght' 420;
+  font-size: var(--t-h2);
+  color: var(--ink);
+  margin-top: var(--space-12);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--line);
+  scroll-margin-top: calc(var(--nav-h) + var(--space-4));
+}
+
+.h3 {
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 40, 'wght' 460;
+  font-size: var(--t-h3);
+  color: var(--ink);
+  margin-top: var(--space-8);
+}
+
+.p {
+  color: var(--ink-dim);
+  line-height: 1.75;
+  margin-top: var(--space-4);
+}
+
+.ul,
+.ol {
+  margin: var(--space-4) 0;
+  padding-left: var(--space-6);
+  color: var(--ink-dim);
+}
+.li {
+  margin: var(--space-2) 0;
+  line-height: 1.7;
+}
+.li::marker {
+  color: var(--ink-faint);
+}
+
+.article strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.article em {
+  color: var(--ink-dim);
+  font-style: italic;
+}
+
+.link {
+  color: var(--ink);
+  border-bottom: 1px solid var(--line-strong);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.link:hover {
+  border-bottom-color: var(--ink);
+}
+
+.quote {
+  margin: var(--space-6) 0;
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--line-strong);
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
+.hr {
+  margin: var(--space-8) 0;
+  border: none;
+  border-top: 1px solid var(--line);
+}
+
+/* ---- Tables (remark-gfm) ----------------------------------------- */
+.tableWrap {
+  margin: var(--space-6) 0;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+}
+.table :global(th),
+.table :global(td) {
+  padding: 0.55rem 0.85rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.table :global(th) {
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-bottom-color: var(--line-strong);
+}
+.table :global(td) {
+  color: var(--ink-dim);
+}
+.table :global(tr:last-child td) {
+  border-bottom: none;
+}
+.table :global(strong) {
+  color: var(--ink);
+}
+
+/* ---- Code -------------------------------------------------------- */
+.inlineCode {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  color: var(--ink);
+  background: rgba(245, 244, 241, 0.07);
+  padding: 0.12em 0.38em;
+  border-radius: var(--radius);
+}
+
+.codeBlock {
+  margin: var(--space-6) 0;
+  padding: var(--space-6);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-raise);
+  overflow-x: auto;
+}
+
+@media (max-width: 1024px) {
+  .page {
+    grid-template-columns: minmax(0, 760px);
+  }
+  .toc {
+    display: none;
+  }
+}

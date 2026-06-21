@@ -1,0 +1,38 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Manim (Python) build artifacts — rendered clips go to public/anim/
+anim/__pycache__/
+anim/media/
+anim/_*.py
+__pycache__/
+*.pyc
+
+# src/data here is the stage/narrative config, NOT the ML dataset dir the
+# repo-root .gitignore excludes via "data/". Force it back into tracking.
+!src/data/
+
+# Temporary placeholder Manim clips (underscore-prefixed); real Act-2 clips are committed.
+public/anim/_*

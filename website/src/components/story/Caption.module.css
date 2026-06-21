@@ -1,0 +1,176 @@
+.wrap {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-content);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  text-align: center;
+  padding: 0 clamp(1.25rem, 5vw, 3rem) clamp(3rem, 9vh, 7rem);
+  pointer-events: none;
+}
+
+/* Caption pinned to the top — frees the lower frame for a labelled figure
+   (Act-2 clips). Kept compact (smaller, wider) so it sits in the top band and
+   doesn't collide with the clip below it. */
+.wrapTop {
+  justify-content: flex-start;
+  padding-top: calc(var(--nav-h) + clamp(0.5rem, 2.5vh, 1.5rem));
+  padding-bottom: 0;
+}
+.wrapTop .block {
+  max-width: 60rem;
+  gap: var(--space-2);
+}
+.wrapTop .caption {
+  font-size: var(--t-h3);
+  font-variation-settings: 'opsz' 72, 'wght' 380;
+}
+
+.block {
+  max-width: 48rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  animation: rise 0.9s var(--ease-out) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+    filter: blur(7px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+.rail {
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.caption {
+  font-size: var(--t-h2);
+  color: var(--ink);
+  text-shadow: var(--glow-text);
+  text-wrap: balance;
+}
+
+.hero .caption {
+  font-size: var(--t-display);
+  font-variation-settings:
+    'opsz' 144,
+    'wght' 340,
+    'SOFT' 0,
+    'WONK' 0;
+}
+
+.sub {
+  max-width: 40rem;
+  font-size: var(--t-body);
+  line-height: 1.65;
+  color: var(--ink-dim);
+}
+
+/* ---- Tokens ------------------------------------------------------- */
+.tokens {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.phon {
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+  letter-spacing: 0.1em;
+  color: var(--ink);
+  padding: 0.32em 0.6em;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  text-shadow: var(--glow-text);
+  animation: pop 0.5s var(--ease-out) both;
+  animation-delay: calc(var(--k) * 65ms);
+}
+
+.word {
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 60, 'wght' 380;
+  font-size: var(--t-h3);
+  color: var(--ink);
+  text-shadow: var(--glow-text);
+  animation: pop 0.55s var(--ease-out) both;
+  animation-delay: calc(var(--k) * 110ms);
+}
+
+.sentence {
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 80, 'wght' 360;
+  font-size: var(--t-h3);
+  color: var(--ink);
+  text-shadow: var(--glow-text-strong);
+  text-wrap: balance;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- Scroll cue (hero only) -------------------------------------- */
+.scrollCue {
+  position: absolute;
+  bottom: clamp(1.25rem, 4vh, 2.25rem);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.scrollLine {
+  width: 1px;
+  height: 38px;
+  background: linear-gradient(to bottom, transparent, var(--ink-dim));
+  animation: drip 2.2s var(--ease-in-out) infinite;
+  transform-origin: top;
+}
+
+@keyframes drip {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  40% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1) translateY(10px);
+    opacity: 0;
+  }
+}

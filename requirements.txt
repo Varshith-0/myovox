@@ -1,0 +1,32 @@
+# EMG-to-text: Python dependencies
+# Pinned to versions verified on the dev box (RTX 3080 Ti, CUDA 12.1, Python 3.12).
+
+# --- core: acoustic model, Conformer, metrics ---
+torch==2.5.1                 # +cu121 build
+torchaudio==2.5.1            # +cu121 build; provides torchaudio.models.Conformer
+numpy
+python-Levenshtein           # PER (edit distance)
+jiwer                        # WER
+
+# --- grapheme->phoneme (phonemization of the transcripts) ---
+g2p_en                       # pulls nltk + more_itertools
+nltk
+more-itertools
+
+# --- config + plotting ---
+pyyaml                       # configs/*.yaml (emg2text.config.load_config)
+scipy
+matplotlib
+
+# --- WavLM-L9 distillation-target feature extraction (emg2text.ssl.extract) ---
+transformers==4.53.3         # microsoft/wavlm-large; Qwen2.5-7B-Instruct (LIFT reranker)
+
+# --- LIFT reranker: QLoRA fine-tune + 4-bit inference (emg2text.rerank.*) ---
+peft                         # LoRA adapters
+datasets                     # jsonl training data loader
+bitsandbytes                 # 4-bit nf4 quantization
+accelerate                   # device placement for the 7B base
+
+# --- WFST open-vocabulary decoding (special install; not plain pip) ---
+# k2==1.24.4  -> install the cu121/torch2.5.1 wheel from https://k2-fsa.github.io/k2/
+# icefall     -> use the vendored copy in emg2speech_htg/Icefall (pip install -e) for get_lattice/get_texts

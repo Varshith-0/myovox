@@ -1,0 +1,160 @@
+/**
+ * Global base styles. Imports tokens, sets the black canvas, the type defaults,
+ * and a handful of reusable primitives (.display, .label, .glow). Component-
+ * specific styles live in CSS modules next to their components.
+ */
+
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: auto; /* Lenis owns smooth scroll; never double it */
+  background: var(--bg-sink);
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--t-body);
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Lenis: applied while smooth scroll is active. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+#root {
+  isolation: isolate;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--bg-sink);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 99px;
+}
+
+:focus-visible {
+  outline: 1px solid var(--line-bright);
+  outline-offset: 3px;
+}
+
+/* ---- Typographic primitives -------------------------------------- */
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 360;
+  font-variation-settings:
+    'opsz' 144,
+    'wght' 360,
+    'SOFT' 0,
+    'WONK' 0;
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+}
+
+.serif {
+  font-family: var(--font-display);
+  font-variation-settings:
+    'opsz' 40,
+    'wght' 380;
+}
+
+/* Small-caps mono label — the technical voice of the site. */
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.glow {
+  text-shadow: var(--glow-text);
+}
+.glow-strong {
+  text-shadow: var(--glow-text-strong);
+}
+
+/* Visually hidden but available to screen readers. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- Reduced motion ---------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

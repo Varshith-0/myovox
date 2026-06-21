@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "emg2text"
+version = "2.0.0"
+description = "Surface-EMG to text decoding — a Conformer+WavLM-L9 ensemble → n-best union → LIFT LLM-rerank pipeline (18.53 WER)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "emg2text contributors" }]
+keywords = ["EMG", "silent-speech", "speech-recognition", "conformer", "CTC", "n-best", "LLM-rerank"]
+dependencies = [
+  "torch>=2.0",
+  "torchaudio",
+  "numpy",
+  "scipy",
+  "jiwer",
+  "python-Levenshtein",
+  "g2p_en",
+  "transformers",
+  "peft",
+  "datasets",
+  "bitsandbytes",
+  "accelerate",
+  "pyyaml",
+  "matplotlib",
+]
+# NOTE: k2 + icefall (the WFST decoder) are installed separately — they need the wheel matching
+# your torch/CUDA. See scripts/setup.sh and https://k2-fsa.github.io/k2/.
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+emg2text-reproduce = "emg2text.reproduce:main"          # acoustic member -> 26.14 / 22.34 (cached logits)
+emg2text-rerank = "emg2text.rerank.infer:main"          # final pipeline -> 18.53
+emg2text-train = "emg2text.training.train:main"         # train the Conformer from scratch
+emg2text-score = "emg2text.decode.score:main"           # score a cached logits file
+
+# The package `emg2text` lives directly in src/ (no src/emg2text wrapper): src/ -> emg2text,
+# src/models/ -> emg2text.models, etc. Requires `pip install -e .` to import.
+[tool.setuptools]
+package-dir = {"emg2text" = "src"}
+packages = [
+    "emg2text", "emg2text.data", "emg2text.models", "emg2text.decode",
+    "emg2text.audio", "emg2text.training", "emg2text.pipeline", "emg2text.rerank",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

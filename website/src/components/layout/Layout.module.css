@@ -1,0 +1,30 @@
+.main {
+  position: relative;
+  z-index: var(--z-content);
+}
+
+.main:focus {
+  outline: none;
+}
+
+/* Keyboard skip link — hidden until focused. */
+.skip {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -120%);
+  z-index: var(--z-loader);
+  padding: var(--space-2) var(--space-4);
+  background: var(--bg-raise);
+  border: 1px solid var(--line-bright);
+  border-radius: 0 0 var(--radius) var(--radius);
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.skip:focus-visible {
+  transform: translate(-50%, 0);
+}

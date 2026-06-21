@@ -1,0 +1,9 @@
+.sections {
+  position: relative;
+  z-index: var(--z-content);
+}
+
+.section {
+  height: 100svh;
+  width: 100%;
+}
