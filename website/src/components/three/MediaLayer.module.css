@@ -17,11 +17,18 @@
   right: 0;
 }
 
-@media (max-width: 820px) {
-  /* Portrait: captions wrap to more lines, so leave more room above the clip. */
+/* Narrow OR short viewports (portrait phones, landscape phones, short windows):
+   a contained 16:9 clip would otherwise float as a small band marooned in black,
+   and long captions (a fixed px height) would overlap a purely vh-based offset.
+   Anchor the clip to the TOP of its band, just under the caption, and floor the
+   offset in px so it always clears the caption regardless of viewport height. */
+@media (max-width: 820px), (max-height: 600px) {
   .stage {
-    top: 30vh;
-    bottom: 8vh;
+    top: max(20vh, 196px);
+    bottom: 4vh;
+  }
+  .contain {
+    object-position: center top;
   }
 }
 

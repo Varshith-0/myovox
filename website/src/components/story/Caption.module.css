@@ -28,6 +28,24 @@
   font-variation-settings: 'opsz' 72, 'wght' 380;
 }
 
+/* Small screens: compact the top-anchored caption so even long headlines stay
+   short enough to clear the clip beneath it, and lift the bottom-anchored caption
+   clear of the fixed play bar. */
+@media (max-width: 600px) {
+  .wrapTop {
+    padding-top: calc(var(--nav-h) + 0.35rem);
+  }
+  .wrapTop .caption {
+    font-size: var(--t-lead);
+  }
+  .wrapTop .block {
+    gap: var(--space-1);
+  }
+  .wrap {
+    padding-bottom: clamp(5rem, 14vh, 7rem);
+  }
+}
+
 .block {
   max-width: 48rem;
   display: flex;
