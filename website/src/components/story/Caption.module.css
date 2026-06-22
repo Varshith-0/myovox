@@ -28,10 +28,10 @@
   font-variation-settings: 'opsz' 72, 'wght' 380;
 }
 
-/* Small screens: compact the top-anchored caption so even long headlines stay
-   short enough to clear the clip beneath it, and lift the bottom-anchored caption
-   clear of the fixed play bar. */
-@media (max-width: 600px) {
+/* Small / portrait screens: compact the top-anchored caption so even long
+   headlines stay short enough to clear the clip beneath it, and lift the
+   bottom-anchored caption clear of the fixed play bar. */
+@media (max-width: 600px), (max-aspect-ratio: 7/5) {
   .wrapTop {
     padding-top: calc(var(--nav-h) + 0.35rem);
   }

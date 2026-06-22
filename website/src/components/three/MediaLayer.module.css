@@ -22,9 +22,9 @@
    and long captions (a fixed px height) would overlap a purely vh-based offset.
    Anchor the clip to the TOP of its band, just under the caption, and floor the
    offset in px so it always clears the caption regardless of viewport height. */
-@media (max-width: 820px), (max-height: 600px) {
+@media (max-width: 820px), (max-height: 600px), (max-aspect-ratio: 7/5) {
   .stage {
-    top: max(20vh, 196px);
+    top: max(20vh, 210px);
     bottom: 4vh;
   }
   .contain {

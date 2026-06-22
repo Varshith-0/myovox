@@ -10,16 +10,19 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  /* 25 stages must fit the viewport height — keep the ticks tight. */
-  gap: clamp(0.18rem, 0.9vh, 0.4rem);
+  gap: clamp(0.12rem, 0.55vh, 0.28rem);
 }
 
+/* The stage label is positioned OUT of the flow (absolute), so each item is only
+   as tall as its tick. A 30-tick rail then stays compact (~330px) and always fits
+   the viewport height — otherwise the labels add ~15px per row and the top ticks
+   (e.g. INTRO) overflow above the screen when the window is short or zoomed in. */
 .item {
+  position: relative;
   display: flex;
-  align-items: center;
   justify-content: flex-end;
-  gap: 0.7rem;
-  padding: 0.05rem 0;
+  align-items: center;
+  padding: 0.2rem 0;
 }
 
 .tick {
@@ -33,14 +36,19 @@
     box-shadow var(--dur-fast) var(--ease-out);
 }
 
+/* Label sits to the LEFT of the tick (into the viewport), revealed on hover/active. */
 .name {
+  position: absolute;
+  right: calc(100% + 0.7rem);
+  top: 50%;
+  white-space: nowrap;
   font-family: var(--font-mono);
   font-size: var(--t-label);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-faint);
   opacity: 0;
-  transform: translateX(6px);
+  transform: translateY(-50%) translateX(6px);
   transition:
     opacity var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out),
@@ -53,7 +61,7 @@
 }
 .item:hover .name {
   opacity: 1;
-  transform: none;
+  transform: translateY(-50%);
   color: var(--ink-dim);
 }
 
@@ -64,11 +72,28 @@
 }
 .active .name {
   opacity: 1;
-  transform: none;
+  transform: translateY(-50%);
   color: var(--ink);
 }
 
 @media (max-width: 820px) {
+  .rail {
+    display: none;
+  }
+}
+
+/* Portrait / squarish viewports: a contained 16:9 Act-2 clip fills the full width
+   and runs into the rail on the right edge. Hide the rail at these aspect ratios
+   (it stays on landscape, where the clip is letterboxed at the sides so the rail
+   sits clear in the empty margin). Covers portrait tablets above the 820px width. */
+@media (max-aspect-ratio: 7/5) {
+  .rail {
+    display: none;
+  }
+}
+
+/* Too short to fit even the compact rail — hide rather than clip. */
+@media (max-height: 360px) {
   .rail {
     display: none;
   }

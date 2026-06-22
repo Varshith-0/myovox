@@ -55,7 +55,10 @@ const fragment = /* glsl */ `
  */
 export function Muscles() {
   const dpr = useStore((s) => s.dpr)
-  const labelsActive = useStore((s) => s.stageIndex === TALKING_INDEX)
+  // The callouts extend horizontally off a fixed 3D anchor, so on narrow screens
+  // they overflow the viewport — drop them there (the glowing patches + the spoken
+  // sentence still carry the "which muscles fire" idea).
+  const labelsActive = useStore((s) => s.stageIndex === TALKING_INDEX && !s.isMobile)
   const setSpeechWord = useStore((s) => s.setSpeechWord)
   const groupRef = useRef<THREE.Group>(null)
   const elapsed = useRef(0) // seconds of "speech" accumulated on this stage
