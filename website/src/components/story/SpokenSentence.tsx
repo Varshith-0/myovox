@@ -14,7 +14,10 @@ const TALKING_INDEX = STAGES.findIndex((s) => s.id === 'articulation')
 export function SpokenSentence() {
   const active = useStore((s) => s.stageIndex === TALKING_INDEX)
   const current = useStore((s) => s.speechWord)
-  if (!active) return null
+  // While narration is on, the word-synced subtitles own the bottom band — don't
+  // stack this demo subtitle under them.
+  const narrationOn = useStore((s) => s.narrationOn)
+  if (!active || narrationOn) return null
 
   return (
     <div className={styles.wrap} aria-hidden="true">

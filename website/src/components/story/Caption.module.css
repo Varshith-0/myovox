@@ -11,6 +11,12 @@
   pointer-events: none;
 }
 
+/* Voice on: the word-synced subtitles occupy the lower band, so bottom-anchored
+   captions lift clear of them. (Top captions — Act-2 — are unaffected.) */
+.lifted {
+  padding-bottom: clamp(11.5rem, 26vh, 16rem);
+}
+
 /* Caption pinned to the top — frees the lower frame for a labelled figure
    (Act-2 clips). Kept compact (smaller, wider) so it sits in the top band and
    doesn't collide with the clip below it. */
@@ -43,6 +49,9 @@
   }
   .wrap {
     padding-bottom: clamp(5rem, 14vh, 7rem);
+  }
+  .lifted {
+    padding-bottom: clamp(9.5rem, 24vh, 12rem);
   }
 }
 
@@ -91,6 +100,12 @@
     'wght' 340,
     'SOFT' 0,
     'WONK' 0;
+}
+
+/* Lift the hero text so the scroll cue + control bar sit clearly below it. Only
+   when the cue is shown (Voice off); with Voice on, `.lifted` handles spacing. */
+.wrap:not(.lifted) .hero {
+  margin-bottom: clamp(4.5rem, 9vh, 7rem);
 }
 
 .sub {
@@ -156,7 +171,7 @@
 /* ---- Scroll cue (hero only) -------------------------------------- */
 .scrollCue {
   position: absolute;
-  bottom: clamp(1.25rem, 4vh, 2.25rem);
+  bottom: clamp(5rem, 8vh, 6.5rem); /* clear of the fixed control bar below it */
   left: 50%;
   transform: translateX(-50%);
   display: flex;

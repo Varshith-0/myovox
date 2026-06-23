@@ -1,0 +1,121 @@
+/* Narration control: an icon-only speaker toggle; when armed, a volume slider
+   reveals on hover/focus. Pill styling matches the Play / speed controls.
+   Children are interactive even though the parent bar ignores pointer events. */
+.group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  pointer-events: auto;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.72rem;
+  background: rgba(11, 11, 12, 0.66);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--line-strong);
+  border-radius: 2rem;
+  color: var(--ink-dim);
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.btn:hover {
+  color: var(--ink);
+  border-color: var(--line-bright);
+  background: rgba(11, 11, 12, 0.85);
+}
+
+.btn:focus-visible {
+  outline: 1px solid var(--line-bright);
+  outline-offset: 3px;
+}
+
+/* Armed: lit, so it's obvious the voice will play. */
+.armed .btn {
+  color: var(--ink);
+  border-color: var(--line-bright);
+}
+
+.icon {
+  display: block;
+}
+
+/* Volume pill — collapsed until the control is hovered/focused. */
+.vol {
+  display: inline-flex;
+  align-items: center;
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  border: 1px solid transparent;
+  border-radius: 2rem;
+  background: transparent;
+  backdrop-filter: blur(10px);
+  transition:
+    width var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out),
+    padding var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.group:hover .vol,
+.group:focus-within .vol {
+  width: 7.5rem;
+  padding: 0.5rem 0.85rem;
+  opacity: 1;
+  pointer-events: auto;
+  border-color: var(--line-strong);
+  background: rgba(11, 11, 12, 0.66);
+}
+
+/* Slider, themed for the dark bar: the filled portion is bright ink, the rest a
+   faint line. The fill ratio comes from the inline `--v` custom property. */
+.vol input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--ink) 0%,
+    var(--ink) calc(var(--v, 1) * 100%),
+    var(--line-strong) calc(var(--v, 1) * 100%),
+    var(--line-strong) 100%
+  );
+  cursor: pointer;
+}
+
+.vol input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: none;
+  cursor: pointer;
+}
+
+.vol input[type='range']::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: none;
+  cursor: pointer;
+}
+
+.vol input[type='range']:focus-visible {
+  outline: 1px solid var(--line-bright);
+  outline-offset: 4px;
+}

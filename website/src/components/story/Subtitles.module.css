@@ -1,0 +1,59 @@
+/* Word-synced subtitles: one sentence centred in the reserved band just above
+   the control bar (the MediaLayer lifts the clip to make room). A soft scrim
+   keeps it legible over the animations. Shown only while narration plays. */
+.wrap {
+  position: fixed;
+  left: 50%;
+  bottom: clamp(5rem, 9vh, 7rem);
+  transform: translateX(-50%);
+  width: min(56ch, 90vw);
+  z-index: var(--z-nav);
+  pointer-events: none;
+  text-align: center;
+}
+
+.wrap::before {
+  content: '';
+  position: absolute;
+  inset: -0.9em -2.5em;
+  background: radial-gradient(
+    62% 130% at 50% 50%,
+    rgba(8, 8, 9, 0.85),
+    rgba(8, 8, 9, 0.52) 55%,
+    transparent 80%
+  );
+  filter: blur(5px);
+  z-index: -1;
+}
+
+.line {
+  margin: 0;
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 40, 'wght' 400;
+  font-size: var(--t-lead);
+  line-height: 1.45;
+  text-wrap: balance;
+}
+
+/* Karaoke colouring within the current sentence: words already spoken read in
+   full ink, the word being spoken glows, upcoming words sit back. */
+.spoken {
+  color: var(--ink);
+}
+.now {
+  color: var(--ink);
+  text-shadow: var(--glow-text-strong);
+}
+.ahead {
+  color: var(--ink-faint);
+}
+
+@media (max-width: 600px) {
+  .wrap {
+    width: 92vw;
+    bottom: clamp(4.5rem, 8vh, 6rem);
+  }
+  .line {
+    font-size: var(--t-body);
+  }
+}

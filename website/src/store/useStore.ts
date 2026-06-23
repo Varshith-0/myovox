@@ -25,11 +25,24 @@ export interface AppState {
   electrodesReady: boolean
   /** Index of the word currently being "spoken" on the Talking stage. */
   speechWord: number
+  /** Narration ("Voice") armed — off until the user opts in (also the audio
+   *  unlock gesture browsers require). Narration is only audible during Play. */
+  narrationOn: boolean
+  /** Narration volume, 0..1 (only audible while {@link narrationOn}). */
+  volume: number
+  /** Hands-free playback is running (auto-advancing the story). */
+  playing: boolean
+  /** Playback speed multiplier (1×–5×) — scales both scroll and the voice. */
+  playSpeed: number
 
   setStageIndex: (i: number) => void
   setReady: (ready: boolean) => void
   setElectrodesReady: (ready: boolean) => void
   setSpeechWord: (i: number) => void
+  setNarrationOn: (on: boolean) => void
+  setVolume: (v: number) => void
+  setPlaying: (playing: boolean) => void
+  setPlaySpeed: (speed: number) => void
   setEnv: (env: Partial<Pick<AppState, 'isMobile' | 'reducedMotion' | 'lowPower' | 'dpr'>>) => void
 }
 
@@ -42,6 +55,10 @@ export const useStore = create<AppState>((set) => ({
   ready: false,
   electrodesReady: false,
   speechWord: 0,
+  narrationOn: false,
+  volume: 1,
+  playing: false,
+  playSpeed: 1,
 
   setStageIndex: (stageIndex) =>
     set((s) => (s.stageIndex === stageIndex ? s : { ...s, stageIndex })),
@@ -50,5 +67,9 @@ export const useStore = create<AppState>((set) => ({
     set((s) => (s.electrodesReady === electrodesReady ? s : { ...s, electrodesReady })),
   setSpeechWord: (speechWord) =>
     set((s) => (s.speechWord === speechWord ? s : { ...s, speechWord })),
+  setNarrationOn: (narrationOn) => set((s) => (s.narrationOn === narrationOn ? s : { ...s, narrationOn })),
+  setVolume: (volume) => set((s) => (s.volume === volume ? s : { ...s, volume })),
+  setPlaying: (playing) => set((s) => (s.playing === playing ? s : { ...s, playing })),
+  setPlaySpeed: (playSpeed) => set((s) => (s.playSpeed === playSpeed ? s : { ...s, playSpeed })),
   setEnv: (env) => set(env),
 }))

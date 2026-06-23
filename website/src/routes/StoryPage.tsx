@@ -4,6 +4,8 @@ import { Caption } from '@/components/story/Caption'
 import { ProgressRail } from '@/components/story/ProgressRail'
 import { SpokenSentence } from '@/components/story/SpokenSentence'
 import { MediaLayer } from '@/components/three/MediaLayer'
+import { NarrationLayer } from '@/components/story/NarrationLayer'
+import { Subtitles } from '@/components/story/Subtitles'
 import { PlayButton } from '@/components/story/PlayButton'
 import { useScrollProgress } from '@/hooks/useScrollProgress'
 
@@ -29,6 +31,8 @@ export function StoryPage() {
       <Caption />
       <ProgressRail />
       <SpokenSentence />
+      <NarrationLayer />
+      <Subtitles />
       <PlayButton />
     </>
   )

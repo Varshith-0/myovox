@@ -113,6 +113,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .bar {
-    display: none; /* auto-scroll is motion — hide for reduced-motion users */
+    display: none; /* auto-play (and its narration) is motion — hide for reduced-motion */
   }
 }

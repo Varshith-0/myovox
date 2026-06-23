@@ -39,14 +39,21 @@ function TokenStream({
  */
 export function Caption() {
   const index = useStore((s) => s.stageIndex)
+  const narrationOn = useStore((s) => s.narrationOn)
+  const playing = useStore((s) => s.playing)
   const stage = STAGES[index]
   const isHero = index === 0
   const atTop = stage.captionPosition === 'top'
+  // Only while actually narrating (armed *and* playing) do the word-synced
+  // subtitles take over: hide the on-screen sub (no duplicate text) and lift
+  // bottom captions clear of the subtitle band.
+  const captionsMode = narrationOn && playing
+  const lifted = captionsMode && !atTop
 
   return (
     <div
       data-caption-wrap
-      className={`${styles.wrap} ${atTop ? styles.wrapTop : ''}`}
+      className={`${styles.wrap} ${atTop ? styles.wrapTop : ''} ${lifted ? styles.lifted : ''}`}
       aria-live="polite"
     >
       <div key={index} className={`${styles.block} ${isHero ? styles.hero : ''}`}>
@@ -55,7 +62,7 @@ export function Caption() {
           {stage.rail}
         </span>
         <h2 className={`${styles.caption} display`}>{stage.caption}</h2>
-        {stage.sub && (
+        {stage.sub && !captionsMode && (
           <p data-caption-sub className={styles.sub}>
             {stage.sub}
           </p>
@@ -67,10 +74,10 @@ export function Caption() {
         />
       </div>
 
-      {isHero && (
+      {isHero && !playing && (
         <div className={styles.scrollCue} aria-hidden="true">
           <span className={styles.scrollLine} />
-          scroll
+          scroll or press play
         </div>
       )}
     </div>
