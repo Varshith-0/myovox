@@ -1,18 +1,18 @@
-# S25 — What we changed (how we trained, and what is different)
-# The closer opens by stating — plainly, no justification — the three changes we
-# made on top of the published baseline, and how the system was trained.
-#   move 1  decode:   scale-1.0 decode      -> tuned open-vocab decode   (51.17 -> 40.63)
-#   move 2  encoder:  causal TDS            -> bidirectional Conformer + voice distillation (40.63 -> 26.14)
-#   move 3  choosing: single 1-best         -> ensemble -> n-best union -> 7B LLM rerank (26.14 -> 18.53)
+# S25 — What we changed (the three changes on a published baseline)
+# A calm closing recap: state — plainly, no justification — the three changes we
+# made on top of the published 51% baseline, and watch the WER tick down.
+#   move 1  decode:   scale-1.0 decode  -> tuned open-vocab decode               (51.17 -> 40.63)
+#   move 2  encoder:  causal TDS        -> bidirectional Conformer + distillation (40.63 -> 26.14)
+#   move 3  choosing: single 1-best     -> ensemble -> n-best union -> 7B rerank  (26.14 -> 18.53)
 # A live WER readout ticks down as each change lands; a one-line training recipe
-# runs along the bottom. Strict monochrome; the single pure-#fff accent is the
-# final 18.53% result.
+# sits at ghost opacity along the bottom, with only "distil the voice" brightening.
+# Strict monochrome; the single pure-#fff accent is the final 18.53% result.
 #
-# ART DIRECTION — fill the canvas, three persistent horizontal zones:
-#   TOP strip   (y ~ +3.0): cap line "WHAT WE CHANGED" + "built on a published 51% baseline"
-#   CENTER      (y ~ -1.9..+2.2): three before->after rows, each "old" morphing into
-#                                 the bright "new"; a WER counter rides top-right.
-#   BOTTOM strip(y ~ -3.1): the running training recipe, filling in beat by beat.
+# Seven beats — one spoken sentence each:
+#   1 cap + WER parks at 51.17        4 row 2 (encoder) -> 26.14, distil brightens
+#   2 subtitle + rule                 5 row 3 (choosing) -> 18.53
+#   3 row 1 (decode) -> 40.63         6 all three rows hold lit together
+#                                     7 resolve: 18.53% ignites + closing line
 from manim import *
 from emg_style import *
 
@@ -35,80 +35,85 @@ class Approach(Scene):
     def construct(self):
         seed()
 
-        # ============================================================== #
-        #  PERSISTENT FRAME — top cap, WER readout, bottom recipe rail    #
-        # ============================================================== #
-        self.next_section("frame")
+        ROW_Y = [1.45, 0.15, -1.15]
+        OLD_X, NEW_X = -4.35, 0.95
+        read_at = np.array([5.35, 2.62, 0])
+        LY = -3.18
 
+        # ----- persistent frame mobjects (built up across beats 1-2) -----
         top1 = mono("WHAT WE CHANGED", 26, INK_DIM, w=BOLD).move_to([0, 3.18, 0])
-        top2 = mono("three changes on top of a published 51% baseline", 17, INK_FAINT).move_to(
+        top2 = mono("three changes on a published 51% baseline", 17, INK_FAINT).move_to(
             [0, 2.66, 0])
         rule = Line([-6.4, 2.34, 0], [6.4, 2.34, 0], stroke_color=LINE, stroke_width=1.2)
-        self.play(FadeIn(top1, shift=DOWN * 0.14), run_time=0.42)
-        self.play(FadeIn(top2), Create(rule), run_time=0.34)
 
-        # live WER readout — parked in the top strip, right side (clear of the rows)
         wer = ValueTracker(51.17)
-        read_at = np.array([5.35, 2.62, 0])
         readout = counter(wer, fmt=lambda v: f"{v:.2f}", s=26, c=INK, at=read_at)
         read_tag = mono("WER %", 13, INK_DIM)
         read_tag.add_updater(lambda m: m.next_to(readout, LEFT, buff=0.18))
-        self.add(readout, read_tag)
-        self.play(FadeIn(readout), FadeIn(read_tag), run_time=0.34)
 
-        # ---- BOTTOM recipe rail skeleton -------------------------------
-        LY = -3.18
-        recipe_title = mono("how we trained", 14, INK_GHOST)
-        recipe_title.move_to([-6.5, LY + 0.46, 0]).align_to(LEFT * 6.5, LEFT)
+        # bottom recipe rail — held at ghost throughout
+        recipe_title = mono("how we trained", 14, INK_GHOST).move_to([0, LY + 0.46, 0])
+        recipe_title.align_to(LEFT * 6.5, LEFT)
         led_rule = Line([-6.6, LY + 0.66, 0], [6.6, LY + 0.66, 0],
                         stroke_color=LINE, stroke_width=1.0)
         steps_txt = ["warm-start the front-end", "train the new encoder", "distil the voice",
                      "QLoRA-finetune the chooser"]
         steps = VGroup()
         for i, t in enumerate(steps_txt):
-            chip = mono(t, 14, INK_GHOST)
-            steps.add(chip)
+            steps.add(mono(t, 14, INK_GHOST))
             if i < len(steps_txt) - 1:
                 steps.add(mono("·", 14, INK_GHOST))
         steps.arrange(RIGHT, buff=0.28).move_to([0, LY, 0])
+
+        # ============================================================== #
+        #  BEAT 1 — "So what, exactly, is new here?"                       #
+        #  cap fades in; WER readout parks at 51.17; rows empty.           #
+        # ============================================================== #
+        self.next_section("beat1")
+        self.add(readout, read_tag)
+        self.play(FadeIn(top1, shift=DOWN * 0.14),
+                  FadeIn(readout), FadeIn(read_tag), run_time=0.5)
+        self.wait(0.35)
+
+        # ============================================================== #
+        #  BEAT 2 — "We didn't start from scratch ... changed three       #
+        #  things." subtitle + rule + ghost recipe rail come in.          #
+        # ============================================================== #
+        self.next_section("beat2")
+        self.play(FadeIn(top2), Create(rule), run_time=0.45)
         self.play(FadeIn(recipe_title), Create(led_rule),
-                  LaggedStartMap(FadeIn, steps, lag_ratio=0.06), run_time=0.5)
+                  LaggedStart(*[FadeIn(c) for c in steps], lag_ratio=0.06), run_time=0.6)
+        self.wait(1.2)
 
         # ============================================================== #
-        #  THE THREE CHANGES — before -> after rows                       #
+        #  BEATS 3-5 — the three before -> after rows                     #
         # ============================================================== #
-        # geometry: three rows in the centre; "old" on the left, arrow, "new" right
-        ROW_Y = [1.45, 0.15, -1.15]
-        OLD_X, ARR_X, NEW_X = -4.35, -1.85, 0.95
         moves = [
-            dict(tag="decode", old="scale-1.0 decode", new="tuned open-vocab decode",
-                 detail="recover the missing scale + blank penalty", wer=40.63,
-                 recipe_hi=0),
-            dict(tag="encoder", old="causal TDS", new="bidirectional Conformer + distillation",
-                 detail="reads both ways · voice-distilled in training",
-                 wer=26.14, recipe_hi=1),
-            dict(tag="choosing", old="single 1-best", new="ensemble → n-best union → 7B rerank",
-                 detail="pool the guesses, then choose with a 7B model", wer=18.53,
-                 recipe_hi=3),
+            dict(beat="beat3", tag="decode", old="scale-1.0 decode",
+                 new="tuned open-vocab decode", wer=40.63, distil=False),
+            dict(beat="beat4", tag="encoder", old="causal TDS",
+                 new="bidirectional Conformer + distillation", wer=26.14, distil=True),
+            dict(beat="beat5", tag="choosing", old="single 1-best",
+                 new="ensemble → n-best union → 7B rerank", wer=18.53, distil=False),
         ]
-
-        all_rows = VGroup()   # every row mobject, so resolve can clear them at once
+        rows = []  # one VGroup per row, so we can dim/spotlight by row
         for k, mv in enumerate(moves):
-            self.next_section(f"move{k+1}")
+            self.next_section(mv["beat"])
             y = ROW_Y[k]
 
-            # row tag on the far left, ghost-tick anchored
-            rtag = mono(mv["tag"], 14, INK_FAINT).move_to([-6.35, y, 0]).align_to(LEFT * 6.35, LEFT)
-            # the "old" approach — faint
+            rtag = mono(mv["tag"], 14, INK_FAINT).move_to([-6.35, y, 0])
+            rtag.align_to(LEFT * 6.35, LEFT)
             old = mono(mv["old"], 18, INK_FAINT).move_to([OLD_X, y, 0])
-            self.play(FadeIn(rtag, shift=RIGHT * 0.05), FadeIn(old), run_time=0.34)
-
-            # arrow sweeps from old toward new; the new lands bright
             arr = flat_arrow([OLD_X + 1.35, y, 0], [NEW_X - 1.55, y, 0], INK_FAINT, 2.0)
             new = mono(mv["new"], 16, INK).move_to([NEW_X, y, 0], aligned_edge=LEFT)
-            detail = mono(mv["detail"], 12, INK_FAINT).next_to(new, DOWN, buff=0.12,
-                                                               aligned_edge=LEFT)
-            all_rows.add(rtag, old, arr, new, detail)
+            row = VGroup(rtag, old, arr, new)
+            rows.append(row)
+
+            # spotlight: dim every earlier row to faint
+            dim_prev = [r.animate.set_opacity(0.34) for r in rows[:-1]]
+
+            self.play(FadeIn(rtag, shift=RIGHT * 0.05), FadeIn(old),
+                      *dim_prev, run_time=0.4)
 
             pulse = Dot(arr[0].get_start(), radius=0.05, color=INK)
             self.add(pulse)
@@ -117,38 +122,46 @@ class Approach(Scene):
                 pulse.animate.move_to(arr[0].get_end()),
                 TransformFromCopy(old, new),
                 wer.animate.set_value(mv["wer"]),
-                run_time=0.66, rate_func=smooth)
+                run_time=0.9, rate_func=smooth)
             self.remove(pulse)
-            self.play(FadeIn(detail, shift=UP * 0.05),
-                      Indicate(steps[mv["recipe_hi"] * 2], scale_factor=1.08, color=INK_DIM),
-                      run_time=0.36)
-            steps[mv["recipe_hi"] * 2].set_color(INK_DIM)
+            self.add(new)  # ensure the copy target persists in the row group
 
-        wer.set_value(18.53)
+            if mv["distil"]:
+                distil_chip = steps[2 * 2]  # "distil the voice"
+                self.play(distil_chip.animate.set_color(INK_DIM),
+                          Indicate(distil_chip, scale_factor=1.1, color=INK), run_time=0.4)
+                distil_chip.set_color(INK_DIM)
+            self.wait(0.4)
+
+        # ============================================================== #
+        #  BEAT 6 — "Three changes." all three rows hold lit together.    #
+        # ============================================================== #
+        self.next_section("beat6")
+        self.play(*[r.animate.set_opacity(1.0) for r in rows], run_time=0.35)
+        self.wait(0.4)
+
+        # ============================================================== #
+        #  BEAT 7 — "Fifty-one percent wrong, down to eighteen and a      #
+        #  half." rows clear; 18.53% ignites; closing line writes.        #
+        # ============================================================== #
+        self.next_section("beat7")
         readout.clear_updaters()
         read_tag.clear_updaters()
+        all_rows = VGroup(*rows)
 
-        # ============================================================== #
-        #  RESOLVE — the final result ignites (single white accent)       #
-        # ============================================================== #
-        self.next_section("resolve")
-        # the rows have done their job — clear them so the result owns the frame.
-        final = num("18.53%", 58, WHITE).move_to([0, 0.6, 0])
-        final_tag = mono("word error rate", 16, INK_DIM).next_to(final, DOWN, buff=0.16)
+        final = num("18.53%", 58, WHITE).move_to([0, 0.55, 0])
+        final_tag = mono("word error rate", 16, INK_DIM).next_to(final, DOWN, buff=0.18)
         final_g = glow(final)
-        self.play(FadeOut(all_rows), FadeOut(readout), FadeOut(read_tag), run_time=0.45)
+
+        self.play(FadeOut(all_rows), FadeOut(readout), FadeOut(read_tag), run_time=0.4)
         self.add(final_g)
         self.play(GrowFromCenter(final), FadeIn(final_tag),
-                  Flash([0, 0.6, 0], color=WHITE, line_length=0.2, num_lines=14,
+                  Flash([0, 0.55, 0], color=WHITE, line_length=0.2, num_lines=14,
                         flash_radius=1.4, time_width=0.4), run_time=0.55)
-        self.play(Circumscribe(VGroup(final, final_tag), color=WHITE, stroke_width=2.0,
-                               buff=0.22, time_width=0.5), run_time=0.5)
 
-        # name the spirit of the section — quietly, no justification
-        closing = serif("we didn't start from zero — we built on top", 24, INK).move_to(
-            [0, -1.4, 0])
-        self.play(Write(closing), run_time=0.55)
-        self.wait(0.6)
+        closing = serif("we built on top", 26, INK).move_to([0, -1.45, 0])
+        self.play(Write(closing), run_time=0.5)
+        self.wait(0.7)
 
 
 if __name__ == "__main__":

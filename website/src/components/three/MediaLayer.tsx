@@ -165,6 +165,17 @@ export function MediaLayer() {
       const sub = document.querySelector('[data-caption-sub]') as HTMLElement | null
       if (sub) sub.style.opacity = activeLocal >= 0 && !reduced ? String(1 - smooth(activeLocal, 0.06, 0.24)) : ''
 
+      // Hero title: shrink from display size (landing) to the normal top-caption
+      // size as the story begins, so it stops overlapping the clip behind it.
+      const heroTitle = document.querySelector('[data-hero-title]') as HTMLElement | null
+      if (heroTitle) {
+        const p = reduced ? 0 : activeLocal >= 0 ? 1 - smooth(activeLocal, 0.0, 0.18) : 1
+        heroTitle.style.setProperty('--hero-p', String(p))
+      }
+      // Scroll cue: full on the landing frame, fading out as you scroll in.
+      const cue = document.querySelector('[data-scroll-cue]') as HTMLElement | null
+      if (cue) cue.style.opacity = reduced ? '1' : String(1 - smooth(Math.max(activeLocal, 0), 0.0, 0.12))
+
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)

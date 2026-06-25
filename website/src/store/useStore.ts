@@ -52,7 +52,7 @@ export const useStore = create<AppState>((set) => ({
   reducedMotion: false,
   lowPower: false,
   dpr: 1.5,
-  ready: false,
+  ready: true, // no WebGL scene to wait on — the story is Manim clips
   electrodesReady: false,
   speechWord: 0,
   narrationOn: false,

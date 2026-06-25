@@ -1,23 +1,20 @@
 # b06 — "Two answer keys"  (bridge after "where-units-from", before "alignment-problem")
 #
-# TEACHES: the reader is graded against TWO answer keys on the SAME frames at once —
+# TEACHES: the same stream of snapshots is graded against TWO answer keys at once —
 #   coarse human PHONEMES (~40, clean & meaningful) and fine self-supervised UNITS
 #   (100, strange but precise). Two keys catch complementary errors and resist
 #   shortcuts: a guess that satisfies one key can still be struck out by the other.
-#   Metaphor: revising from two independent sets of class notes — the overlap forces
-#   real understanding. Hand-off: neither key says WHEN each sound happens.
+#   Only what BOTH agree on is real. Hand-off: neither key says WHEN each sound happens.
 #
-# Three-zone full-canvas composition (pose -> build -> transform -> name):
-#   CENTER FORK: a single frame-stream enters from below and forks into two target
-#                rails — TOP "phonemes (~40, coarse)", BOTTOM "units (100, fine)",
-#                each with its own check/cross grading mark.
-#   TRANSFORM:   two trial guesses ride the fork. (1) a cheap shortcut lights the
-#                coarse rail (check) but the fine rail catches it (cross). (2) a slip
-#                the coarse rail misses (check) but the fine rail flags (cross).
-#                Only when BOTH agree does a shared core glow pure #fff.
-#   BOTTOM:      a live "fooled?" tally — one key is easy to fool, two keys far harder.
-#   NAME:        serif "two views, one sound" + mono "harder to fake than one",
-#                then the hand-off "but neither key tells us WHEN".
+# Locked 8-beat sheet (one self.next_section per beat, timed to dur_sec):
+#   1 fork        stream rides in along bottom, forks into two EMPTY rails (1.54s)
+#   2 top key     top rail fills ~40 coarse phonemes "human-named"; bottom dim (1.62s)
+#   3 bottom key  bottom rail fills 100 fine units "machine-found"; spotlight down (1.86s)
+#   4 lazy guess  top passes (check); 3 fine cells smear to u88, boxed, fine cross (2.52s)
+#   5 symmetry    reset; slip units miss but the forty flag -> "each catches..." (1.21s)
+#   6 agree       ONE guess lights BOTH; #fff checks + bright agreement core (2.14s)
+#   7 name        machinery -> ghost; serif "two views, one sound" + sub (1.46s)
+#   8 hand-off    bottom line "but neither key tells us WHEN each sound happens" (1.21s)
 from manim import *
 from emg_style import *
 import numpy as np
@@ -25,14 +22,14 @@ import numpy as np
 WHITE = "#ffffff"
 
 # --- geometry ---------------------------------------------------------------
-STREAM_Y = -2.55          # the incoming frame-stream baseline
-FORK_X = -1.9             # where the stream splits
+STREAM_Y = -2.7           # the incoming frame-stream baseline
+FORK_X = -2.1             # where the stream splits
 PH_Y = 1.55               # phoneme (coarse) rail height
 UN_Y = -0.45              # unit (fine) rail height
-RAIL_X0 = -0.2            # rails start
-RAIL_X1 = 4.7             # rails end (grade mark sits just past)
-GRADE_X = 5.35            # x of the check/cross grade marks
-LABEL_X = -6.4            # left column for rail names/tags
+RAIL_X0 = 0.0             # rails start
+RAIL_X1 = 4.6             # rails end (grade mark sits just past)
+GRADE_X = 5.4             # x of the check/cross grade marks
+LABEL_X = -6.5            # left column for rail names/tags
 
 
 def tri(angle, c, op=1.0, s=0.085):
@@ -54,7 +51,7 @@ def check(center, c=INK, w=3.0, s=0.5):
                   Line(b, d, stroke_color=c, stroke_width=w))
 
 
-def token_row(labels, y, x0, x1, sq=0.42, fs=20, dim_set=()):
+def token_row(labels, y, x0, x1, sq=0.42, fs=20):
     """A rail of small token cells across [x0,x1] at height y."""
     n = len(labels)
     xs = np.linspace(x0, x1, n)
@@ -63,8 +60,7 @@ def token_row(labels, y, x0, x1, sq=0.42, fs=20, dim_set=()):
     for i, lab in enumerate(labels):
         c = Square(sq, stroke_color=INK_GHOST, stroke_width=1.3,
                    fill_color=BG, fill_opacity=1.0).move_to([xs[i], y, 0])
-        col = INK_FAINT if i in dim_set else INK_DIM
-        t = mono(lab, fs, col).move_to(c)
+        t = mono(lab, fs, INK_DIM).move_to(c)
         cells.add(c)
         texts.add(t)
     return VGroup(cells, texts), cells, texts
@@ -75,17 +71,16 @@ class TwoAnswerKeys(Scene):
         seed()
 
         # ============================================================
-        # B0 — POSE: the single frame-stream enters from below.
+        # BEAT 1 — FORK (1.54s): the single frame-stream rides in and
+        #          forks at one node into two EMPTY rails (up and down).
         # ============================================================
-        self.next_section("pose")
+        self.next_section("fork")
 
-        title = mono("ONE STREAM OF FRAMES  ·  TWO ANSWER KEYS", 24, INK_DIM, w=BOLD)
-        title.move_to([0, 3.35, 0])
-        subtitle = mono("graded against both at once", 16, INK_FAINT).move_to([0, 2.86, 0])
-        self.play(FadeIn(title, shift=DOWN * 0.12), run_time=0.42)
-        self.play(FadeIn(subtitle), run_time=0.3)
+        title = mono("ONE STREAM  ·  TWO ANSWER KEYS", 24, INK_DIM, w=BOLD)
+        title.move_to([0, 3.4, 0])
+        self.play(FadeIn(title, shift=DOWN * 0.12), run_time=0.4)
 
-        # a compact filmstrip of frames rides in from the left along STREAM_Y.
+        # a compact filmstrip of frames rides in along the bottom STREAM_Y.
         nframes = 9
         fw = 0.46
         strip = VGroup()
@@ -98,118 +93,131 @@ class TwoAnswerKeys(Scene):
                          for h in (-0.08, 0.02, 0.12)]),
             )
             strip.add(card)
-        strip.arrange(RIGHT, buff=0.08).move_to([-3.6, STREAM_Y, 0])
-        stream_lbl = mono("frames  ·  50 / sec", 15, INK_FAINT)
-        stream_lbl.next_to(strip, LEFT, buff=0.28)
-        if stream_lbl.get_left()[0] < -6.9:
-            stream_lbl.next_to(strip, DOWN, buff=0.14).align_to(strip, LEFT)
+        strip.arrange(RIGHT, buff=0.08).move_to([-4.1, STREAM_Y, 0])
+        stream_lbl = mono("snapshots  ·  50 / sec", 15, INK_FAINT)
+        stream_lbl.next_to(strip, DOWN, buff=0.16).align_to(strip, LEFT)
 
         self.play(LaggedStart(*[FadeIn(c, shift=RIGHT * 0.12) for c in strip],
-                              lag_ratio=0.05, run_time=0.55),
+                              lag_ratio=0.05),
                   FadeIn(stream_lbl), run_time=0.55)
 
         # a fork node where the stream splits up (phonemes) and down (units).
         fork = Dot([FORK_X, STREAM_Y, 0], radius=0.06, color=INK)
         feed = Line(strip.get_right() + RIGHT * 0.04, [FORK_X, STREAM_Y, 0],
                     stroke_color=INK_FAINT, stroke_width=2.0)
-        self.play(Create(feed), FadeIn(fork, scale=0.6), run_time=0.35)
+        self.play(Create(feed), FadeIn(fork, scale=0.6), run_time=0.3)
 
-        # ============================================================
-        # B1 — BUILD: fork into two target rails, each with a grading mark.
-        # ============================================================
-        self.next_section("build")
-
+        # two empty rails fork out (just the routing arrows + grade slots).
         up_arrow = flat_arrow([FORK_X, STREAM_Y, 0],
                               [RAIL_X0 - 0.45, PH_Y, 0], INK_FAINT, 2.0)
         dn_arrow = flat_arrow([FORK_X, STREAM_Y, 0],
                               [RAIL_X0 - 0.45, UN_Y, 0], INK_FAINT, 2.0)
-        self.play(Create(up_arrow), Create(dn_arrow), run_time=0.45)
+        up_guide = Line([RAIL_X0 - 0.2, PH_Y, 0], [RAIL_X1 + 0.5, PH_Y, 0],
+                        stroke_color=INK_GHOST, stroke_width=1.0)
+        dn_guide = Line([RAIL_X0 - 0.2, UN_Y, 0], [RAIL_X1 + 0.5, UN_Y, 0],
+                        stroke_color=INK_GHOST, stroke_width=1.0)
+        self.play(Create(up_arrow), Create(dn_arrow),
+                  Create(up_guide), Create(dn_guide), run_time=0.4)
+        self.wait(0.1)
 
-        # TOP rail — phonemes: coarse, clean, human-named.
+        # the two grading slots: just past each rail's right end.
+        ph_grade_c = np.array([GRADE_X, PH_Y, 0])
+        un_grade_c = np.array([GRADE_X, UN_Y, 0])
+
+        # ============================================================
+        # BEAT 2 — TOP KEY (1.62s): the coarse ~40 phonemes; bottom dim.
+        # ============================================================
+        self.next_section("top_key")
+
         ph_labels = ["K", "AE", "T", "S"]
-        ph_row, ph_cells, ph_tx = token_row(ph_labels, PH_Y, RAIL_X0, RAIL_X1,
-                                             sq=0.5, fs=22)
-        ph_name = mono("phonemes", 22, INK).move_to([LABEL_X, PH_Y + 0.22, 0])
-        ph_name.align_to([LABEL_X, 0, 0], LEFT)
+        ph_row, ph_cells, ph_tx = token_row(ph_labels, PH_Y, RAIL_X0 + 0.3, RAIL_X1,
+                                             sq=0.52, fs=24)
+        ph_name = mono("phonemes", 22, INK)
+        ph_name.move_to([LABEL_X, PH_Y + 0.2, 0]).align_to([LABEL_X, 0, 0], LEFT)
         ph_tag = mono("~40 · coarse", 14, INK_FAINT)
         ph_tag.next_to(ph_name, DOWN, buff=0.12).align_to(ph_name, LEFT)
         ph_tag2 = mono("human-named", 14, INK_FAINT)
         ph_tag2.next_to(ph_tag, DOWN, buff=0.06).align_to(ph_name, LEFT)
         ph_label = VGroup(ph_name, ph_tag, ph_tag2)
 
-        # BOTTOM rail — units: fine, strange, machine-found (more, smaller cells).
+        self.play(FadeOut(up_guide),
+                  LaggedStart(*[Create(c) for c in ph_cells], lag_ratio=0.08),
+                  FadeIn(ph_name, shift=RIGHT * 0.06),
+                  run_time=0.7)
+        self.play(LaggedStart(*[FadeIn(t) for t in ph_tx], lag_ratio=0.08),
+                  FadeIn(ph_tag), FadeIn(ph_tag2),
+                  # keep the bottom rail clearly ghosted for now.
+                  dn_arrow.animate.set_opacity(0.3), dn_guide.animate.set_opacity(0.3),
+                  run_time=0.5)
+        self.wait(0.15)
+
+        # ============================================================
+        # BEAT 3 — BOTTOM KEY (1.86s): the fine 100 units; spotlight down.
+        # ============================================================
+        self.next_section("bottom_key")
+
         un_labels = ["u17", "u17", "u88", "u88", "u04", "u52", "u52", "u91"]
-        un_row, un_cells, un_tx = token_row(un_labels, UN_Y, RAIL_X0, RAIL_X1,
+        un_row, un_cells, un_tx = token_row(un_labels, UN_Y, RAIL_X0 + 0.3, RAIL_X1,
                                             sq=0.42, fs=15)
-        un_name = mono("units", 22, INK).move_to([LABEL_X, UN_Y + 0.22, 0])
-        un_name.align_to([LABEL_X, 0, 0], LEFT)
+        un_name = mono("units", 22, INK)
+        un_name.move_to([LABEL_X, UN_Y + 0.2, 0]).align_to([LABEL_X, 0, 0], LEFT)
         un_tag = mono("100 · fine", 14, INK_FAINT)
         un_tag.next_to(un_name, DOWN, buff=0.12).align_to(un_name, LEFT)
         un_tag2 = mono("machine-found", 14, INK_FAINT)
         un_tag2.next_to(un_tag, DOWN, buff=0.06).align_to(un_name, LEFT)
         un_label = VGroup(un_name, un_tag, un_tag2)
 
-        self.play(
-            LaggedStart(*[Create(c) for c in ph_cells], lag_ratio=0.06),
-            LaggedStart(*[Create(c) for c in un_cells], lag_ratio=0.05),
-            FadeIn(ph_name, shift=RIGHT * 0.06), FadeIn(un_name, shift=RIGHT * 0.06),
-            run_time=0.6,
-        )
-        self.play(
-            LaggedStart(*[FadeIn(t) for t in ph_tx], lag_ratio=0.06),
-            LaggedStart(*[FadeIn(t) for t in un_tx], lag_ratio=0.05),
-            FadeIn(ph_tag), FadeIn(ph_tag2), FadeIn(un_tag), FadeIn(un_tag2),
-            run_time=0.5,
-        )
-
-        # the two grading marks: a slot just past each rail's right end.
-        ph_grade_c = np.array([GRADE_X, PH_Y, 0])
-        un_grade_c = np.array([GRADE_X, UN_Y, 0])
-        ph_slot = mono("grade", 14, INK_GHOST).move_to(ph_grade_c + UP * 0.55)
-        un_slot = mono("grade", 14, INK_GHOST).move_to(un_grade_c + DOWN * 0.55)
-        self.play(FadeIn(ph_slot), FadeIn(un_slot), run_time=0.3)
-
-        # ---- BOTTOM tally skeleton: "fooled?" ----
-        LY = -3.45
-        tally_rule = Line([-6.4, LY + 0.42, 0], [6.4, LY + 0.42, 0],
-                          stroke_color=LINE, stroke_width=1.0)
-        tally_lbl = mono("one key — easy to fool", 16, INK_FAINT).move_to([0, LY, 0])
-        self.play(Create(tally_rule), FadeIn(tally_lbl), run_time=0.35)
+        # spotlight moves DOWN: dim the top, brighten the bottom rail.
+        self.play(FadeOut(dn_guide),
+                  dn_arrow.animate.set_opacity(1.0),
+                  ph_row.animate.set_opacity(0.4), ph_label.animate.set_opacity(0.4),
+                  run_time=0.4)
+        self.play(LaggedStart(*[Create(c) for c in un_cells], lag_ratio=0.05),
+                  FadeIn(un_name, shift=RIGHT * 0.06),
+                  run_time=0.6)
+        self.play(LaggedStart(*[FadeIn(t) for t in un_tx], lag_ratio=0.05),
+                  FadeIn(un_tag), FadeIn(un_tag2),
+                  run_time=0.5)
+        self.wait(0.16)
 
         # ============================================================
-        # B2 — TRANSFORM (1): a cheap shortcut satisfies COARSE, fails FINE.
+        # BEAT 4 — LAZY GUESS (2.52s): a blurry guess passes COARSE but the
+        #          fine units catch the smear (3 cells collapse to "u88").
         # ============================================================
-        self.next_section("shortcut")
+        self.next_section("lazy_guess")
 
-        trial1 = mono("trial: a blurry shortcut", 17, INK_DIM).move_to([0, 2.86, 0])
-        self.play(ReplacementTransform(subtitle, trial1), run_time=0.35)
+        trial1 = mono("a lazy guess blurs three sounds into one", 17, INK_DIM)
+        trial1.move_to([0, 2.85, 0])
+        # re-brighten both rails to neutral so the trial reads cleanly.
+        self.play(FadeIn(trial1, shift=DOWN * 0.08),
+                  ph_row.animate.set_opacity(1.0), ph_label.animate.set_opacity(1.0),
+                  run_time=0.4)
 
-        # a guess-pulse rides up to the phoneme rail and lights it: the coarse names
-        # are right, so the coarse key is satisfied (check).
+        # guess-pulse rides up to the coarse rail and lights it: the coarse names
+        # are right, so the coarse key shrugs and passes (check).
         pulse_up = Dot([FORK_X, STREAM_Y, 0], radius=0.07, color=WHITE)
         self.add(pulse_up)
-        self.play(pulse_up.animate.move_to([RAIL_X0 - 0.2, PH_Y, 0]),
-                  run_time=0.45, rate_func=smooth)
+        self.play(pulse_up.animate.move_to([RAIL_X0, PH_Y, 0]),
+                  run_time=0.4, rate_func=smooth)
         self.play(
             LaggedStart(*[c.animate.set_stroke(INK, width=2.2) for c in ph_cells],
-                        lag_ratio=0.08),
-            LaggedStart(*[t.animate.set_color(INK) for t in ph_tx], lag_ratio=0.08),
+                        lag_ratio=0.06),
+            LaggedStart(*[t.animate.set_color(INK) for t in ph_tx], lag_ratio=0.06),
             FadeOut(pulse_up, scale=0.3),
-            run_time=0.5,
+            run_time=0.45,
         )
         ph_ok = check(ph_grade_c, c=INK, w=3.2, s=0.55)
-        self.play(Create(ph_ok), run_time=0.3)
+        self.play(Create(ph_ok), run_time=0.25)
 
-        # but the SAME blurry guess collapses two distinct units into one — the fine
-        # key catches the difference it erased (u88 vs u04 both came out "u88").
-        blur_idx = (2, 3, 4)   # cells that should differ but got smeared
+        # but the SAME blurry guess collapses three distinct units into one — the
+        # fine key catches the difference it erased.
+        blur_idx = (2, 3, 4)
         for i in blur_idx:
             un_tx[i].generate_target()
             un_tx[i].target = mono("u88", 15, INK).move_to(un_cells[i])
         self.play(*[MoveToTarget(un_tx[i]) for i in blur_idx],
                   *[un_cells[i].animate.set_stroke(INK_DIM, width=1.8) for i in blur_idx],
                   run_time=0.45)
-        # the fine key flags the smear: cross over the offending cells.
         smear_box = SurroundingRectangle(VGroup(*[un_cells[i] for i in blur_idx]),
                                          color=INK, stroke_width=1.8, buff=0.06)
         un_cross = Cross(Square(0.5).move_to(un_grade_c), stroke_color=INK,
@@ -218,156 +226,120 @@ class TwoAnswerKeys(Scene):
         self.play(Create(un_cross),
                   Flash(un_grade_c, color=INK, flash_radius=0.5,
                         line_length=0.1, num_lines=10), run_time=0.35)
-
-        verdict1 = mono("coarse: fooled    fine: caught it", 16, INK_DIM).move_to([0, LY, 0])
-        self.play(ReplacementTransform(tally_lbl, verdict1), run_time=0.35)
-        self.wait(0.1)
+        self.wait(0.15)
 
         # ============================================================
-        # B3 — TRANSFORM (2): a slip COARSE misses, FINE flags. (symmetry)
+        # BEAT 5 — SYMMETRY (1.21s): a slip the units miss is exactly what the
+        #          forty flag — resolve to the tally line.
         # ============================================================
         self.next_section("symmetry")
 
-        trial2 = mono("trial: a subtle slip", 17, INK_DIM).move_to([0, 2.86, 0])
-        self.play(ReplacementTransform(trial1, trial2),
-                  # reset rail 1 visuals to neutral for the second trial.
-                  FadeOut(ph_ok), FadeOut(un_cross), FadeOut(smear_box),
-                  *[un_cells[i].animate.set_stroke(INK_GHOST, width=1.3) for i in blur_idx],
-                  run_time=0.4)
-        # restore the smeared units to their distinct values.
+        # reset trial 1, restore distinct units, and play the symmetric trial fast.
         for i, lab in zip(blur_idx, ("u88", "u04", "u52")):
             un_tx[i].generate_target()
             un_tx[i].target = mono(lab, 15, INK_DIM).move_to(un_cells[i])
-        self.play(*[MoveToTarget(un_tx[i]) for i in blur_idx],
-                  *[c.animate.set_stroke(INK_GHOST, width=1.3) for c in ph_cells],
-                  *[t.animate.set_color(INK_DIM) for t in ph_tx],
-                  run_time=0.4)
+        # coarse rail flags the slip (cross); fine rail shrugs (check).
+        ph_cross = Cross(Square(0.5).move_to(ph_grade_c), stroke_color=INK,
+                         stroke_width=3.2).scale(0.55)
+        un_ok = check(un_grade_c, c=INK, w=3.2, s=0.55)
+        slip_box = SurroundingRectangle(ph_cells[2], color=INK,
+                                        stroke_width=1.8, buff=0.06)
 
-        # this time the slip lands a phoneme that the coarse key happily accepts
-        # (T vs the fine-grained variant) — coarse check — but the fine units catch
-        # the wrong micro-texture.
-        slip_i = 2   # the "T" cell on the coarse rail
-        ph_tx[slip_i].generate_target()
-        ph_tx[slip_i].target = mono("T", 22, INK).move_to(ph_cells[slip_i])
-        pulse_dn = Dot([FORK_X, STREAM_Y, 0], radius=0.07, color=WHITE)
-        self.add(pulse_dn)
-        self.play(pulse_dn.animate.move_to([RAIL_X0 - 0.2, PH_Y, 0]),
-                  MoveToTarget(ph_tx[slip_i]),
-                  ph_cells[slip_i].animate.set_stroke(INK, width=2.2),
-                  FadeOut(pulse_dn, scale=0.3),
-                  run_time=0.5)
-        ph_ok2 = check(ph_grade_c, c=INK, w=3.2, s=0.55)
-        self.play(Create(ph_ok2), run_time=0.3)
+        self.play(
+            FadeOut(ph_ok), FadeOut(un_cross), FadeOut(smear_box),
+            *[MoveToTarget(un_tx[i]) for i in blur_idx],
+            *[un_cells[i].animate.set_stroke(INK_GHOST, width=1.3) for i in blur_idx],
+            FadeOut(trial1),
+            run_time=0.35,
+        )
+        self.play(Create(slip_box), Create(ph_cross), Create(un_ok), run_time=0.4)
 
-        # the fine units flag the offending texture cells.
-        fine_idx = (5, 6)
-        for i in fine_idx:
-            un_tx[i].generate_target()
-            un_tx[i].target = mono("u52", 15, INK).move_to(un_cells[i])
-        fine_box = SurroundingRectangle(VGroup(*[un_cells[i] for i in fine_idx]),
-                                        color=INK, stroke_width=1.8, buff=0.06)
-        un_cross2 = Cross(Square(0.5).move_to(un_grade_c), stroke_color=INK,
-                          stroke_width=3.2).scale(0.55)
-        self.play(*[MoveToTarget(un_tx[i]) for i in fine_idx],
-                  *[un_cells[i].animate.set_stroke(INK_DIM, width=1.8) for i in fine_idx],
-                  Create(fine_box), run_time=0.4)
-        self.play(Create(un_cross2),
-                  Flash(un_grade_c, color=INK, flash_radius=0.5,
-                        line_length=0.1, num_lines=10), run_time=0.35)
-
-        verdict2 = mono("each key catches what the other misses", 16, INK_DIM).move_to([0, LY, 0])
-        self.play(ReplacementTransform(verdict1, verdict2), run_time=0.35)
-        self.wait(0.1)
+        tally = mono("each key catches what the other misses", 18, INK_DIM)
+        tally.move_to([0, -3.45, 0])
+        self.play(FadeIn(tally, shift=UP * 0.08), run_time=0.3)
+        self.wait(0.16)
 
         # ============================================================
-        # B4 — AGREE: both keys pass; the shared core glows pure #fff.
+        # BEAT 6 — AGREE (2.14s): one guess lights BOTH rails; #fff checks +
+        #          a single bright core where they agree. THE payoff.
         # ============================================================
         self.next_section("agree")
 
-        trial3 = mono("right on BOTH — nowhere to hide", 17, INK).move_to([0, 2.86, 0])
-        self.play(ReplacementTransform(trial2, trial3),
-                  FadeOut(ph_ok2), FadeOut(un_cross2), FadeOut(fine_box),
-                  run_time=0.4)
-        # restore the fine cells, and make the slip phoneme honest again.
-        for i, lab in zip(fine_idx, ("u52", "u52")):
-            un_tx[i].generate_target()
-            un_tx[i].target = mono(lab, 15, INK_DIM).move_to(un_cells[i])
-        self.play(*[MoveToTarget(un_tx[i]) for i in fine_idx],
-                  *[un_cells[i].animate.set_stroke(INK_GHOST, width=1.3) for i in fine_idx],
-                  ph_cells[slip_i].animate.set_stroke(INK_GHOST, width=1.3),
-                  ph_tx[slip_i].animate.set_color(INK_DIM),
-                  run_time=0.4)
+        self.play(FadeOut(slip_box), FadeOut(ph_cross), FadeOut(un_ok),
+                  run_time=0.3)
 
-        # one guess lights BOTH rails; both grade marks turn to checks.
+        # one guess lights BOTH rails at once.
         glow_up = Dot([FORK_X, STREAM_Y, 0], radius=0.08, color=WHITE)
         glow_dn = Dot([FORK_X, STREAM_Y, 0], radius=0.08, color=WHITE)
         self.add(glow_up, glow_dn)
-        self.play(
-            glow_up.animate.move_to([RAIL_X0 - 0.2, PH_Y, 0]),
-            glow_dn.animate.move_to([RAIL_X0 - 0.2, UN_Y, 0]),
-            run_time=0.45, rate_func=smooth)
+        self.play(glow_up.animate.move_to([RAIL_X0, PH_Y, 0]),
+                  glow_dn.animate.move_to([RAIL_X0, UN_Y, 0]),
+                  run_time=0.45, rate_func=smooth)
         self.play(
             LaggedStart(*[c.animate.set_stroke(INK, width=2.2) for c in ph_cells],
-                        lag_ratio=0.05),
-            LaggedStart(*[t.animate.set_color(INK) for t in ph_tx], lag_ratio=0.05),
-            LaggedStart(*[c.animate.set_stroke(INK, width=2.0) for c in un_cells],
                         lag_ratio=0.04),
-            LaggedStart(*[t.animate.set_color(INK) for t in un_tx], lag_ratio=0.04),
+            LaggedStart(*[t.animate.set_color(INK) for t in ph_tx], lag_ratio=0.04),
+            LaggedStart(*[c.animate.set_stroke(INK, width=2.0) for c in un_cells],
+                        lag_ratio=0.03),
+            LaggedStart(*[t.animate.set_color(INK) for t in un_tx], lag_ratio=0.03),
             FadeOut(glow_up, scale=0.3), FadeOut(glow_dn, scale=0.3),
-            run_time=0.55,
+            run_time=0.5,
         )
-        both_ph = check(ph_grade_c, c=WHITE, w=3.4, s=0.6)
-        both_un = check(un_grade_c, c=WHITE, w=3.4, s=0.6)
+        both_ph = check(ph_grade_c, c=WHITE, w=3.6, s=0.62)
+        both_un = check(un_grade_c, c=WHITE, w=3.6, s=0.62)
         self.play(Create(both_ph), Create(both_un), run_time=0.35)
 
-        # the SHARED CORE: where the two rails agree, one bright peak forms.
-        core = Dot([1.85, (PH_Y + UN_Y) / 2, 0], radius=0.16, color=WHITE)
+        # the SHARED CORE: one bright #fff peak where the two rails agree.
+        core = Dot([2.0, (PH_Y + UN_Y) / 2, 0], radius=0.17, color=WHITE)
         core_g = glow(core)
-        link_up = Line([1.85, PH_Y - 0.3, 0], core.get_center(),
+        link_up = Line([2.0, PH_Y - 0.3, 0], core.get_center(),
                        stroke_color=WHITE, stroke_width=2.0).set_opacity(0.5)
-        link_dn = Line([1.85, UN_Y + 0.3, 0], core.get_center(),
+        link_dn = Line([2.0, UN_Y + 0.3, 0], core.get_center(),
                        stroke_color=WHITE, stroke_width=2.0).set_opacity(0.5)
-        core_lbl = mono("the same sound — agreed", 16, INK).next_to(core, RIGHT, buff=0.3)
+        # dim everything else so the agreement core is the brightest object.
         self.add(core_g)
-        self.play(Create(link_up), Create(link_dn),
-                  GrowFromCenter(core), run_time=0.4)
-        self.play(FadeIn(core_lbl, shift=RIGHT * 0.1),
-                  Flash(core.get_center(), color=WHITE, flash_radius=0.7,
-                        line_length=0.14, num_lines=14, time_width=0.4), run_time=0.45)
-
-        verdict3 = mono("two keys — far harder to fool", 16, INK).move_to([0, LY, 0])
-        self.play(ReplacementTransform(verdict2, verdict3), run_time=0.35)
+        self.play(
+            Create(link_up), Create(link_dn), GrowFromCenter(core),
+            ph_label.animate.set_opacity(0.4), un_label.animate.set_opacity(0.4),
+            stream_lbl.animate.set_opacity(0.3),
+            run_time=0.45,
+        )
+        self.play(Flash(core.get_center(), color=WHITE, flash_radius=0.75,
+                        line_length=0.14, num_lines=14, time_width=0.4),
+                  Indicate(core, scale_factor=1.25, color=WHITE),
+                  run_time=0.45)
+        self.wait(0.14)
 
         # ============================================================
-        # B5 — NAME + HAND-OFF + POSTER HOLD.
+        # BEAT 7 — NAME (1.46s): machinery -> ghost; serif payoff owns center.
         # ============================================================
         self.next_section("name")
 
-        # dim the machinery; let the name own the centre-right.
         machinery = VGroup(strip, feed, fork, up_arrow, dn_arrow,
-                           ph_row, un_row, ph_label, un_label,
-                           ph_slot, un_slot, both_ph, both_un, stream_lbl,
-                           link_up, link_dn)
-        name_big = serif("two views, one sound", 40, WHITE).move_to([0, 0.95, 0])
+                           ph_row, un_row, ph_label, un_label, stream_lbl,
+                           both_ph, both_un, link_up, link_dn, tally, title)
+        name_big = serif("two views, one sound", 42, WHITE).move_to([0, 0.95, 0])
         name_sub = mono("right on both is far harder to fake than one", 18, INK_DIM)
-        name_sub.next_to(name_big, DOWN, buff=0.26)
+        name_sub.next_to(name_big, DOWN, buff=0.28)
         name_g = glow(name_big)
 
         self.play(
             machinery.animate.set_opacity(0.16),
-            core_lbl.animate.set_opacity(0.0),
-            core.animate.move_to([0, 1.7, 0]).scale(0.9),
+            core.animate.move_to([0, 1.85, 0]).scale(0.85),
             FadeOut(core_g),
-            run_time=0.55,
+            run_time=0.5,
         )
         self.remove(core)
         self.add(name_g)
         self.play(GrowFromCenter(name_big), run_time=0.5)
-        self.play(FadeIn(name_sub, shift=UP * 0.1), run_time=0.55)
+        self.play(FadeIn(name_sub, shift=UP * 0.1), run_time=0.46)
 
-        # hand-off line to the alignment problem.
+        # ============================================================
+        # BEAT 8 — HAND-OFF (1.21s): neither key says WHEN each sound happens.
+        # ============================================================
+        self.next_section("handoff")
+
         handoff = mono("but neither key tells us WHEN each sound happens",
-                       17, INK_FAINT).move_to([0, LY, 0])
-        self.play(ReplacementTransform(verdict3, handoff), run_time=0.45)
-
-        self.wait(0.6)
+                       18, INK_FAINT).move_to([0, -2.4, 0])
+        self.play(FadeIn(handoff, shift=UP * 0.1), run_time=0.5)
+        self.wait(0.5)

@@ -32,9 +32,10 @@
   }
 }
 
-/* Voice on: lift the clip so its lower edge clears the subtitle band. */
+/* Voice on: lift the clip so its lower edge clears the subtitle band (sized for
+   the tallest subtitles, ~4–5 lines). */
 .withCaptions .stage {
-  bottom: clamp(11rem, 19vh, 14rem);
+  bottom: clamp(13rem, 22vh, 16.5rem);
 }
 @media (max-width: 820px), (max-height: 600px), (max-aspect-ratio: 7/5) {
   .withCaptions .stage {

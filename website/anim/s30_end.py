@@ -7,6 +7,14 @@
 # ART DIRECTION — full-canvas, cinematic, NOT the ledger style of the earlier
 # scenes. Strict monochrome; depth from opacity/size; the single pure-#fff accents
 # are the ignition flash and the shimmer along the letters.
+#
+# Six beats — one spoken sentence each (re-paced; same four visuals):
+#   1 trace      "watch a whisper of muscle turn into light"   (2.27s)
+#   2 shatter    "it breaks apart ... a scatter of tiny pieces" (3.25s)
+#   3 reform     "those pieces find each other and become words" (3.45s)
+#   4 ignite     "from silent muscle to readable text"          (1.55s)
+#   5 hold       "that was the whole idea"                       (0.93s)
+#   6 settle     "the end"                                       (0.60s)
 from manim import *
 from emg_style import *
 import numpy as np
@@ -49,70 +57,89 @@ class End(Scene):
         end.move_to([0, CY, 0]).set_opacity(0)
         targets = outline_points(end, N)
 
-        # ---- atmosphere: a slowly rotating mote field ------------------
+        # ---- atmosphere: a slowly rotating mote field (ambient calm) ----
         bg = VGroup()
         for _ in range(72):
             bg.add(Dot([uniform(-6.8, 6.8), uniform(-3.7, 3.7), 0],
                        radius=uniform(0.008, 0.03), color=INK).set_opacity(uniform(0.05, 0.32)))
-        self.play(LaggedStart(*[FadeIn(d) for d in bg], lag_ratio=0.008), run_time=1.1)
+        self.play(LaggedStart(*[FadeIn(d) for d in bg], lag_ratio=0.008), run_time=0.9)
         bg.add_updater(lambda m, dt: m.rotate(0.05 * dt, about_point=ORIGIN))
 
         # ===============================================================
-        # BEAT 1 — the last signal traces across, glowing
+        # BEAT 1 (2.27s) — "watch a whisper of muscle turn into light"
+        # the last signal traces across, glowing, a scan dot riding its crest
         # ===============================================================
-        self.next_section("signal")
+        self.next_section("trace")
         xs = np.linspace(-6.2, 6.2, 260)
         wave_pts = [np.array([x, emg_y(x) + CY, 0]) for x in xs]
         wave = VMobject().set_points_smoothly(wave_pts).set_stroke(INK, 2.6)
-        # build the glow copies explicitly (so we can remove them for certain — a
-        # nested glow() VGroup can survive FadeOut once Create() re-adds the wave).
+        # explicit glow copies so we can remove them for certain later.
         wglow = VGroup(*[wave.copy().set_stroke(width=6 + 3 * i, opacity=0.06) for i in range(3)])
         scan = Dot(wave_pts[0], radius=0.07, color=WHITE)
         self.add(wglow)
         self.play(Create(wave), MoveAlongPath(scan, wave),
-                  run_time=1.6, rate_func=rate_functions.ease_in_out_sine)
+                  run_time=1.7, rate_func=rate_functions.ease_in_out_sine)
         self.play(FadeOut(scan), run_time=0.25)
+        self.remove(scan)
+        self.wait(0.3)
 
         # ===============================================================
-        # BEAT 2 — the signal shatters into a cloud of particles
+        # BEAT 2 (3.25s) — "it breaks apart ... a scatter of tiny pieces"
+        # the wave shatters and scatters outward into a faint particle cloud
         # ===============================================================
         self.next_section("shatter")
         wpts = [wave.point_from_proportion(t) for t in np.linspace(0, 1, N)]
         parts = VGroup(*[Dot(p, radius=0.02, color=INK).set_opacity(uniform(0.55, 0.95))
                          for p in wpts])
         self.add(parts)
-        self.play(FadeOut(wave), FadeOut(wglow), run_time=0.4)
-        self.remove(wave, wglow, scan)
-        # a brief outward scatter (breaking apart) before they regroup
-        self.play(*[p.animate.shift([uniform(-0.5, 0.5), uniform(-0.7, 0.7), 0])
-                    for p in parts], run_time=0.5, rate_func=rate_functions.ease_out_quad)
+        self.play(FadeOut(wave), FadeOut(wglow), run_time=0.5)
+        self.remove(wave, wglow)
+        # a slow outward scatter — the signal breaking into pieces
+        self.play(*[p.animate.shift([uniform(-0.6, 0.6), uniform(-0.85, 0.85), 0])
+                    .set_opacity(uniform(0.4, 0.7))
+                    for p in parts],
+                  run_time=1.5, rate_func=rate_functions.ease_out_quad)
+        self.wait(1.1)
 
         # ===============================================================
-        # BEAT 3 — the particles stream together into THE END
+        # BEAT 3 (3.45s) — "those pieces find each other and become words"
+        # particles stream together and settle onto the THE END letterforms
         # ===============================================================
-        self.next_section("form")
+        self.next_section("reform")
         self.play(
             LaggedStart(*[p.animate.move_to(t).set_opacity(0.95)
                           for p, t in zip(parts, targets)], lag_ratio=0.0032),
-            run_time=2.6, rate_func=rate_functions.ease_in_out_sine)
+            run_time=2.9, rate_func=rate_functions.ease_in_out_sine)
+        self.wait(0.5)
 
         # ===============================================================
-        # BEAT 4 — ignition: the title reveals as the particles arrive, with a
-        # single light-sweep along the letters. Once THE END is formed, we hold.
+        # BEAT 4 (1.55s) — "from silent muscle to readable text"
+        # THE END ignites: the letters reveal, flash, then a single light-sweep
         # ===============================================================
         self.next_section("ignite")
         end.set_opacity(1.0)
         end_g = glow(end)
         self.add(end_g)
-        self.play(FadeIn(end), parts.animate.set_opacity(0.0), run_time=0.6)
+        self.play(FadeIn(end), parts.animate.set_opacity(0.0), run_time=0.4)
         self.remove(parts)
         self.play(Flash(end.get_center(), color=WHITE, line_length=0.42, num_lines=26,
-                        flash_radius=2.6, time_width=0.5), run_time=0.6)
-        # light sweeps once along the letterforms
+                        flash_radius=2.6, time_width=0.5), run_time=0.5)
         self.play(ShowPassingFlash(end.copy().set_stroke(WHITE, 2.6).set_fill(opacity=0),
-                                   time_width=0.5), run_time=1.15)
-        # THE END is formed — hold here.
-        self.wait(1.8)
+                                   time_width=0.5), run_time=0.65)
+
+        # ===============================================================
+        # BEAT 5 (0.93s) — "that was the whole idea"
+        # the sweep finishes; THE END holds steady and bright
+        # ===============================================================
+        self.next_section("hold")
+        self.wait(0.93)
+
+        # ===============================================================
+        # BEAT 6 (0.6s) — "the end"
+        # everything settles; the title rests alone on the dark, motes drifting
+        # ===============================================================
+        self.next_section("settle")
+        self.wait(0.6)
 
 
 if __name__ == "__main__":

@@ -1,18 +1,21 @@
 # website/anim/s23_journey.py  —  S23 "The whole journey" (recap)
 # A single uninterrupted left->right "current" through the WHOLE machine, staged
 # across the FULL canvas as a three-deck circuit board:
-#   TOP strip   : a quiet context line — "everything you have just seen, in order"
+#   TOP strip   : a quiet context line — "everything you have just learned, in order"
 #                 — over a thin fenced rule, with a live "stage k / 9" readout.
 #   CENTER deck : the nine reused station glyphs (mouth, dotted head, fingerprint
 #                 filmstrip, READER, phoneme cells, word-map, candidate pool, LLM
 #                 chooser, TEXT) drawn LARGE on one horizontal rail; a bright white
-#                 pulse sweeps it and lights each station one-by-one as a lit_rail
-#                 segment fills behind it.
+#                 pulse sweeps it and lights each station as a lit_rail fills behind.
 #   BOTTOM deck : a 0..100% completion bar with a morphing data token, and — as the
 #                 pulse arrives — the sentence "the quick brown fox" assembling one
 #                 word at a time, then the compact pipeline breadcrumb of the chain.
-# The point is motion-as-recap: nothing restated in words — you WATCH one packet of
-# data flow through every stage and come out as one glowing sentence.
+#
+# This is a RECAP scene: motion-as-recap, not discovery. The pulse pauses on the
+# logical boundaries of the eight narration sentences (one next_section per
+# sentence), so each spoken line owns exactly one lighting event — mouth, sensors,
+# fingerprint, then a PAIRED beat for reader->sounds, a PAIRED beat for
+# word-map->pool, and a PAIRED beat for chooser->text — instead of nine flashes.
 #
 # Strict monochrome (emg_style inks + pure #fff for the single peak accent). No LaTeX.
 from manim import *
@@ -38,10 +41,6 @@ class Journey(Scene):
         seed()
 
         # ---- canvas geometry -------------------------------------------------
-        # Three decks filling the whole frame (x in [-7.1,7.1], y in [-4,4]):
-        #   TOP    strip  ~ +2.5 .. +3.6   context line + stage counter
-        #   CENTER deck   ~ -1.3 .. +2.0   nine stations on one rail
-        #   BOTTOM strip  ~ -3.7 .. -2.0   sentence assembling + breadcrumb
         xs = np.linspace(-5.95, 5.95, 9)
         STY = 0.95                     # station row y (CENTER)
         rail_y = STY - 1.05            # rail just below the stations  (~-0.10)
@@ -52,12 +51,11 @@ class Journey(Scene):
         # =================================================================
         # TOP STRIP — context line + fenced rule + stage counter
         # =================================================================
-        context = mono("everything you have just seen, in order",
+        context = mono("everything you have just learned, in order",
                        21, INK_FAINT).move_to([-0.55, TOP_Y, 0])
         top_rule = Line([-6.4, TOP_Y - 0.5, 0], [6.4, TOP_Y - 0.5, 0],
                         stroke_color=INK_GHOST, stroke_width=1.0)
 
-        # stage readout sits at the right end of the strip — "stage  k / 9".
         stage = ValueTracker(0)
         counter_at = np.array([5.55, TOP_Y, 0])
         counter_val = counter(stage, fmt=lambda v: f"{int(round(v))} / 9", s=22, c=INK,
@@ -178,7 +176,6 @@ class Journey(Scene):
                     st_wordmap, st_pool, st_chooser, st_text]
         names = ["speak", "31 sensors", "fingerprints", "the reader", "sounds",
                  "word-map", "guesses", "the chooser", "text"]
-        # one-word "what flows out of this station" tokens, shown on the data token.
         carries = ["voice", "signal", "print", "read", "DH AH K", "word",
                    "guesses", "FOX", "text"]
 
@@ -210,8 +207,6 @@ class Journey(Scene):
                       at=np.array([bar_left - 0.58, BAR_Y, 0]))
         bar_endlbl = mono("100%", 13, INK_FAINT).move_to([bar_left + BAR_W + 0.58, BAR_Y, 0])
 
-        # the data token: a small capsule with a morphing one-word payload, riding
-        # just below the rail to show WHAT is flowing (not just how far).
         TOK_Y = rail_y - 0.55
         def token(text, frac):
             x = xs[0] + (xs[-1] - xs[0]) * frac
@@ -224,47 +219,62 @@ class Journey(Scene):
             t.move_to(cap_box.get_center())
             return VGroup(cap_box, t).move_to([x, TOK_Y, 0])
 
-        # the sentence assembles word-by-word in the bottom strip as the pulse lands.
-        # Built as ONE serif Text so Pango keeps a single consistent baseline (no
-        # per-word vertical drift from descenders), then sliced into word groups by
-        # glyph index so each word can fade in on its own beat.
         sent_str = "the quick brown fox"
         sent = serif(sent_str, 44, INK).move_to([0, SENT_Y, 0])
-        # glyph ranges per word (spaces are not glyphs in Pango Text submobjects).
         word_lens = [len(w) for w in sent_str.split(" ")]
         sent_words = VGroup()
         _cur = 0
         for wl in word_lens:
             sent_words.add(VGroup(*sent[_cur:_cur + wl]))
             _cur += wl
-        # which station "reveals" each word (last four stations).
-        word_at_station = [5, 6, 7, 8]
+
+        # ---- helper: advance the pulse to station i, igniting it -----------
+        pulse = Dot(radius=0.09, color=WHITE, fill_opacity=1.0)
+        pulse.move_to([xs[0], rail_y, 0])
+        tok = token(carries[0], 0.0)
+
+        def step_to(i, words=(), rt_travel=0.5, rt_ignite=0.32):
+            """Slide the pulse to station i, fill meters, morph the token, ignite the
+            station, and optionally fade in finished-sentence words. One station =
+            two short plays so the ignite reads as the same beat as the travel."""
+            frac = i / 8.0
+            self.play(
+                pulse.animate.move_to([xs[i], rail_y, 0]),
+                prog.animate.set_value(frac),
+                stage.animate.set_value(i + 1),
+                ApplyFunction(lambda m: set_op(m, 1.0), stations[i]),
+                labels[i].animate.set_opacity(1.0),
+                Transform(tok, token(carries[i], frac)),
+                run_time=rt_travel, rate_func=smooth,
+            )
+            extra = [sent_words[w].animate.set_opacity(1.0) for w in words]
+            self.play(
+                Indicate(stations[i], scale_factor=1.10, color=INK),
+                *extra,
+                run_time=rt_ignite,
+            )
 
         # =================================================================
-        # ANIMATION
+        # ANIMATION — one next_section per spoken sentence
         # =================================================================
 
-        # 0) POSE — fade in the top context strip + empty meters. Establishes the
-        #    question: one packet, everything-in-order, with empty meters waiting.
+        # BEAT 0 (2.14s) — "Now watch one thought travel the whole machine."
+        # POSE: build the board; stations dim & dormant; the white pulse waits at
+        # the far left, poised to enter. Nothing lit yet.
         self.next_section("pose")
-        self.play(FadeIn(context, shift=DOWN * 0.1), Create(top_rule), run_time=0.55)
+        self.play(FadeIn(context, shift=DOWN * 0.1), Create(top_rule), run_time=0.5)
         self.play(FadeIn(counter_lbl), FadeIn(counter_val),
                   FadeIn(bar_track), FadeIn(pct), FadeIn(bar_endlbl),
-                  run_time=0.5)
+                  Create(rail), run_time=0.45)
         self.add(bar_fill)
-
-        # 1) BUILD THE BOARD — rail, then LaggedStart-drop the nine stations in
-        #    pipeline order with stems + labels, then dim them dormant.
-        self.next_section("board")
-        self.play(Create(rail), run_time=0.45)
         self.play(
             LaggedStart(
                 *[AnimationGroup(
-                    FadeIn(stations[i], shift=DOWN * 0.15),
+                    FadeIn(stations[i], shift=DOWN * 0.12),
                     FadeIn(labels[i]),
                     Create(stems[i]),
                 ) for i in range(9)],
-                lag_ratio=0.26, run_time=2.4,
+                lag_ratio=0.14, run_time=0.95,
             )
         )
         for s in stations:
@@ -272,13 +282,7 @@ class Journey(Scene):
         for lab in labels:
             lab.set_opacity(0.5)
 
-        # 2) SWEEP THE CURRENT — the white pulse races the rail. Three meters move in
-        #    sync: TOP counter ticks 1->9, BOTTOM bar fills 0->100%, token morphs.
-        #    Stations ignite one bright peak at a time behind the pulse; the last
-        #    four also drop a word of "the quick brown fox" into the bottom strip.
-        self.next_section("sweep")
-        pulse = Dot(radius=0.09, color=WHITE, fill_opacity=1.0)
-        pulse.move_to([xs[0], rail_y, 0])
+        # the lit-rail and halo follow the pulse; sentence words start invisible.
         halo = always_redraw(lambda: VGroup(*[
             Circle(radius=0.09 + 0.055 * (k + 1), stroke_color=WHITE,
                    stroke_width=2.5, stroke_opacity=0.10, fill_opacity=0)
@@ -289,39 +293,48 @@ class Journey(Scene):
             [xs[0], rail_y, 0],
             [xs[0] + (xs[-1] - xs[0]) * prog.get_value(), rail_y, 0],
             stroke_color=INK, stroke_width=2.8, stroke_opacity=0.65))
-
-        # the sentence words start invisible; each fades in on its station's beat.
         for w in sent_words:
             w.set_opacity(0.0)
         self.add(sent_words)
-
-        tok = token(carries[0], 0.0)
         self.add(lit_rail, halo, pulse, tok)
-        for i in range(9):
-            frac = i / 8.0
-            new_tok = token(carries[i], frac)
-            self.play(
-                pulse.animate.move_to([xs[i], rail_y, 0]),
-                prog.animate.set_value(frac),
-                stage.animate.set_value(i + 1),
-                ApplyFunction(lambda m: set_op(m, 1.0), stations[i]),
-                labels[i].animate.set_opacity(1.0),
-                Transform(tok, new_tok),
-                run_time=0.30, rate_func=smooth,
-            )
-            # ignite the station + (for the last four) reveal a word.
-            extra = []
-            if i in word_at_station:
-                w = sent_words[word_at_station.index(i)]
-                extra.append(w.animate.set_opacity(1.0))
-            self.play(
-                Indicate(stations[i], scale_factor=1.10, color=INK),
-                *extra,
-                run_time=0.18,
-            )
+        self.wait(0.45)
 
-        # 3) ARRIVE & RESOLVE — pulse exits & fades; bake a static fully-lit rail.
-        #    The sentence already sits in the bottom strip; bloom it with glow().
+        # BEAT 1 (0.62s) — "You speak." → station 0 (mouth).
+        self.next_section("speak")
+        step_to(0, rt_travel=0.26, rt_ignite=0.2)
+
+        # BEAT 2 (1.92s) — "Thirty-one sensors feel the faint electricity."
+        self.next_section("sensors")
+        step_to(1, rt_travel=0.85, rt_ignite=0.4)
+        self.wait(0.45)
+
+        # BEAT 3 (1.75s) — "Each snapshot of signal becomes a little fingerprint."
+        self.next_section("fingerprint")
+        step_to(2, rt_travel=0.8, rt_ignite=0.4)
+        self.wait(0.35)
+
+        # BEAT 4 (1.56s) — "The reader turns those fingerprints into sounds."
+        #   PAIRED: station 3 (READER) then 4 (sounds); word "the" drops.
+        self.next_section("reader")
+        step_to(3, rt_travel=0.45, rt_ignite=0.22)
+        step_to(4, words=(0,), rt_travel=0.45, rt_ignite=0.22)
+
+        # BEAT 5 (2.34s) — "The map of words turns sounds into a pool of sentences."
+        #   PAIRED: station 5 (word-map) then 6 (pool); words "quick","brown" drop.
+        self.next_section("wordmap")
+        step_to(5, words=(1,), rt_travel=0.6, rt_ignite=0.32)
+        step_to(6, words=(2,), rt_travel=0.6, rt_ignite=0.32)
+        self.wait(0.4)
+
+        # BEAT 6 (1.30s) — "And the chooser picks the words you meant."
+        #   PAIRED: station 7 (LLM) then 8 (TEXT); word "fox" lands, counter 9/9.
+        self.next_section("chooser")
+        step_to(7, rt_travel=0.4, rt_ignite=0.22)
+        step_to(8, words=(3,), rt_travel=0.4, rt_ignite=0.22)
+
+        # BEAT 7 (1.95s) — "Everything you have just learned, in order, lighting up."
+        #   Pulse exits & fades; bake the full lit rail; the finished sentence blooms
+        #   with the single white Flash; the compact breadcrumb settles below.
         self.next_section("resolve")
         stage.set_value(9)
         self.play(
@@ -332,24 +345,21 @@ class Journey(Scene):
         full_lit = Line([xs[0], rail_y, 0], [xs[-1], rail_y, 0],
                         stroke_color=INK, stroke_width=2.8, stroke_opacity=0.65)
         counter_val.clear_updaters()
+        prog.clear_updaters()
+        pct.clear_updaters()
         self.add(full_lit)
 
-        # link the TEXT station down to the finished sentence, then bloom it.
         arrow = Arrow(stations[-1].get_bottom() + DOWN * 0.02,
                       [xs[-1], rail_y - 0.55, 0],
                       stroke_width=2.2, color=INK_DIM, buff=0.05,
                       max_tip_length_to_length_ratio=0.22)
         fg = glow(sent)
         self.play(GrowArrow(arrow), run_time=0.3)
-        self.play(FadeIn(fg), run_time=0.45)
+        self.play(FadeIn(fg), run_time=0.4)
         self.play(Flash(sent, color=WHITE, line_length=0.22, num_lines=20,
-                        flash_radius=2.6, time_width=0.4), run_time=0.5)
+                        flash_radius=2.6, time_width=0.4), run_time=0.45)
 
-        # 4) NAME THE WHOLE — the bottom progress bar gives way to the compact
-        #    pipeline breadcrumb of the whole chain, beneath the sentence.
-        self.next_section("name")
-        prog.clear_updaters()
-        pct.clear_updaters()
+        # breadcrumb of the whole chain replaces the progress bar.
         chain = VGroup()
         parts = ["muscle", "sensors", "print", "read", "sounds",
                  "map", "guesses", "choose", "text"]
@@ -361,15 +371,11 @@ class Journey(Scene):
         self.play(
             FadeOut(bar_fill), FadeOut(pct), FadeOut(bar_endlbl),
             bar_track.animate.set_opacity(0.0),
-            run_time=0.4,
+            run_time=0.35,
         )
         self.remove(bar_fill, bar_track)
-        self.play(LaggedStartMap(FadeIn, chain, lag_ratio=0.05, run_time=0.8))
-
-        # 5) POSTER HOLD — the dense final frame: TOP context line + counter(9/9),
-        #    CENTER all nine stations lit on the full rail, the glowing sentence,
-        #    BOTTOM breadcrumb of the whole chain. One balanced image.
-        self.wait(0.6)
+        self.play(LaggedStart(*[FadeIn(m) for m in chain], lag_ratio=0.05, run_time=0.6))
+        self.wait(0.55)
 
 
 if __name__ == "__main__":

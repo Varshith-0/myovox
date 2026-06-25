@@ -51,35 +51,41 @@ export function Caption() {
   const lifted = captionsMode && !atTop
 
   return (
-    <div
-      data-caption-wrap
-      className={`${styles.wrap} ${atTop ? styles.wrapTop : ''} ${lifted ? styles.lifted : ''}`}
-      aria-live="polite"
-    >
-      <div key={index} className={`${styles.block} ${isHero ? styles.hero : ''}`}>
-        <span className={styles.rail}>
-          {String(index + 1).padStart(2, '0')} / {String(STAGE_COUNT).padStart(2, '0')} ·{' '}
-          {stage.rail}
-        </span>
-        <h2 className={`${styles.caption} display`}>{stage.caption}</h2>
-        {stage.sub && !captionsMode && (
-          <p data-caption-sub className={styles.sub}>
-            {stage.sub}
-          </p>
-        )}
-        <TokenStream
-          phonemes={stage.tokens?.phonemes}
-          words={stage.tokens?.words}
-          sentence={stage.tokens?.sentence}
-        />
+    <>
+      <div
+        data-caption-wrap
+        className={`${styles.wrap} ${atTop ? styles.wrapTop : ''} ${lifted ? styles.lifted : ''}`}
+        aria-live="polite"
+      >
+        <div key={index} className={`${styles.block} ${isHero ? styles.hero : ''}`}>
+          <span className={styles.rail}>
+            {String(index + 1).padStart(2, '0')} / {String(STAGE_COUNT).padStart(2, '0')} ·{' '}
+            {stage.rail}
+          </span>
+          <h2 data-hero-title={isHero ? '' : undefined} className={`${styles.caption} display`}>
+            {stage.caption}
+          </h2>
+          {stage.sub && !captionsMode && (
+            <p data-caption-sub className={styles.sub}>
+              {stage.sub}
+            </p>
+          )}
+          <TokenStream
+            phonemes={stage.tokens?.phonemes}
+            words={stage.tokens?.words}
+            sentence={stage.tokens?.sentence}
+          />
+        </div>
       </div>
 
+      {/* The scroll cue lives OUTSIDE the caption wrap so the wrap's title-card
+          transform can't drag it off-screen; MediaLayer fades it as you scroll. */}
       {isHero && !playing && (
-        <div className={styles.scrollCue} aria-hidden="true">
+        <div data-scroll-cue className={styles.scrollCue} aria-hidden="true">
           <span className={styles.scrollLine} />
           scroll or press play
         </div>
       )}
-    </div>
+    </>
   )
 }

@@ -93,13 +93,28 @@
   text-wrap: balance;
 }
 
+/* The hero title interpolates from a large landing size down to the normal
+   top-caption size (--t-h3) as you scroll, so it clears the clip behind it.
+   MediaLayer drives --hero-p from 1 → 0; the calc stays viewport-correct because
+   both ends are clamp() lengths. The em-based max-width keeps characters-per-line
+   constant as the font scales, so it stays a steady TWO lines (no 3→2→1 reflow). */
 .hero .caption {
-  font-size: var(--t-display);
+  --hero-p: 1;
+  --hero-big: clamp(2.5rem, 1.4rem + 4.4vw, 4.6rem);
+  font-size: calc(var(--t-h3) + var(--hero-p) * (var(--hero-big) - var(--t-h3)));
+  max-width: 14em;
+  margin-inline: auto;
   font-variation-settings:
-    'opsz' 144,
+    'opsz' 96,
     'wght' 340,
     'SOFT' 0,
     'WONK' 0;
+}
+
+/* Unlike other top captions, the hero block isn't width-capped — the title's own
+   em max-width governs the wrap so the two-line shape holds at every font size. */
+.wrapTop .block.hero {
+  max-width: none;
 }
 
 /* Lift the hero text so the scroll cue + control bar sit clearly below it. Only
@@ -170,10 +185,13 @@
 
 /* ---- Scroll cue (hero only) -------------------------------------- */
 .scrollCue {
-  position: absolute;
+  position: fixed; /* outside the caption wrap — unaffected by its title-card transform */
+  z-index: var(--z-content);
+  pointer-events: none;
   bottom: clamp(5rem, 8vh, 6.5rem); /* clear of the fixed control bar below it */
   left: 50%;
   transform: translateX(-50%);
+  will-change: opacity;
   display: flex;
   flex-direction: column;
   align-items: center;

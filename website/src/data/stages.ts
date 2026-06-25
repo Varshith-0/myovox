@@ -97,10 +97,6 @@ export const stageAct = (s: Stage): 1 | 2 => s.act ?? 1
 export const stageMedia = (s: Stage): StageMedia => s.media ?? { kind: 'scene' }
 export const stageScrollVh = (s: Stage): number => s.scrollVh ?? 100
 
-// The solid head is the default everywhere (face: 1); only the hero stage opts
-// out (face: 0) to keep the dispersed point-cloud "dust" intro that forms into it.
-const NONE = { face: 1, muscles: 0, electrodes: 0, signal: 0, neural: 0, tokens: 0 } as const
-
 // Shared Act-2 scene: the 3D canvas is fully faded (the MediaLayer covers it),
 // the head a faint dispersed hint behind the crossfade.
 const A2: SceneParams = {
@@ -114,7 +110,7 @@ const A2: SceneParams = {
 }
 
 /** An Act-2 (Manim video) stage. */
-function act2(id: string, rail: string, caption: string, alt: string, sub?: string): Stage {
+function act2(id: string, rail: string, caption: string, alt: string, sub?: string, scrollVh = 165): Stage {
   return {
     id,
     rail,
@@ -128,107 +124,51 @@ function act2(id: string, rail: string, caption: string, alt: string, sub?: stri
       fit: 'contain',
       alt,
     },
-    scrollVh: 165,
+    scrollVh,
     captionPosition: 'top',
     scene: A2,
   }
 }
 
 export const STAGES: readonly Stage[] = [
-  // ---- Act 1: the body (live 3D head) ----
-  {
-    id: 'hero',
-    rail: 'Intro',
-    caption: 'We can read speech from the muscles of your face.',
-    sub: 'No microphone, no sound — just the faint electricity of moving muscles, read back into text. Scroll to see how it gets to four words in five.',
-    scene: {
-      camPos: [0, 0.15, 4.4],
-      camTarget: [0, 0, 0],
-      headYaw: 0,
-      form: 0.06,
-      rim: 0.7,
-      bloom: 0.9,
-      layers: { ...NONE, face: 0 },
-    },
-  },
-  {
-    id: 'muscles',
-    rail: 'Muscles',
-    caption: 'Speech starts as movement.',
-    sub: 'Your brain fires nerves that drive dozens of muscles in the face and throat — even the faintest motion makes electricity.',
-    scene: {
-      camPos: [0.7, 0.12, 3.6],
-      camTarget: [0, -0.02, 0],
-      headYaw: 0.18,
-      form: 1,
-      rim: 1.0,
-      bloom: 1.0,
-      layers: { ...NONE, face: 1 },
-    },
-  },
-  {
-    id: 'articulation',
-    rail: 'Talking',
-    caption: 'Talking is dozens of muscles firing in sequence.',
-    sub: 'Lips, jaw, tongue and throat — every sound is a different pattern.',
-    captionPosition: 'top',
-    scene: {
-      camPos: [0.1, 0.05, 5.3],
-      camTarget: [0, 0.66, 0],
-      headYaw: 0.04,
-      form: 1,
-      rim: 0.9,
-      bloom: 1.05,
-      layers: { ...NONE, muscles: 1 },
-    },
-  },
-  {
-    id: 'electricity',
-    rail: 'Electricity',
-    caption: 'Every time a muscle moves, it makes a little electricity on the skin.',
-    sub: 'Far too faint to feel — but a sensor can.',
-    captionPosition: 'top',
-    scene: {
-      camPos: [0.8, 0.05, 4.0],
-      camTarget: [0.05, 0.1, 0],
-      headYaw: 0.3,
-      form: 1,
-      rim: 1.0,
-      bloom: 1.15,
-      layers: { ...NONE, muscles: 0.55, electrodes: 0.22 },
-    },
-  },
-  {
-    id: 'sensors',
-    rail: 'Sensors',
-    caption: 'A grid of 31 sensors rests on the skin and listens.',
-    sub: 'Each one feels the electricity from the muscles beneath it — five thousand times a second.',
-    scene: {
-      camPos: [2.1, 0.0, 2.7],
-      camTarget: [0.25, -0.12, 0],
-      headYaw: 0.62,
-      form: 1,
-      rim: 1.05,
-      bloom: 1.1,
-      layers: { ...NONE, electrodes: 1 },
-    },
-  },
-  {
-    id: 'recording',
-    rail: 'Recording',
-    caption: 'Each sensor traces a wiggly line, five thousand times a second.',
-    sub: 'Thirty-one lines, thousands of points each — a noisy mess we now have to make sense of.',
-    captionPosition: 'top',
-    scene: {
-      camPos: [1.4, -0.05, 2.6],
-      camTarget: [0.2, -0.15, 0],
-      headYaw: 0.45,
-      form: 1,
-      rim: 1.0,
-      bloom: 1.2,
-      layers: { ...NONE, electrodes: 0.65, signal: 1 },
-    },
-  },
+  // ---- Intro: the "why" prologue + the body/data (all Manim clips) ----
+  act2(
+    'hero', 'Intro',
+    'We can read speech from the muscles of your face.',
+    'A bundle of 31 EMG traces scrolls in and collapses into one glowing line that resolves into the words "read speech from muscle"; the title EMG → TEXT settles in.',
+    'No microphone, no sound — just the faint electricity of moving muscles, read back into text. By the end, four words in five come back right.',
+  ),
+  act2(
+    'why', 'Why',
+    'Why this exists.',
+    'A dense research-paper page of equations and tables dissolves into a clean moving diagram; a silent, mouthing face turns into typed text on a screen.',
+    'Research papers are a wall of math almost nobody reads. This is the same science — made to watch. The idea underneath: you can type by mouthing words, with no sound at all.',
+  ),
+  act2(
+    'landscape', 'Why this way',
+    'Three ways to read speech from the body.',
+    'Three doors — a brain implant, a scalp cap, and skin sensors — each scored on three rows: needs surgery?, signal strength, and needs movement? Skin sensors win on surgery and signal.',
+    'A brain implant works even without movement, but it takes surgery. Scalp sensors need no surgery, but the signal is faint and smeared. Muscle sensors on the skin are strong and surgery-free — the practical sweet spot, as long as you can still move your face.',
+  ),
+  act2(
+    'roadmap', 'The map',
+    'What you’re about to learn.',
+    'A left-to-right map lights up stop by stop: the body, fingerprints, the reader, sounds, the word map, the chooser, and the final score — about fifty short scenes.',
+    'Here is the whole journey: the body and its signal, tidy fingerprints, the reader that learns, sounds instead of spelling, words on a map of English, and a chooser that picks the best sentence — ending at the score. About fifty short scenes, each one idea.',
+  ),
+  act2(
+    'muscles', 'Muscles',
+    'Speech starts as movement.',
+    'A nerve spark spreads into a 2D face; named muscle groups — orbicularis oris, zygomaticus, masseter, genioglossus, sternohyoid — light in speech rhythm; a faint flicker rises on the skin.',
+    'To shape one word your brain fires dozens of muscles — lips, cheeks, jaw, tongue and throat — each on its own rhythm. And every contraction leaks a faint flicker of electricity onto the skin.',
+  ),
+  act2(
+    'signal', 'The signal',
+    'Thirty-one sensors, listening.',
+    'A one-millivolt pulse rises on a voltage axis; a grid of 31 skin sensors traces overlapping wiggly lines; a microphone marked "training only" fades in; the view zooms out to the corpus counts.',
+    'Each faint pulse is read by a grid of 31 skin sensors, five thousand times a second, with the real voice recorded alongside — across 9,660 sentences from one speaker. Hidden inside that noise is every word; the rest of the story is pulling it back out.',
+    245,
+  ),
 
   // ---- Act 2: the machine (scrubbed Manim clips) ----
   act2(
