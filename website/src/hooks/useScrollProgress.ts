@@ -9,11 +9,10 @@ const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v)
 
 /**
  * Fractional stage index (0..STAGE_COUNT-1) read from the live DOM rects, so the
- * mapping stays correct even when stages have different heights (Act-2 video
- * stages are taller). The section whose top has crossed the viewport top is the
- * current one; the fraction scrolled into it eases toward the next stage. This
- * is then normalized into `scroll.progress` so the existing `sampleScene` /
- * `stageIndexFor` (which expect a 0..1 over the stages) keep working unchanged.
+ * mapping stays correct even when stages have different heights (the video stages
+ * are taller). The section whose top has crossed the viewport top is the current
+ * one; the fraction scrolled into it eases toward the next stage. It is normalized
+ * into `scroll.progress` (a 0..1 over all stages) for the hot path.
  */
 function stageFloatFromDom(): number {
   for (let i = 0; i < STAGE_COUNT; i++) {
@@ -50,10 +49,10 @@ export function useScrollProgress(ref: RefObject<HTMLElement | null>): void {
         end: 'bottom bottom',
         scrub: true,
         onUpdate: () => {
-          // Section-aware progress (robust to per-stage scrollVh). The continuous
-          // value drives the 3D scene blend; the *active* stage is the section you
-          // are currently in (floor, not nearest) so the caption/clip don't flip to
-          // the next stage halfway through a tall Act-2 section.
+          // Section-aware progress (robust to per-stage scrollVh). The *active*
+          // stage is the section you are currently in (floor, not nearest) so the
+          // caption/clip don't flip to the next stage halfway through a tall video
+          // section.
           const f = stageFloatFromDom()
           scroll.progress = f / Math.max(1, STAGE_COUNT - 1)
           setStageIndex(Math.min(STAGE_COUNT - 1, Math.floor(f)))

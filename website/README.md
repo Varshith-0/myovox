@@ -1,10 +1,10 @@
-# Myovox — interactive WebGL explainer
+# Myovox — interactive explainer
 
 A scroll-driven, cinematic explainer of how speech is decoded from the faint electrical signals of
-facial muscles (surface EMG → text). Black-and-white only: a glowing point-cloud human head on black,
-transforming through the stages of the pipeline as you scroll. Three pages:
+facial muscles (surface EMG → text). Black-and-white only: each stage of the pipeline plays as a
+short, scroll-scrubbed animation on black. Three pages:
 
-- **Story** (`/`) — the scroll experience.
+- **Story** (`/`) — the scroll experience: ~50 short animated scenes, one idea each.
 - **Technical** (`/technical`) — the full technical report (tables, formulas, code).
 - **Code** (`/code`) — curated implementation snippets + the repository link.
 
@@ -13,9 +13,9 @@ decoding, **18.53% word error rate**). Every number shown is drawn from `docs/te
 
 ## Stack
 
-Vite + React + TypeScript (strict) · three.js / @react-three/fiber / drei / postprocessing ·
-GSAP ScrollTrigger + Lenis (single shared RAF) · Zustand · react-router (HashRouter) ·
-react-markdown + remark-gfm · Fonts: Fraunces (display) + JetBrains Mono.
+Vite + React + TypeScript (strict) · GSAP ScrollTrigger + Lenis (single shared RAF) · Zustand ·
+react-router (HashRouter) · react-markdown + remark-gfm · react-syntax-highlighter ·
+Fonts: Fraunces (display) + JetBrains Mono.
 
 ## Develop
 
@@ -27,50 +27,62 @@ npm run dev        # http://localhost:5173/myovox/
 Other scripts: `npm run build` · `npm run preview` · `npm run typecheck` · `npm run lint` ·
 `npm run format`.
 
-## The 3D head
+## The animations
 
-The head is a point cloud surface-sampled, **at author time**, from a realistic human-head scan and
-shipped as two small binaries in `public/` (`head-points.bin`, `head-mesh.bin`) — no runtime glTF
-parsing, no textures. Each point is fresnel-shaded by its own normal so grazing points glow (the rim),
-with a black inner mesh occluding the back so the head reads as a luminous shell.
+The Story is a sequence of pre-rendered [Manim](https://www.manim.community/) clips. Each scene is a
+Python file in [`anim/`](anim/) (`01-hero.py … 50-end.py`, in story order, plus the shared
+`style.py`); it renders to `public/anim/<id>.mp4` + `<id>.poster.webp`, where `<id>` is the kebab-case
+clip id referenced from `src/data/stages.ts`. At runtime the `MediaLayer` plays the active stage's
+clip and **scrubs it with the local scroll** — the animation literally plays as you scroll. Reduced
+motion shows the static poster instead.
 
-Re-bake (e.g. to swap the model or change point count) with:
+The author-time pipeline lives entirely in `anim/`:
 
 ```bash
-npm run bake:head   # downloads the source scan on first run, writes public/head-*.bin
+cd anim
+./render.sh            # render all 50 scenes -> public/anim/<id>.{mp4,poster.webp}
+./render.sh hero       # render one scene by clip id
+./render.sh og         # render the social card -> public/og.png
 ```
 
-To swap the head: change `SRC_URL` in `scripts/bake-head.mjs` to another permissive head model
-(glTF/GLB with a single triangle mesh) and re-run. The procedural fallback in
-`src/three/headGeometry.ts` is used automatically if `head-points.bin` is missing.
+[`anim/render.manifest.json`](anim/render.manifest.json) is the authoritative
+`file → scene class → clip id` map (story order matches `src/data/stages.ts`); `render.sh` reads it,
+runs `manim -qh` then `encode.sh` (re-encodes every frame as a keyframe for smooth scrubbing and
+emits the poster). Narration is generated separately:
 
-**Source geometry:** the “Lee Perry-Smith” head (Infinite-Realities), distributed with the three.js
-examples under **CC-BY 3.0**. Only sampled geometry is used; attribution is given here and on the Code
-page.
+```bash
+python scripts/narrate.py            # all stages, from src/data/narration.json (the spoken-script source)
+python scripts/narrate.py hero why   # specific stages -> public/anim/<id>.mp3 + <id>.captions.json
+```
+
+`render.sh` defaults to a base anaconda install (`MENV=/opt/anaconda3`) that provides `manim` +
+`ffmpeg`; override `MENV` / `MEDIA_DIR` for another environment.
 
 ## Architecture
 
 ```
 src/
+  main.tsx                entry
   App.tsx                 router + Lenis provider + GSAP↔Lenis RAF sync
   routes/                 StoryPage · TechnicalPage · CodePage (the last two lazy-loaded)
   components/
     layout/               Nav · Footer · Layout · Loader
-    three/                Scene · HeadRig · Head · HeadOccluder · Electrodes ·
-                          SignalField · NeuralNet · CameraRig · SceneDriver · Effects
-    story/                StorySections · Caption · ProgressRail
-    ui/                   GlowText · CodeBlock
-  hooks/                  useLenis (RAF bridge) · useScrollProgress · useResponsive · useHeadPoints
-  store/                  useStore (zustand) · scroll (hot progress) · sceneSample (per-frame state)
-  data/                   stages.ts (narrative + keyframes) · results.ts · site.ts
-  three/                  headGeometry · headMesh · anchors · graph
+    media/                MediaLayer (the scroll-scrubbed Manim-clip player)
+    story/                StorySections · Caption · ProgressRail · SpokenSentence ·
+                          NarrationLayer · Subtitles · PlayButton · SpeakerControl · CaptionsToggle
+    ui/                   CodeBlock · LogoMark · codeTheme
+  hooks/                  useLenis (RAF bridge) · useScrollProgress · useResponsive
+  store/                  useStore (zustand UI state) · scroll (hot-path progress) · narration (audio playhead)
+  data/                   stages.ts (the narrative spine) · site.ts · speech.ts · muscles.ts ·
+                          narration.ts (+ narration.json — the spoken-script source for narrate.py)
   content/                technical_report.md · snippets.ts
   styles/                 tokens.css · globals.css
 ```
 
-**The core rule:** ScrollTrigger writes one normalized `progress` into a hot-path module; the 3D
-scene reads it imperatively in `useFrame` and interpolates between per-stage keyframes. The scene is
-never coupled to DOM scroll events, and there is one RAF loop (GSAP's ticker drives Lenis).
+**The core rule:** a single ScrollTrigger turns the story container's scroll into one fractional
+stage index — it writes a normalized `progress` into a hot-path module and pushes the active stage
+into the store. The captions/rail react to that index, and the MediaLayer scrubs the active clip
+imperatively in its own RAF loop. Nothing downstream reads DOM scroll events directly.
 
 ## Deploy (GitHub Pages)
 
@@ -89,8 +101,7 @@ npm run build && npm run preview
 
 ## Accessibility & performance
 
-Respects `prefers-reduced-motion` (no scrubbing/idle motion, instant scroll); degrades on mobile/weak
-GPUs (fewer points, lighter post-processing — append `?lite` to force it); a WebGL error boundary
-falls back to readable content rather than crashing; skip link, semantic headings, and a text
-alternative for the canvas. The heavy chunks (three.js, the report renderer) are code-split out of the
-initial load.
+Respects `prefers-reduced-motion` (no scrubbing — static posters, instant scroll); word-synced
+subtitles are on by default; semantic headings, a skip link, and a text alternative for each clip.
+The reading pages (react-markdown + the syntax highlighter) are code-split out of the initial Story
+bundle, and only clips near the active stage are loaded/decoded.

@@ -1,54 +1,21 @@
 /**
  * The narrative spine of the Story page.
  *
- * One entry = one full-viewport scroll section. Act 1 stages render the live 3D
- * scene (reading the normalized scroll `progress` from the store and interpolating
- * between adjacent stages' `scene` params — see {@link sampleScene}); Act 2 stages
- * render a scrubbed Manim clip via the MediaLayer (their `scene.layers` are all 0
- * so the canvas fades out). This keeps the scene decoupled from the DOM — the
- * single most important architectural rule of this app.
+ * One entry = one full-viewport scroll section. Every stage renders a scrubbed
+ * Manim clip via the MediaLayer, driven by the section's local scroll. The
+ * caption and progress-rail overlays react to the active stage index (published
+ * by useScrollProgress into the store) — never to DOM scroll events directly,
+ * the single most important architectural rule of this app.
  */
 
-export type Vec3 = readonly [number, number, number]
-
 /**
- * Interpolatable scene state. Every field is numeric (or a vector of numbers)
- * so the renderer can lerp between two stages cleanly.
- */
-export interface SceneParams {
-  /** Camera world position. */
-  readonly camPos: Vec3
-  /** Camera look-at target. */
-  readonly camTarget: Vec3
-  /** Target head yaw in radians (the scene eases toward this). */
-  readonly headYaw: number
-  /** Head formation: 0 = dispersed point cloud, 1 = fully formed surface. */
-  readonly form: number
-  /** Fresnel rim-light intensity on the head (the core glow). */
-  readonly rim: number
-  /** Post-processing bloom strength for this stage. */
-  readonly bloom: number
-  /** Layer opacities/intensities, each 0..1, faded per stage. */
-  readonly layers: {
-    /** Solid realistic head (crossfades with the point cloud on the muscles stage). */
-    readonly face: number
-    readonly muscles: number
-    readonly electrodes: number
-    readonly signal: number
-    readonly neural: number
-    readonly tokens: number
-  }
-}
-
-/**
- * What renders behind a stage's caption.
- *  - `scene`: the live 3D canvas (Act 1, the default).
- *  - `video`: a Manim clip scrubbed by the stage's local scroll (Act 2). `src`
- *     and `poster` are paths *relative to BASE_URL* (e.g. `anim/ctc.mp4`); the
- *     MediaLayer prefixes `import.meta.env.BASE_URL` so they resolve under
- *     `/myovox/`. `poster` is shown for reduced-motion / while loading; `alt`
- *     is a one-sentence description of the animation for assistive tech.
- *  - `svg`: an optional live React/SVG stage (named component).
+ * What renders behind a stage's caption. Today every stage is a `video` — a Manim
+ * clip scrubbed by the stage's local scroll. `src` and `poster` are paths
+ * *relative to BASE_URL* (e.g. `anim/ctc.mp4`); the MediaLayer prefixes
+ * `import.meta.env.BASE_URL` so they resolve under `/myovox/`. `poster` is shown
+ * for reduced-motion / while loading; `alt` is a one-sentence description of the
+ * animation for assistive tech. (`scene`/`svg` remain in the union as the contract
+ * for any future live stage.)
  */
 export type StageMedia =
   | { readonly kind: 'scene' }
@@ -70,12 +37,10 @@ export interface Stage {
   readonly caption: string
   /** Optional sub-line under the caption. */
   readonly sub?: string
-  /** Which act: 1 = live 3D body, 2 = Manim machine. Defaults to 1. */
-  readonly act?: 1 | 2
   /** What renders behind the caption. Defaults to `{ kind: 'scene' }`. */
   readonly media?: StageMedia
-  /** Section height in vh (scroll length). Defaults to 100; Act-2 video stages
-   *  want ~140–180 so the clip has comfortable scrub range. */
+  /** Section height in vh (scroll length). Defaults to 100; video stages want
+   *  ~140–245 so the clip has comfortable scrub range. */
   readonly scrollVh?: number
   /** Phoneme/word/sentence content surfaced by the Tokens layer. */
   readonly tokens?: {
@@ -85,38 +50,19 @@ export interface Stage {
   }
   /** Where the caption sits (default bottom). 'top' frees the frame for labels. */
   readonly captionPosition?: 'top' | 'bottom'
-  /** The scene state this stage holds. Act-2 stages set all layers ~0. */
-  readonly scene: SceneParams
 }
 
-/** Layers fully off — Act-2 (Manim) stages fade the 3D scene out entirely. */
-export const OFF = { face: 0, muscles: 0, electrodes: 0, signal: 0, neural: 0, tokens: 0 } as const
-
-/** Accessors that apply the schema defaults (act 1, scene media, 100vh). */
-export const stageAct = (s: Stage): 1 | 2 => s.act ?? 1
+/** Accessors that apply the schema defaults (video media, 100vh). */
 export const stageMedia = (s: Stage): StageMedia => s.media ?? { kind: 'scene' }
 export const stageScrollVh = (s: Stage): number => s.scrollVh ?? 100
 
-// Shared Act-2 scene: the 3D canvas is fully faded (the MediaLayer covers it),
-// the head a faint dispersed hint behind the crossfade.
-const A2: SceneParams = {
-  camPos: [0, 0.12, 5.0],
-  camTarget: [0, 0, 0],
-  headYaw: 0,
-  form: 0.15,
-  rim: 0.15,
-  bloom: 0.3,
-  layers: { ...OFF },
-}
-
-/** An Act-2 (Manim video) stage. */
+/** A Manim video stage scrubbed by its section's local scroll. */
 function act2(id: string, rail: string, caption: string, alt: string, sub?: string, scrollVh = 165): Stage {
   return {
     id,
     rail,
     caption,
     sub,
-    act: 2,
     media: {
       kind: 'video',
       src: `anim/${id}.mp4`,
@@ -126,7 +72,6 @@ function act2(id: string, rail: string, caption: string, alt: string, sub?: stri
     },
     scrollVh,
     captionPosition: 'top',
-    scene: A2,
   }
 }
 
@@ -438,54 +383,3 @@ export const STAGES: readonly Stage[] = [
 ] as const
 
 export const STAGE_COUNT = STAGES.length
-
-/* ------------------------------------------------------------------ */
-/* Interpolation: map global scroll progress -> a blended SceneParams  */
-/* ------------------------------------------------------------------ */
-
-const lerp = (a: number, b: number, t: number) => a + (b - a) * t
-
-const lerpVec3 = (a: Vec3, b: Vec3, t: number): Vec3 => [
-  lerp(a[0], b[0], t),
-  lerp(a[1], b[1], t),
-  lerp(a[2], b[2], t),
-]
-
-/** Smoothstep easing for buttery transitions between stage keyframes. */
-const ease = (t: number) => t * t * (3 - 2 * t)
-
-/**
- * Sample the scene at a normalized global progress `p` in [0, 1].
- * `p = 0` is the first stage, `p = 1` the last; intermediate values blend the
- * two surrounding stages with smoothstep easing.
- */
-export function sampleScene(p: number): SceneParams {
-  const clamped = Math.min(1, Math.max(0, p))
-  const f = clamped * (STAGE_COUNT - 1)
-  const i = Math.min(STAGE_COUNT - 2, Math.floor(f))
-  const t = ease(f - i)
-  const a = STAGES[i].scene
-  const b = STAGES[i + 1].scene
-  return {
-    camPos: lerpVec3(a.camPos, b.camPos, t),
-    camTarget: lerpVec3(a.camTarget, b.camTarget, t),
-    headYaw: lerp(a.headYaw, b.headYaw, t),
-    form: lerp(a.form, b.form, t),
-    rim: lerp(a.rim, b.rim, t),
-    bloom: lerp(a.bloom, b.bloom, t),
-    layers: {
-      face: lerp(a.layers.face, b.layers.face, t),
-      muscles: lerp(a.layers.muscles, b.layers.muscles, t),
-      electrodes: lerp(a.layers.electrodes, b.layers.electrodes, t),
-      signal: lerp(a.layers.signal, b.layers.signal, t),
-      neural: lerp(a.layers.neural, b.layers.neural, t),
-      tokens: lerp(a.layers.tokens, b.layers.tokens, t),
-    },
-  }
-}
-
-/** The stage index nearest a given global progress — drives the active caption. */
-export function stageIndexFor(p: number): number {
-  const clamped = Math.min(1, Math.max(0, p))
-  return Math.round(clamped * (STAGE_COUNT - 1))
-}

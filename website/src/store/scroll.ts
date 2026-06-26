@@ -1,10 +1,10 @@
 /**
  * The hot-path scroll value, deliberately kept out of React/zustand.
  *
- * ScrollTrigger writes `progress` here every frame (see {@link useScrollProgress});
- * the WebGL scene reads it imperatively inside `useFrame`. Because it is a plain
- * module-level value, updating it 60×/second costs nothing and never re-renders
- * the React tree — the core decoupling the architecture depends on.
+ * ScrollTrigger writes `progress` here every frame (see {@link useScrollProgress}).
+ * Because it is a plain module-level value, updating it 60×/second costs nothing
+ * and never re-renders the React tree — the hot-path seam any per-frame consumer
+ * can read imperatively instead of through React state.
  */
 
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v)

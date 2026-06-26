@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist', 'node_modules', 'scripts/_assets']),
+  globalIgnores(['dist', 'node_modules']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -19,20 +19,11 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
-  // Build-time Node scripts (the head baker) — plain JS, Node globals.
+  // The MediaLayer scrubs the <video>/poster elements imperatively in a RAF loop
+  // (mutating refs and element styles outside React rendering). The React-Compiler
+  // immutability rule (which assumes hook values are pure) doesn't apply there.
   {
-    files: ['scripts/**/*.{js,mjs}'],
-    extends: [js.configs.recommended],
-    languageOptions: {
-      globals: globals.node,
-      sourceType: 'module',
-    },
-  },
-  // The 3D layer mutates three.js objects (uniforms, transforms) imperatively in
-  // useFrame — outside React rendering. The React-Compiler immutability rule
-  // (which assumes hook values are pure) doesn't apply to that pattern.
-  {
-    files: ['src/components/three/**/*.tsx'],
+    files: ['src/components/media/**/*.tsx'],
     rules: {
       'react-hooks/immutability': 'off',
     },

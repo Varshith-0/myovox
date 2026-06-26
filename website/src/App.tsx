@@ -28,9 +28,9 @@ function ScrollSync() {
 }
 
 /**
- * Dev-only handles for the Playwright screenshot harness (Section 8.3 / Section 9). Lets the
- * harness drive scroll deterministically: to a raw progress, to a stage's top,
- * or to a precise sub-progress within an Act-2 stage (to verify video scrub).
+ * Dev-only handles (exposed on `window` in dev builds only) to drive scroll
+ * deterministically from the console: to a raw progress, to a stage's top, or to
+ * a precise sub-progress within a stage (to inspect the video scrub).
  */
 function DevScrollHooks() {
   const lenis = useLenis()
@@ -99,8 +99,8 @@ function ScrollReset() {
 
 /**
  * Root: HashRouter (reliable on GitHub Pages — no refresh-404) wrapping the
- * Lenis smooth-scroll provider, the layout shell (fixed nav + global 3D scene),
- * and the three routes.
+ * Lenis smooth-scroll provider, the layout shell (fixed nav + footer), and the
+ * three routes.
  */
 export default function App() {
   useResponsive()

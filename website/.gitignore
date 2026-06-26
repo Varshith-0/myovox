@@ -16,12 +16,6 @@ dist-ssr
 *.tsbuildinfo
 .vite/
 
-# Playwright (the scripts/*.mjs shots drive a headless browser)
-test-results/
-playwright-report/
-playwright/.cache/
-blob-report/
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -44,5 +38,5 @@ __pycache__/
 # repo-root .gitignore excludes via "data/". Force it back into tracking.
 !src/data/
 
-# Temporary placeholder Manim clips (underscore-prefixed); real Act-2 clips are committed.
+# Temporary placeholder Manim clips (underscore-prefixed); the real clips are committed.
 public/anim/_*
