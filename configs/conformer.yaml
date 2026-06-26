@@ -1,5 +1,5 @@
 # Headline acoustic member: bidirectional Conformer + WavLM-L9 4-term distillation.
-# Reproduces 26.14 % test WER / 22.34 % test PER. Consumed by `emg2text.train --config`.
+# Reproduces 26.14 % test WER / 22.34 % test PER. Consumed by `myovox.train --config`.
 # Run-specific routing (--name, --warm_start, --ssl_pt, --recog_ckpt) is passed by run.sh.
 epochs: 50
 batch: 8

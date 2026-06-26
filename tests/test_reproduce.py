@@ -10,16 +10,16 @@ LOGITS = ROOT / "outputs" / "main" / "conf_l9_logits.pt"
 
 
 def test_entrypoints_exist():
-    import emg2text.reproduce as r
-    import emg2text.report as rep
+    import myovox.reproduce as r
+    import myovox.report as rep
     assert hasattr(r, "main") and hasattr(rep, "main")
 
 
 @pytest.mark.skipif(not LOGITS.exists(), reason="cached headline logits not present")
 def test_headline_greedy_per_matches():
     import torch
-    from emg2text.decode import evaluate as V
-    from emg2text.decode import decode as D
+    from myovox.decode import evaluate as V
+    from myovox.decode import decode as D
     blob = torch.load(LOGITS, map_location="cpu", weights_only=False)
     _, syms, phone_def = V.split_refs("test")
     n = min(len(blob["test"]), len(syms))

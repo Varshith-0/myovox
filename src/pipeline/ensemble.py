@@ -7,7 +7,7 @@ import argparse
 
 import torch
 
-from emg2text.log import setup_logging, get_logger
+from myovox.log import setup_logging, get_logger
 
 log = get_logger(__name__)
 

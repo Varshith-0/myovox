@@ -8,7 +8,7 @@ import re
 
 import numpy as np
 
-from emg2text import config
+from myovox import config
 
 
 def load_phone_def(tokens_path=None):

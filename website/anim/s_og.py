@@ -13,7 +13,7 @@ class OG(Scene):
         seed()
         # at 1200x630 the frame is 8 tall, ~15.24 wide (x ~ -7.6..7.6)
 
-        brand = mono("EMG → TEXT", 22, INK_FAINT, w=BOLD).move_to([0, 2.62, 0])
+        brand = mono("MYOVOX", 22, INK_FAINT, w=BOLD).move_to([0, 2.62, 0])
 
         line1 = serif("Reading speech from the", 46, INK)
         line2 = serif("muscles of the face.", 46, INK)

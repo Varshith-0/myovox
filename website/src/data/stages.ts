@@ -46,7 +46,7 @@ export interface SceneParams {
  *  - `video`: a Manim clip scrubbed by the stage's local scroll (Act 2). `src`
  *     and `poster` are paths *relative to BASE_URL* (e.g. `anim/ctc.mp4`); the
  *     MediaLayer prefixes `import.meta.env.BASE_URL` so they resolve under
- *     `/emg2text/`. `poster` is shown for reduced-motion / while loading; `alt`
+ *     `/myovox/`. `poster` is shown for reduced-motion / while loading; `alt`
  *     is a one-sentence description of the animation for assistive tech.
  *  - `svg`: an optional live React/SVG stage (named component).
  */
@@ -135,7 +135,7 @@ export const STAGES: readonly Stage[] = [
   act2(
     'hero', 'Intro',
     'We can read speech from the muscles of your face.',
-    'A bundle of 31 EMG traces scrolls in and collapses into one glowing line that resolves into the words "read speech from muscles"; the title EMG → TEXT settles in.',
+    'A bundle of 31 EMG traces scrolls in and collapses into one glowing line that resolves into the words "read speech from muscles"; the title MYOVOX settles in.',
     'No microphone, no sound — just the faint electricity of moving muscles, read back into text. By the end, four words in five come back right.',
   ),
   act2(

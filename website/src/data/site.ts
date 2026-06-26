@@ -1,9 +1,9 @@
 /** Site-wide constants: brand, repo link, navigation. One place to edit. */
 
 export const SITE = {
-  brand: 'EMG → TEXT',
-  title: 'EMG → Text',
-  repoUrl: 'https://github.com/Varshith-0/emg2text',
+  brand: 'MYOVOX',
+  title: 'Myovox',
+  repoUrl: 'https://github.com/Varshith-0/myovox',
   tagline: 'Reading speech from the muscles of the face.',
 } as const
 

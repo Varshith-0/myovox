@@ -7,7 +7,7 @@ and metric that produced them via artifact_name().
 from __future__ import annotations
 import pickle
 
-from emg2text import config as C
+from myovox import config as C
 
 OUT = C.RESULTS_ROOT                               # repo-root outputs/
 CKPT = C.CKPT_ROOT                                 # repo-root checkpoints/

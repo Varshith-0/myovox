@@ -1,7 +1,7 @@
 name: Deploy website to GitHub Pages
 
 # Builds the cinematic explainer in website/ and publishes it to GitHub Pages.
-# Served at https://<user>.github.io/emg2text/ — matches vite `base: '/emg2text/'`.
+# Served at https://<user>.github.io/myovox/ — matches vite `base: '/myovox/'`.
 
 on:
   push:

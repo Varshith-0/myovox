@@ -7,7 +7,7 @@ Each training run writes, under outputs/runs/<name>/:
 """
 import json
 
-from emg2text.paths import RUNS
+from myovox.paths import RUNS
 
 
 def _jsonable(v):

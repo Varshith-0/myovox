@@ -11,11 +11,11 @@ import argparse, json
 from pathlib import Path
 import torch
 
-from emg2text.config import apply_config_and_logging
-from emg2text.decode.evaluate import split_refs
-from emg2text.paths import NBEST, OUT, CKPT, quarantine_test_indices
-from emg2text.rerank.data import SYS, build_user, norm, nb_file
-from emg2text.rerank.tune import corpus_wer, paired_bootstrap, acoustic_onebest_hyps
+from myovox.config import apply_config_and_logging
+from myovox.decode.evaluate import split_refs
+from myovox.paths import NBEST, OUT, CKPT, quarantine_test_indices
+from myovox.rerank.data import SYS, build_user, norm, nb_file
+from myovox.rerank.tune import corpus_wer, paired_bootstrap, acoustic_onebest_hyps
 
 
 def load_model(base, adapter):

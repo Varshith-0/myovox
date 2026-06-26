@@ -9,8 +9,8 @@ from pathlib import Path
 
 import pytest
 
-from emg2text import config as C
-from emg2text.paths import quarantine_test_indices
+from myovox import config as C
+from myovox.paths import quarantine_test_indices
 
 REPORT = C.RESULTS_ROOT / "B" / "lift_report_liftx.json"
 

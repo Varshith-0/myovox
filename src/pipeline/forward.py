@@ -2,11 +2,11 @@
 Enables snapshot ensembling (cheap decorrelated members from late epochs of a run)."""
 import argparse
 import torch
-from emg2text import config as C
-from emg2text.data import data as DATA
-from emg2text.models.model import EMGConformer
-from emg2text.training.train_augmented import forward_split
-from emg2text.paths import OUT as NEWOUT
+from myovox import config as C
+from myovox.data import data as DATA
+from myovox.models.model import EMGConformer
+from myovox.training.train_augmented import forward_split
+from myovox.paths import OUT as NEWOUT
 
 
 def main():

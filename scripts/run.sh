@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# emg2text — ONE command to reproduce the 18.53 % WER pipeline end to end.
+# myovox — ONE command to reproduce the 18.53 % WER pipeline end to end.
 #
 #   bash scripts/run.sh            full pipeline FROM SCRATCH (trains everything) -> 18.53   (~15-25 h, GPU 0)
 #   bash scripts/run.sh --check    fast verification from cached artifacts (26.14 + 18.53)   (~15 min)
@@ -13,9 +13,9 @@ set -uo pipefail
 cd "$(dirname "$0")/.."          # repo root (this script lives in scripts/)
 
 # ---- environment (GPU 0 only; editable install; HF cache; CPU decode pool) --------
-export EMG2TEXT_ROOT="$(pwd)"
-# the emg2text package lives in src/ (pyproject package-dir maps emg2text -> src). Install it
-# editable in STRICT mode so only emg2text.* is exposed (a lenient install would put src/ on the
+export MYOVOX_ROOT="$(pwd)"
+# the myovox package lives in src/ (pyproject package-dir maps myovox -> src). Install it
+# editable in STRICT mode so only myovox.* is exposed (a lenient install would put src/ on the
 # path and shadow stdlib modules like `ssl`). Idempotent; overwrites any prior lenient install.
 pip install -e . --config-settings editable_mode=strict -q 2>/dev/null || pip install -e . -q
 export CUDA_VISIBLE_DEVICES=0
@@ -49,14 +49,14 @@ nbest_run(){  # nbset scale num_paths output_beam splits logits
   say "n-best $nbset  scale=$scale paths=$np ob=$ob splits=$splits"
   mkdir -p "$OUT/logs"; local pids=()
   for k in $(seq 0 $((NPARTS-1))); do
-    OMP_NUM_THREADS=4 python -u -m emg2text.pipeline.nbest --splits "$splits" --part "$k" --nparts "$NPARTS" \
+    OMP_NUM_THREADS=4 python -u -m myovox.pipeline.nbest --splits "$splits" --part "$k" --nparts "$NPARTS" \
         --num_paths "$np" --nbest_scales "$NB_SCALES" --output_beam "$ob" --search_beam "$NB_SBEAM" \
         --blank_pen "$NB_BLANK" --scale "$scale" --logits "$logits" --nbset "$nbset" \
         > "$OUT/logs/nbest_${nbset}_p${k}.log" 2>&1 &
     pids+=($!)
   done
   local fail=0; for p in "${pids[@]}"; do wait "$p" || fail=$((fail+1)); done
-  python -u -m emg2text.pipeline.nbest --splits "$splits" --merge --nparts "$NPARTS" --nbset "$nbset"
+  python -u -m myovox.pipeline.nbest --splits "$splits" --merge --nparts "$NPARTS" --nbset "$nbset"
   [ "$fail" -eq 0 ] || echo "WARNING: $fail n-best shards failed for $nbset"
 }
 
@@ -65,10 +65,10 @@ nbest_run(){  # nbset scale num_paths output_beam splits logits
 # =============================================================================
 if [ "${1:-}" = "--check" ]; then
   say "CHECK 1/2  acoustic member (cached logits) -> expect 26.14 / 22.34"
-  python -m emg2text.reproduce || true
+  python -m myovox.reproduce || true
   say "CHECK 2/2  final LIFT rerank (cached ensU + adapter) -> expect 18.53"
-  python -m emg2text.rerank.infer --nbset ensU --adapter "$CK/lift_qwen_x" --val_lo 0 --tag "$LOGTAG"
-  python -m emg2text.report --tag "$LOGTAG"
+  python -m myovox.rerank.infer --nbset ensU --adapter "$CK/lift_qwen_x" --val_lo 0 --tag "$LOGTAG"
+  python -m myovox.report --tag "$LOGTAG"
   exit 0
 fi
 
@@ -78,23 +78,23 @@ fi
 [ -s "$CK/baseline/epoch_30.pt" ] || { echo "ERROR: missing front-end warm-start seed $CK/baseline/epoch_30.pt (fetch via scripts/setup.sh)"; exit 1; }
 
 # 1. WavLM-Large layer-9 features (deterministic; the 17 GB cache — never re-extract if present)
-have "$CK/main/ssl_wl_l9.pt" || python -m emg2text.audio.ssl_features --config $CFG/ssl_features.yaml
+have "$CK/main/ssl_wl_l9.pt" || python -m myovox.audio.ssl_features --config $CFG/ssl_features.yaml
 
 # 2. frozen WavLM->phone conv teacher (distillation term iv)
-have "$CK/main/recog_wl_l9/best.pt" || python -m emg2text.audio.teacher_conv --config $CFG/teacher_conv.yaml \
+have "$CK/main/recog_wl_l9/best.pt" || python -m myovox.audio.teacher_conv --config $CFG/teacher_conv.yaml \
     --out "$CK/main/recog_wl_l9"
 
 # 3. strong BiLSTM audio teacher (frame-KL for the augmented member)
-have "$CK/recog2_bilstm/best.pt" || python -m emg2text.audio.teacher_bilstm --config $CFG/teacher_bilstm.yaml --name recog2_bilstm
+have "$CK/recog2_bilstm/best.pt" || python -m myovox.audio.teacher_bilstm --config $CFG/teacher_bilstm.yaml --name recog2_bilstm
 
 # 4. headline Conformer (member 1) -> outputs/main/conf_l9_logits.pt + scores 26.14/22.34
-have "$OUT/main/conf_l9_logits.pt" || python -m emg2text.training.train --config $CFG/conformer.yaml --name conf_l9
+have "$OUT/main/conf_l9_logits.pt" || python -m myovox.training.train --config $CFG/conformer.yaml --name conf_l9
 
 # 5. anti-overfit augmented Conformer (member 2) -> outputs/p2_aug2_logits.pt
-have "$OUT/p2_aug2_logits.pt" || python -m emg2text.training.train_augmented --config $CFG/augmented.yaml --name p2_aug2
+have "$OUT/p2_aug2_logits.pt" || python -m myovox.training.train_augmented --config $CFG/augmented.yaml --name p2_aug2
 
 # 6. ensemble the two members' phone log-probs (val+test)
-have "$OUT/ens_logits.pt" || python -m emg2text.pipeline.ensemble \
+have "$OUT/ens_logits.pt" || python -m myovox.pipeline.ensemble \
     --inputs "$OUT/main/conf_l9_logits.pt" "$OUT/p2_aug2_logits.pt" --splits val,test --out "$OUT/ens_logits.pt"
 
 # 7. multi-scale n-best on the ensemble logits (val+test)
@@ -104,16 +104,16 @@ done < <(python -c "import yaml;[print(v['nbset'],v['scale'],v['num_paths'],v['o
 
 # 8. union the n-best sets -> ensU (oracle ~9.30)
 UNION_OUT=$(yget $CFG/nbest.yaml union_out)
-have "$OUT/nbest/${UNION_OUT}_test_nbest.pt" || python -m emg2text.pipeline.union \
+have "$OUT/nbest/${UNION_OUT}_test_nbest.pt" || python -m myovox.pipeline.union \
     --inputs $(python -c "import yaml;print(' '.join(v['nbset'] for v in yaml.safe_load(open('$CFG/nbest.yaml'))['variants']))") \
     --out "$UNION_OUT" --splits val,test
 
 # 9. leak-free TRAIN n-best via 2-fold cross-decode (each half decoded by the other fold's model)
-have "$OUT/xfoldA_xdecode_logits.pt" || python -m emg2text.training.train_augmented --config $CFG/augmented.yaml \
+have "$OUT/xfoldA_xdecode_logits.pt" || python -m myovox.training.train_augmented --config $CFG/augmented.yaml \
     --name xfoldA --train_lo 0 --train_hi 4250 --xdecode_lo 4250 --xdecode_hi 8500
-have "$OUT/xfoldB_xdecode_logits.pt" || python -m emg2text.training.train_augmented --config $CFG/augmented.yaml \
+have "$OUT/xfoldB_xdecode_logits.pt" || python -m myovox.training.train_augmented --config $CFG/augmented.yaml \
     --name xfoldB --train_lo 4250 --train_hi 8500 --xdecode_lo 0 --xdecode_hi 4250
-have "$OUT/ens_xdecode_train.pt" || python -m emg2text.training.crossfold \
+have "$OUT/ens_xdecode_train.pt" || python -m myovox.training.crossfold \
     --inputs "$OUT/xfoldA_xdecode_logits.pt" "$OUT/xfoldB_xdecode_logits.pt" --out "$OUT/ens_xdecode_train.pt"
 
 # 10. n-best on the cross-decoded TRAIN logits
@@ -125,16 +125,16 @@ nbest_run "$TRN_NBSET" "$TRN_SCALE" "$TRN_NP" "$TRN_OB" train "$OUT/ens_xdecode_
 
 # 11. assemble LIFT training data (TRAIN split only -> leakage-safe)
 TOPK=$(yget $CFG/lift.yaml topk)
-have "$OUT/B/lift_x.jsonl" || python -m emg2text.rerank.data \
+have "$OUT/B/lift_x.jsonl" || python -m myovox.rerank.data \
     --nbset "$TRN_NBSET" --split train --out "$OUT/B/lift_x.jsonl" --topk "$TOPK"
 
 # 12. QLoRA fine-tune the reranker
-have "$CK/lift_qwen_x/adapter_model.safetensors" || python -m emg2text.rerank.train \
+have "$CK/lift_qwen_x/adapter_model.safetensors" || python -m myovox.rerank.train \
     --config $CFG/lift.yaml --train_jsonl "$OUT/B/lift_x.jsonl" --name lift_qwen_x
 
 # 13. final inference: variant selected on val, applied once to test -> 18.53
-python -m emg2text.rerank.infer --nbset "$UNION_OUT" --adapter "$CK/lift_qwen_x" --val_lo 0 --tag "$LOGTAG"
+python -m myovox.rerank.infer --nbset "$UNION_OUT" --adapter "$CK/lift_qwen_x" --val_lo 0 --tag "$LOGTAG"
 
 # ---- report produced vs paper -----------------------------------------------
-python -m emg2text.report --tag "$LOGTAG"
+python -m myovox.report --tag "$LOGTAG"
 echo "RUN_DONE"

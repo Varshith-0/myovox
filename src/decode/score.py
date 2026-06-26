@@ -1,14 +1,14 @@
 """Canonical scorer: decode phone log-posteriors through the WFST and report WER/PER.
 
-Run:  python -m emg2text.score --logits LOGITS.pt [--scale S | --split test]
-The trainer and `emg2text.reproduce` both score through this harness so numbers are comparable.
+Run:  python -m myovox.score --logits LOGITS.pt [--scale S | --split test]
+The trainer and `myovox.reproduce` both score through this harness so numbers are comparable.
 """
 import argparse
 from pathlib import Path
 
 import torch
 
-from emg2text.decode import evaluate as V
+from myovox.decode import evaluate as V
 
 
 def read_text_file(path, split):

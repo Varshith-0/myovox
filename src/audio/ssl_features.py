@@ -4,15 +4,15 @@ Feeds raw audio at native rate through a HuggingFace SSL model and saves a chose
 hidden layer (~137.7 Hz features) as {layer, model, feats} to ckpts/main/ssl_<tag>.pt.
 The headline uses microsoft/wavlm-large layer 9:
 
-  python3 -m emg2text.ssl_features --model microsoft/wavlm-large --layer 9 --tag wl_l9
+  python3 -m myovox.ssl_features --model microsoft/wavlm-large --layer 9 --tag wl_l9
 """
 import argparse, sys, time, pickle
 from pathlib import Path
 import numpy as np
 import torch
 
-from emg2text import config as C
-from emg2text.decode import evaluate as V
+from myovox import config as C
+from myovox.decode import evaluate as V
 
 
 @torch.no_grad()

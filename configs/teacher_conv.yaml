@@ -1,5 +1,5 @@
 # Frozen WavLM-L9 -> phoneme conv recognizer (cross-modal distillation term iv).
-# Consumed by `emg2text.teacher_conv --config`.
+# Consumed by `myovox.teacher_conv --config`.
 epochs: 20
 batch: 24
 lr: 0.0003

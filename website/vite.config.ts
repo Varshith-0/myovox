@@ -10,7 +10,7 @@ import react from '@vitejs/plugin-react'
  * hard-coded leading-slash path, so it stays correct under any base.
  */
 export default defineConfig({
-  base: process.env.VITE_BASE ?? '/emg2text/',
+  base: process.env.VITE_BASE ?? '/myovox/',
   plugins: [react()],
   // Build id used to cache-bust the Act-2 clips/posters. Their filenames are
   // stable (anim/<id>.mp4), so when a clip is re-rendered the browser would

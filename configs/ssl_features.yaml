@@ -1,5 +1,5 @@
 # WavLM-Large layer-9 feature extraction (the audio distillation target).
-# Consumed by `emg2text.ssl_features --config`.
+# Consumed by `myovox.ssl_features --config`.
 model: microsoft/wavlm-large
 layer: 9
 tag: wl_l9

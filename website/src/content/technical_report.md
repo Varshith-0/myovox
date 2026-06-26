@@ -125,7 +125,7 @@ the projection to be **phoneme-decodable**, not merely close to WavLM — guardi
 smooth-but-non-decodable blur.
 
 ### 4.3 Result (verified, Δ+0.00) and the EMG-only control
-`scripts/run_headline.sh` trains; `emg2text.reproduce` decodes cached logits (val-tuned scale 0.25):
+`scripts/run_headline.sh` trains; `myovox.reproduce` decodes cached logits (val-tuned scale 0.25):
 
 | | val WER | val PER | TEST WER | TEST PER |
 |---|---|---|---|---|
@@ -169,7 +169,7 @@ the highest-scored candidate — cannot hallucinate). Leakage controls:
 - **Verbatim-recall audit.** Free-generation recall of references *absent from the candidate set* = **0**
   (no train-text leakage through the LLM).
 
-`scripts/reproduce_final.sh` (`emg2text.rerank.infer`, cached union n-best + adapter):
+`scripts/reproduce_final.sh` (`myovox.rerank.infer`, cached union n-best + adapter):
 
 | Metric | Value |
 |---|---|
@@ -218,7 +218,7 @@ Both CIs exclude 0 — the rerank gain is significant.
 | | Command | Reads | Produces |
 |---|---|---|---|
 | Target 1 | `bash scripts/reproduce_baseline.sh` | `checkpoints/baseline/epoch_30.pt` | val 53.12/45.31, test **40.63/39.02** |
-| Acoustic | `emg2text.reproduce` | `outputs/main/conf_l9_logits.pt` | test **26.14/22.34** |
+| Acoustic | `myovox.reproduce` | `outputs/main/conf_l9_logits.pt` | test **26.14/22.34** |
 | Target 2 | `bash scripts/reproduce_final.sh` | `outputs/nbest/ensU_*`, `checkpoints/lift_qwen_x/` | test **18.53** (oracle 9.30, excl-dups 18.75, recall 0) |
 
 - **Split:** authors' official 8,500 / 760 / 400 sequential.
@@ -228,7 +228,7 @@ Both CIs exclude 0 — the rerank gain is significant.
 - **Hardware:** one NVIDIA GPU (12 GB), CUDA 12.1; PyTorch 2.5 + cu121; k2 / icefall [9];
   transformers + peft (QLoRA Qwen2.5-7B-Instruct). `scripts/env.sh` pins GPU 0 + the HF cache.
 - **From scratch:** `scripts/run_headline.sh` (WavLM-L9 extraction → audio-recognizer → Conformer →
-  decode); ensemble/union/LIFT via `emg2text.{ensemble,union,rerank.train}` (see `scripts/`).
+  decode); ensemble/union/LIFT via `myovox.{ensemble,union,rerank.train}` (see `scripts/`).
 
 ---
 

@@ -23,16 +23,16 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from emg2text import config as C
-from emg2text.data import data as DATA
-from emg2text.models import losses as L
-from emg2text.decode import evaluate as V
-from emg2text.models.losses import distill_loss, crosscon_loss
-from emg2text.audio.teacher_conv import AudioRecognizer
-from emg2text.models.model import EMGConformer
-from emg2text.audio.teacher_bilstm import BiLSTMRecognizer
-from emg2text.paths import CKPT as NEWCKPT, OUT as NEWOUT
-from emg2text.runlog import RunLog
+from myovox import config as C
+from myovox.data import data as DATA
+from myovox.models import losses as L
+from myovox.decode import evaluate as V
+from myovox.models.losses import distill_loss, crosscon_loss
+from myovox.audio.teacher_conv import AudioRecognizer
+from myovox.models.model import EMGConformer
+from myovox.audio.teacher_bilstm import BiLSTMRecognizer
+from myovox.paths import CKPT as NEWCKPT, OUT as NEWOUT
+from myovox.runlog import RunLog
 
 LABEL = "Phase2 Conformer + WavLM-L9 + aug + frameKL"
 

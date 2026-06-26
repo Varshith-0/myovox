@@ -2,7 +2,7 @@
 # The emotional coda. The calmest scene: four sentences, four reveals. Each new
 # line is spotlit while everything already shown dims back so attention always
 # rests on the newest words.
-#   beat 1  the "EMG → TEXT" brand mark fades in — the title of the whole journey
+#   beat 1  the "MYOVOX" brand mark fades in — the title of the whole journey
 #   beat 2  "Thank you" writes in with a single soft white Flash
 #   beat 3  divider + "made by" + the glowing "Varshith Madishetty" plate
 #   beat 4  "built with the help of" + the rotating Claude sunburst + "Claude"
@@ -35,7 +35,7 @@ class Thanks(Scene):
         #  The brand mark fades in at top — the title of everything.       #
         # ============================================================== #
         self.next_section("brand")
-        brand = mono("EMG → TEXT", 30, INK, w=BOLD).move_to([0, 0.55, 0])
+        brand = mono("MYOVOX", 30, INK, w=BOLD).move_to([0, 0.55, 0])
         sub = mono("skin electricity  →  words on a screen", 16, INK_FAINT).next_to(
             brand, DOWN, buff=0.34)
         self.play(FadeIn(brand, shift=DOWN * 0.12), run_time=0.9)
@@ -43,7 +43,7 @@ class Thanks(Scene):
         self.wait(2.6)
 
         # settle the brand mark up to its title position for the rest of the scene
-        brand_small = mono("EMG → TEXT", 16, INK_FAINT, w=BOLD).move_to([0, 3.15, 0])
+        brand_small = mono("MYOVOX", 16, INK_FAINT, w=BOLD).move_to([0, 3.15, 0])
         self.play(ReplacementTransform(brand, brand_small),
                   FadeOut(sub, shift=UP * 0.1), run_time=0.4)
 

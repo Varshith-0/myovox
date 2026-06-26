@@ -1,6 +1,6 @@
 # Anti-overfit augmented Conformer (the second ensemble member, "p2_aug2") and the two
 # cross-decode folds (xfoldA/xfoldB). SPD-covariance augmentation + frame-level KL from the
-# BiLSTM audio teacher. Consumed by `emg2text.train_augmented --config`.
+# BiLSTM audio teacher. Consumed by `myovox.train_augmented --config`.
 epochs: 40
 batch: 8
 lr: 0.0003

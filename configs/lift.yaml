@@ -1,4 +1,4 @@
-# LIFT QLoRA reranker on Qwen2.5-7B-Instruct. Consumed by `emg2text.rerank.train --config`
+# LIFT QLoRA reranker on Qwen2.5-7B-Instruct. Consumed by `myovox.rerank.train --config`
 # (training hyperparameters) and run.sh (topk / tag for data + inference).
 model: Qwen/Qwen2.5-7B-Instruct
 epochs: 3.0

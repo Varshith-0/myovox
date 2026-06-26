@@ -1,5 +1,5 @@
 """Config: constants single-source + offline WFST-decode runtime config."""
-from emg2text import config
+from myovox import config
 
 
 def test_default_decode():
@@ -14,7 +14,7 @@ def test_split_single_source():
     assert config.SPLITS["val"] == (8500, 9260)
     assert config.SPLITS["test"] == (9260, 9660)
     # evaluate.split_slice must read from config (no duplicate magic numbers)
-    from emg2text.decode import evaluate
+    from myovox.decode import evaluate
     assert evaluate.split_slice("test") == config.SPLITS["test"]
 
 

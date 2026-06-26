@@ -1,6 +1,6 @@
 # How a Muscle Signal Becomes a Word — The Complete Explanation
 
-*A from-the-ground-up walkthrough of the emg2text system. No code, no equations — just a
+*A from-the-ground-up walkthrough of the Myovox system. No code, no equations — just a
 careful explanation of how every part works and why. If you read this end to end, you will
 understand exactly how a faint electrical signal from the muscles of the face is turned into
 readable English text.*

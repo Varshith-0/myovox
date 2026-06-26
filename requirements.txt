@@ -14,14 +14,14 @@ nltk
 more-itertools
 
 # --- config + plotting ---
-pyyaml                       # configs/*.yaml (emg2text.config.load_config)
+pyyaml                       # configs/*.yaml (myovox.config.load_config)
 scipy
 matplotlib
 
-# --- WavLM-L9 distillation-target feature extraction (emg2text.ssl.extract) ---
+# --- WavLM-L9 distillation-target feature extraction (myovox.ssl.extract) ---
 transformers==4.53.3         # microsoft/wavlm-large; Qwen2.5-7B-Instruct (LIFT reranker)
 
-# --- LIFT reranker: QLoRA fine-tune + 4-bit inference (emg2text.rerank.*) ---
+# --- LIFT reranker: QLoRA fine-tune + 4-bit inference (myovox.rerank.*) ---
 peft                         # LoRA adapters
 datasets                     # jsonl training data loader
 bitsandbytes                 # 4-bit nf4 quantization

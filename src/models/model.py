@@ -16,9 +16,9 @@ from torch import nn
 import torch.nn.functional as F
 from torchaudio.models import Conformer
 
-from emg2text.models import frontend  # vendored: featuresNorm, RotationInvariantMLP
-from emg2text import config
-from emg2text.log import get_logger
+from myovox.models import frontend  # vendored: featuresNorm, RotationInvariantMLP
+from myovox import config
+from myovox.log import get_logger
 
 log = get_logger(__name__)
 

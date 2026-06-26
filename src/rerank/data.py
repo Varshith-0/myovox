@@ -9,9 +9,9 @@ from __future__ import annotations
 import argparse, json, re
 import torch
 
-from emg2text.config import apply_config_and_logging
-from emg2text.decode.evaluate import split_refs
-from emg2text.paths import NBEST, OUT
+from myovox.config import apply_config_and_logging
+from myovox.decode.evaluate import split_refs
+from myovox.paths import NBEST, OUT
 
 SYS = ("You correct the output of a silent-speech EMG recognizer. You are given several candidate "
        "transcriptions of one short spoken sentence and the recognizer's detected phoneme sequence "

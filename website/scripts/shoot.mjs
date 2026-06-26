@@ -3,7 +3,7 @@
 /* global document, window, getComputedStyle */
 import { chromium } from 'playwright'
 
-const BASE = process.env.URL || 'http://localhost:5173/emg2text/'
+const BASE = process.env.URL || 'http://localhost:5173/myovox/'
 const FRACS = process.env.FRACS ? process.env.FRACS.split(',').map(Number) : [0.0, 0.1, 0.13, 0.16, 0.2, 0.26]
 
 const browser = await chromium.launch()

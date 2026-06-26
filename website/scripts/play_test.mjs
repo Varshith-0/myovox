@@ -4,7 +4,7 @@
 import { chromium } from 'playwright'
 
 const [, , stageId = 'wfst', port = '5173', waitMs = '1600', localStr = '0.3'] = process.argv
-const url = `http://localhost:${port}/emg2text/`
+const url = `http://localhost:${port}/myovox/`
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } })
 const errs = []

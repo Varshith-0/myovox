@@ -11,7 +11,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from emg2text import config
+from myovox import config
 
 
 # ----------------------------------------------------------------------------

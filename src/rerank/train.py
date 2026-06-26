@@ -11,8 +11,8 @@ from transformers import (AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfi
                           Trainer, TrainingArguments, DataCollatorForSeq2Seq)
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 
-from emg2text.config import apply_config_and_logging
-from emg2text.paths import CKPT
+from myovox.config import apply_config_and_logging
+from myovox.paths import CKPT
 
 
 def main():

@@ -1,4 +1,4 @@
-# EMG → Text — interactive WebGL explainer
+# Myovox — interactive WebGL explainer
 
 A scroll-driven, cinematic explainer of how speech is decoded from the faint electrical signals of
 facial muscles (surface EMG → text). Black-and-white only: a glowing point-cloud human head on black,
@@ -8,7 +8,7 @@ transforming through the stages of the pipeline as you scroll. Three pages:
 - **Technical** (`/technical`) — the full technical report (tables, formulas, code).
 - **Code** (`/code`) — curated implementation snippets + the repository link.
 
-It accompanies the [emg2text](https://github.com/Varshith-0/emg2text) pipeline (surface-EMG speech
+It accompanies the [myovox](https://github.com/Varshith-0/myovox) pipeline (surface-EMG speech
 decoding, **18.53% word error rate**). Every number shown is drawn from `docs/technical_report.md`.
 
 ## Stack
@@ -21,7 +21,7 @@ react-markdown + remark-gfm · Fonts: Fraunces (display) + JetBrains Mono.
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173/emg2text/
+npm run dev        # http://localhost:5173/myovox/
 ```
 
 Other scripts: `npm run build` · `npm run preview` · `npm run typecheck` · `npm run lint` ·
@@ -74,8 +74,8 @@ never coupled to DOM scroll events, and there is one RAF loop (GSAP's ticker dri
 
 ## Deploy (GitHub Pages)
 
-`vite.config.ts` sets `base: '/emg2text/'`. Pushing to `main` runs `.github/workflows/deploy.yml`,
-which builds `website/` and publishes `dist/` → `https://<user>.github.io/emg2text/`.
+`vite.config.ts` sets `base: '/myovox/'`. Pushing to `main` runs `.github/workflows/deploy.yml`,
+which builds `website/` and publishes `dist/` → `https://<user>.github.io/myovox/`.
 
 - For a `username.github.io` user-site or a custom domain, build with `VITE_BASE=/ npm run build`.
 - Routing uses **HashRouter** (URLs like `/#/technical`) — zero-config and refresh-proof on Pages.

@@ -10,10 +10,10 @@ import sys
 import pickle
 import multiprocessing as mp
 
-from emg2text import config as C
-from emg2text.decode import decode as D
-from emg2text.data import text as _text
-from emg2text.log import get_logger
+from myovox import config as C
+from myovox.decode import decode as D
+from myovox.data import text as _text
+from myovox.log import get_logger
 
 log = get_logger(__name__)
 
@@ -84,7 +84,7 @@ _POOL = None
 
 def _worker_init():
     global _WORKER_DEC
-    from emg2text.decode import decode as _D
+    from myovox.decode import decode as _D
     _WORKER_DEC = _D.WFSTDecoder(device="cpu")
 
 
@@ -210,7 +210,7 @@ def subprocess_eval(logits_path, system, track="acoustic-only", ckpt="", seed=0,
     process holding the 18 GB SSL tensor; a clean subprocess sidesteps that (byte-identical).
     """
     import subprocess
-    cmd = [sys.executable, "-u", "-m", "emg2text.decode.score",
+    cmd = [sys.executable, "-u", "-m", "myovox.decode.score",
            "--logits", str(logits_path), "--system", system, "--track", track,
            "--ckpt", str(ckpt), "--seed", str(seed), "--blank_pen", str(blank_pen)]
     log.info("subprocess_eval: %s", " ".join(cmd))

@@ -7,10 +7,10 @@ import torch, torch.nn as nn, torch.nn.functional as F, torch.optim as optim
 from torch.utils.data import DataLoader
 import Levenshtein
 
-from emg2text import config as C
-from emg2text.data import data as DATA
-from emg2text.audio.teacher_conv import WavLMPhonemeDS, collate
-from emg2text.paths import CKPT as NEWCKPT
+from myovox import config as C
+from myovox.data import data as DATA
+from myovox.audio.teacher_conv import WavLMPhonemeDS, collate
+from myovox.paths import CKPT as NEWCKPT
 
 
 class BiLSTMRecognizer(nn.Module):

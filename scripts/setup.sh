@@ -1,12 +1,12 @@
 #!/bin/bash
-# One-time setup for the emg2text pipeline (Conformer+WavLM-L9 ensemble -> n-best union ->
+# One-time setup for the myovox pipeline (Conformer+WavLM-L9 ensemble -> n-best union ->
 # LIFT rerank -> 18.53 % WER). Installs deps + the icefall WFST decoder, and lists the OSF
 # data + checkpoint artifacts to download. After this, the whole pipeline runs with: bash scripts/run.sh
 set -eu
-REPO_ROOT="${EMG2TEXT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+REPO_ROOT="${MYOVOX_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 cd "$REPO_ROOT"
 
-echo "==> 1/3  Python dependencies + editable install (emg2text-* console scripts)"
+echo "==> 1/3  Python dependencies + editable install (myovox-* console scripts)"
 pip install -e . --config-settings editable_mode=strict
 echo "    NOTE: install k2 manually for your CUDA/torch: https://k2-fsa.github.io/k2/"
 

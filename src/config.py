@@ -1,8 +1,8 @@
-"""Single source of truth for emg2text: paths, constants, and the decode config.
+"""Single source of truth for Myovox: paths, constants, and the decode config.
 
 Every other module imports its constants from here — there are no magic numbers
-elsewhere. Paths derive from the repo root (this file is src/emg2text/config.py →
-parents[1]), overridable with the EMG2TEXT_ROOT environment variable.
+elsewhere. Paths derive from the repo root (this file is src/myovox/config.py →
+parents[1]), overridable with the MYOVOX_ROOT environment variable.
 
 The repo has ONE pipeline: a bidirectional Conformer distilled from WavLM-L9, two
 of which are ensembled, their n-best unioned, and reranked by a QLoRA LLM → 18.53 WER.
@@ -16,7 +16,7 @@ from pathlib import Path
 # ----------------------------------------------------------------------------
 # Paths
 # ----------------------------------------------------------------------------
-REPO_ROOT = Path(os.environ.get("EMG2TEXT_ROOT", Path(__file__).resolve().parents[1]))
+REPO_ROOT = Path(os.environ.get("MYOVOX_ROOT", Path(__file__).resolve().parents[1]))
 DATA_ROOT = REPO_ROOT / "data" / "GeneralCorpusData"
 LANG_DIR = REPO_ROOT / "data" / "wfst_decoder" / "ckptsLargeVocb" / "lang_phone"
 CKPT_ROOT = REPO_ROOT / "checkpoints"
@@ -102,11 +102,11 @@ class DecodeConfig:
 class Config:
     """Top-level runtime config (offline decode)."""
     decode: DecodeConfig = field(default_factory=DecodeConfig)
-    root: str | None = None                        # overrides EMG2TEXT_ROOT if set
+    root: str | None = None                        # overrides MYOVOX_ROOT if set
 
     def __post_init__(self):
         if self.root:
-            os.environ["EMG2TEXT_ROOT"] = str(self.root)
+            os.environ["MYOVOX_ROOT"] = str(self.root)
 
     def to_dict(self):
         return asdict(self)
@@ -149,7 +149,7 @@ def apply_config_and_logging(ap):
     if pre.config:
         ap.set_defaults(**load_yaml_cfg(pre.config, {}))
     args = ap.parse_args()
-    from emg2text.log import setup_logging
+    from myovox.log import setup_logging
     setup_logging(args.log_level)
     return args
 

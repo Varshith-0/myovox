@@ -1,6 +1,6 @@
 /**
  * Curated code excerpts for the Code page. Each is faithful to the actual
- * implementation in the emg2text repository (lightly trimmed for clarity); the
+ * implementation in the Myovox repository (lightly trimmed for clarity); the
  * page links to the real files. Keep these in sync with the source if it moves.
  */
 

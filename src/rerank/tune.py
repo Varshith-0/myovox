@@ -24,8 +24,8 @@ import numpy as np
 import torch
 import Levenshtein
 
-from emg2text.decode.evaluate import split_refs
-from emg2text.paths import NBEST, OUT, quarantine_test_indices, LEGACY_LOGITS
+from myovox.decode.evaluate import split_refs
+from myovox.paths import NBEST, OUT, quarantine_test_indices, LEGACY_LOGITS
 
 
 def norm(s):
@@ -110,7 +110,7 @@ def acoustic_onebest_hyps(split):
     cache = OUT / f"legacy_{split}_onebest.json"
     if cache.exists():
         return json.loads(cache.read_text())
-    from emg2text.decode.evaluate import decode_words
+    from myovox.decode.evaluate import decode_words
     blob = torch.load(LEGACY_LOGITS, map_location="cpu", weights_only=False)
     hyps = decode_words(blob[split], 0.25, blank_pen=2.0, sb=50.0, ob=50.0)
     cache.write_text(json.dumps(hyps))
@@ -181,7 +181,7 @@ def main():
         R["oracle_test_wer"] = None
 
     # acoustic-only greedy PER (modality-honest, unchanged by LM/LLM)
-    from emg2text.decode.evaluate import greedy_per_logits
+    from myovox.decode.evaluate import greedy_per_logits
     blob = torch.load(LEGACY_LOGITS, map_location="cpu", weights_only=False)
     _, syms, pdf = split_refs("test")
     R["test_greedy_PER"] = greedy_per_logits(blob["test"], syms[:len(test_utts)], pdf)

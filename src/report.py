@@ -1,18 +1,18 @@
 """Print the produced numbers next to the paper targets (docs/technical_report.md), with
 PASS/FAIL per row. Run at the end of run.sh.
 
-  python -m emg2text.report --tag liftx
+  python -m myovox.report --tag liftx
 
 Acoustic row is recomputed from the cached headline logits (scale 0.25); the final row is
-read from the LIFT report JSON produced by emg2text.rerank.infer.
+read from the LIFT report JSON produced by myovox.rerank.infer.
 """
 import argparse
 import json
 from pathlib import Path
 
-from emg2text import config as C
-from emg2text.paths import OUT
-from emg2text.decode.evaluate import RESULTS_DIR
+from myovox import config as C
+from myovox.paths import OUT
+from myovox.decode.evaluate import RESULTS_DIR
 
 # (label, produced WER, produced PER, target WER, target PER, WER tol, PER tol)
 WER_TOL, PER_TOL = 0.5, 0.7
@@ -20,7 +20,7 @@ WER_TOL, PER_TOL = 0.5, 0.7
 
 def _acoustic_row(logits_path):
     import torch
-    from emg2text.decode import evaluate as ev
+    from myovox.decode import evaluate as ev
     if not logits_path.exists():
         return None
     blob = torch.load(logits_path, map_location="cpu", weights_only=False)
@@ -42,7 +42,7 @@ def main():
     ap.add_argument("--acoustic-logits", default=str(RESULTS_DIR / "conf_l9_logits.pt"))
     args = ap.parse_args()
 
-    print("\n================ emg2text — produced vs paper (docs/technical_report.md) ================")
+    print("\n================ myovox — produced vs paper (docs/technical_report.md) ================")
     print(f"{'system':40s} {'WER':>8} {'target':>8} {'PER':>8} {'target':>8}  status")
     all_pass = True
 

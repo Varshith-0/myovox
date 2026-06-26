@@ -12,10 +12,10 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-from emg2text import config
-from emg2text.data.covariance import EpochJitterEMGDataset
-from emg2text.data import text as T
-from emg2text.log import get_logger
+from myovox import config
+from myovox.data.covariance import EpochJitterEMGDataset
+from myovox.data import text as T
+from myovox.log import get_logger
 
 log = get_logger(__name__)
 

@@ -1,14 +1,14 @@
 """Fast reproduction of the headline: decode the trained Conformer's cached test logits
 through the WFST and confirm 26.14 % WER / 22.34 % PER (within +-0.7), in seconds.
 
-Run:    python -m emg2text.reproduce     (or the console script: emg2text-reproduce)
+Run:    python -m myovox.reproduce     (or the console script: myovox-reproduce)
 Writes: outputs/main/repro.md            (prints REPRO_PASS / REPRO_FAIL)
 
 To reproduce from scratch instead (train the model, then decode), run: scripts/run_headline.sh
 """
 import sys
 
-from emg2text.decode import evaluate as V
+from myovox.decode import evaluate as V
 
 LOGITS = V.RESULTS_DIR / "conf_l9_logits.pt"   # saved by train.py (val+test phone log-probs)
 SCALE = 0.25                                   # acoustic scale selected on val (argmin val WER)
@@ -31,7 +31,7 @@ def main():
     lines = [
         "# Headline reproduction — bidirectional Conformer + WavLM-L9\n",
         f"Decoded the trained Conformer's cached **test** logits through the self-contained "
-        f"`emg2text` package (val-tuned acoustic scale {SCALE}, applied once to test). "
+        f"`myovox` package (val-tuned acoustic scale {SCALE}, applied once to test). "
         f"Tolerance: +-{TOL} WER/PER.\n",
         "| system | scale | exp WER | got WER | dWER | exp PER | got PER | dPER | status |",
         "|---|---|---|---|---|---|---|---|---|",

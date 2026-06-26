@@ -1,4 +1,4 @@
-"""Shared style for all emg2text Manim scenes.
+"""Shared style for all myovox Manim scenes.
 
 Strict monochrome — emphasis comes from opacity, stroke width, scale, and the
 `glow` helper, never colour. Palette and fonts mirror website/src/styles/tokens.css

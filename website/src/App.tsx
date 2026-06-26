@@ -71,9 +71,9 @@ function DevScrollHooks() {
 /** Per-route document title (HashRouter doesn't change it on its own) — so shared
  *  links and browser tabs read meaningfully instead of all saying the same thing. */
 const ROUTE_TITLES: Record<string, string> = {
-  '/': 'EMG → Text — reading speech from the muscles of the face',
-  '/technical': 'Technical report — EMG → Text',
-  '/code': 'Code — EMG → Text',
+  '/': 'Myovox — reading speech from the muscles of the face',
+  '/technical': 'Technical report — Myovox',
+  '/code': 'Code — Myovox',
 }
 function DocumentTitle() {
   const { pathname } = useLocation()

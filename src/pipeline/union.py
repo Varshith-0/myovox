@@ -7,8 +7,8 @@ consistent acoustic score via add_ctc; LIFT conditions on the candidate texts + 
 """
 import argparse
 import torch
-from emg2text.pipeline.nbest import report
-from emg2text.paths import NBEST
+from myovox.pipeline.nbest import report
+from myovox.paths import NBEST
 
 
 def nb_file(nbset, split):

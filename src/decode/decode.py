@@ -8,7 +8,7 @@ model code — decoding only ever reads cached logits from disk (see tests/test_
 import torch
 import Levenshtein
 
-from emg2text import config as C
+from myovox import config as C
 
 import k2
 from icefall.decode import get_lattice, one_best_decoding

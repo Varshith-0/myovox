@@ -16,8 +16,8 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
 import Levenshtein
 
-from emg2text import config as C
-from emg2text.data import data as DATA
+from myovox import config as C
+from myovox.data import data as DATA
 
 
 class AudioRecognizer(nn.Module):

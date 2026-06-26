@@ -10,13 +10,13 @@ lexicon-independent) for downstream LISA-style LLM rescoring.
 To raise the oracle ceiling we union samples taken at several `nbest_scale` values
 (smaller -> more unique paths) and optionally several acoustic scales.
 
-We reuse the legacy `emg2text.decode.WFSTDecoder` verbatim (its loaded HLG, token maps,
+We reuse the legacy `myovox.decode.WFSTDecoder` verbatim (its loaded HLG, token maps,
 acoustic-token mapping, and blank-penalty convention) — nothing in legacy is modified.
 
 Output (cached, deterministic downstream): outputs/nbest/{split}_nbest.pt
   {meta, utts: [ {greedy_phones, cands: [{text, am, lm}], n_unique} ]}
 
-On merge this file maps to emg2text/decode_nbest.py.
+On merge this file maps to myovox/decode_nbest.py.
 """
 from __future__ import annotations
 import argparse, time
@@ -27,10 +27,10 @@ import k2
 from icefall.decode import get_lattice, Nbest, one_best_decoding
 from icefall.utils import get_texts
 
-from emg2text import config as C
-from emg2text.decode import decode as D
-from emg2text.decode.evaluate import wer_of, split_refs
-from emg2text.paths import NBEST, LEGACY_LOGITS
+from myovox import config as C
+from myovox.decode import decode as D
+from myovox.decode.evaluate import wer_of, split_refs
+from myovox.paths import NBEST, LEGACY_LOGITS
 
 
 def greedy_phone_string(lp: torch.Tensor, id2tok, a_ids) -> str:

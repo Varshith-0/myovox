@@ -7,7 +7,7 @@ import { chromium } from 'playwright'
 const [, , stageId = 'ctc', localStr = '0.5', out = '/tmp/cap.png', port = '5173', w = '1280', h = '800'] =
   process.argv
 const local = Number(localStr)
-const url = `http://localhost:${port}/emg2text/`
+const url = `http://localhost:${port}/myovox/`
 
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: Number(w), height: Number(h) } })

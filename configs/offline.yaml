@@ -1,4 +1,4 @@
-# Offline WFST-decode configuration (used by emg2text-decode / inference.run).
+# Offline WFST-decode configuration (used by myovox-decode / inference.run).
 decode:
   acoustic_scale: 0.25           # headline Conformer + WavLM-L9 operating point (val-tuned)
   blank_penalty: 2.0
@@ -6,4 +6,4 @@ decode:
   output_beam: 50.0
 
 paths:
-  root: null                     # null -> repo root (or $EMG2TEXT_ROOT)
+  root: null                     # null -> repo root (or $MYOVOX_ROOT)

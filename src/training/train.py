@@ -11,8 +11,8 @@ the headline: 26.14 % test WER / 22.34 % test PER.
        + lam_recog*CTC(frozen WavLM-L9->phone recognizer(proj), phones)        (cross-modal iv)
 
 Inputs (all under checkpoints/main by default — see scripts/run_headline.sh to build them):
-  --ssl_pt       WavLM-Large layer-9 features        (emg2text.ssl_features)
-  --recog_ckpt   frozen WavLM-L9 -> phone recognizer (emg2text.teacher_conv)
+  --ssl_pt       WavLM-Large layer-9 features        (myovox.ssl_features)
+  --recog_ckpt   frozen WavLM-L9 -> phone recognizer (myovox.teacher_conv)
   --warm_start   small DualHead baseline ckpt (checkpoints/baseline/epoch_30.pt) that warm-starts
                  the feature front-end + CTC heads; '' trains everything from scratch
 
@@ -28,15 +28,15 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from emg2text import config as C
-from emg2text.data import data as DATA
-from emg2text.models import losses as L
-from emg2text.decode import evaluate as V
-from emg2text.models.losses import distill_loss, crosscon_loss
-from emg2text.audio.teacher_conv import AudioRecognizer
-from emg2text.models.model import EMGConformer
-from emg2text.runlog import RunLog
-from emg2text.paths import artifact_name
+from myovox import config as C
+from myovox.data import data as DATA
+from myovox.models import losses as L
+from myovox.decode import evaluate as V
+from myovox.models.losses import distill_loss, crosscon_loss
+from myovox.audio.teacher_conv import AudioRecognizer
+from myovox.models.model import EMGConformer
+from myovox.runlog import RunLog
+from myovox.paths import artifact_name
 
 LABEL = "Conformer + WavLM-L9 (headline, acoustic-only)"
 

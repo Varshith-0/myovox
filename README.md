@@ -1,11 +1,11 @@
-# emg2text — surface-EMG → text decoding
+# Myovox — surface-EMG → text decoding
 
 Decode open-vocabulary English text from 31-channel surface electromyography (sEMG) of vocalized
 speech, on the *emg2speech* General Corpus (one subject, 9,660 sentences). One pipeline:
 
 | Pipeline | Test WER | Test PER | What it is |
 |---|---|---|---|
-| **emg2text** | **18.53** | 20.90 | Conformer+WavLM-L9 **ensemble** → multi-scale n-best **union** → **LIFT** LLM rerank |
+| **Myovox** | **18.53** | 20.90 | Conformer+WavLM-L9 **ensemble** → multi-scale n-best **union** → **LIFT** LLM rerank |
 
 ```
 EMG (31ch, 5kHz) → SPD covariance → Conformer (×2, distilled from WavLM-L9) → phoneme CTC
@@ -30,14 +30,14 @@ bash scripts/run.sh                    # full pipeline FROM SCRATCH (trains ever
 `scripts/run.sh` inlines the environment (GPU 0, editable install, HF cache, CPU decode pool) and runs the
 whole chain. **Every step is idempotent** — it is skipped if its output exists, so a crashed run
 resumes where it stopped. It requires the `varshith` tmux session for the long run. It ends by printing
-the produced numbers next to the paper targets (`python -m emg2text.report`).
+the produced numbers next to the paper targets (`python -m myovox.report`).
 
 ### Which file produces which number
 
 | Number | Entry point | Key code |
 |---|---|---|
-| **26.14 / 22.34** (acoustic) | `python -m emg2text.reproduce` (cached) / `emg2text.train` (from scratch) | `model.py`, `train.py`, `losses.py`, `decode.py` |
-| **18.53** (final) | `python -m emg2text.rerank.infer` | `ensemble.py`, `nbest.py`, `union.py`, `rerank/{data,train,tune,infer}.py` |
+| **26.14 / 22.34** (acoustic) | `python -m myovox.reproduce` (cached) / `myovox.train` (from scratch) | `model.py`, `train.py`, `losses.py`, `decode.py` |
+| **18.53** (final) | `python -m myovox.rerank.infer` | `ensemble.py`, `nbest.py`, `union.py`, `rerank/{data,train,tune,infer}.py` |
 
 ---
 
@@ -63,14 +63,14 @@ its Section 3 baseline is historical context — this repo reproduces the 26.14 
 ## Repository layout
 
 ```
-emg2text/
+myovox/
 ├── README.md  pyproject.toml  requirements.txt  LICENSE
 ├── scripts/                       # run.sh (the ONE command: full pipeline + --check) + setup.sh
 ├── configs/                       # all hyperparameters (one YAML per stage)
 │   ├── conformer.yaml  augmented.yaml  teacher_conv.yaml  teacher_bilstm.yaml
 │   └── ssl_features.yaml  nbest.yaml  lift.yaml  offline.yaml
 ├── docs/technical_report.md       # method, results, limitations
-├── src/                           # the `emg2text` package (pyproject maps emg2text -> src/)
+├── src/                           # the `myovox` package (pyproject maps myovox -> src/)
 │   ├── config.py                  # SINGLE source of truth: paths + ALL constants + YAML loader
 │   ├── paths.py  log.py  runlog.py  reproduce.py  report.py
 │   ├── data/      data.py  covariance.py  text.py        # corpus, SPD features [vendored], g2p

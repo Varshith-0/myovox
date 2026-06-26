@@ -1,9 +1,9 @@
 {
-  "name": "emg2text-website",
+  "name": "myovox-website",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "EMG → Text — an interactive WebGL explainer for the surface-EMG speech decoding pipeline.",
+  "description": "Myovox — an interactive WebGL explainer for the surface-EMG speech decoding pipeline.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
