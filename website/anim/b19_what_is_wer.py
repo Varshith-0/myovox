@@ -8,7 +8,7 @@
 #   4 swap       head on "ate"; ink cross + S tag; swap 0 -> 1
 #   5 extra      head on "a";   box + I tag + ghost gap above; add 0 -> 1
 #   6 missing    head on the gap; dashed slot + D tag; drop 0 -> 1; head exits
-#   7 fraction   counts fly into 1+1+1 over 8 true words; readout sweeps to 37%
+#   7 fraction   counts fly into 1+1+1 over 8 true words; readout sweeps to 37.5%
 #   8 lower      numerator drops to 1+1; readout falls to 25%; "lower is the goal"
 #   9 NAME       serif #fff "word error rate" with one flash; everything else dims
 from manim import *
@@ -113,8 +113,8 @@ class WhatIsWer(Scene):
         EDIT_Y = -2.55
         tally_lab = mono("count the fixes", 16, INK_FAINT).move_to([-4.4, -1.55, 0])
         s_slot = mono("swap  0", 18, INK_DIM).move_to([-4.4, EDIT_Y + 0.62, 0])
-        i_slot = mono("add   0", 18, INK_DIM).move_to([-4.4, EDIT_Y + 0.10, 0])
-        d_slot = mono("drop  0", 18, INK_DIM).move_to([-4.4, EDIT_Y - 0.42, 0])
+        i_slot = mono("drop  0", 18, INK_DIM).move_to([-4.4, EDIT_Y + 0.10, 0])
+        d_slot = mono("add   0", 18, INK_DIM).move_to([-4.4, EDIT_Y - 0.42, 0])
 
         head = Rectangle(width=COL_W * 0.92, height=2.0, stroke_color=INK_FAINT,
                          stroke_width=1.6, fill_opacity=0).move_to([col_x(0), MID_Y, 0])
@@ -150,7 +150,7 @@ class WhatIsWer(Scene):
         ins_mark = SurroundingRectangle(guess_chips[5], color=INK, buff=0.10,
                                         stroke_width=2.0)
         i_tag = mono("I", 16, INK).next_to(guess_chips[5], DOWN, buff=0.46)
-        new_i = mono("add   1", 18, INK).move_to(i_slot)
+        new_i = mono("drop  1", 18, INK).move_to(i_slot)
         self.play(Create(ins_gap), Create(ins_mark), FadeIn(i_tag, shift=UP * 0.06),
                   Transform(i_slot, new_i), run_time=0.72)
 
@@ -166,7 +166,7 @@ class WhatIsWer(Scene):
         truth_emph = SurroundingRectangle(truth_chips[6], color=INK_FAINT, buff=0.10,
                                           stroke_width=1.6)
         d_tag = mono("D", 16, INK).next_to([col_x(6), GUESS_Y, 0], DOWN, buff=0.32)
-        new_d = mono("drop  1", 18, INK).move_to(d_slot)
+        new_d = mono("add   1", 18, INK).move_to(d_slot)
         self.play(Create(del_dash), Create(truth_emph), FadeIn(d_tag, shift=UP * 0.06),
                   Transform(d_slot, new_d), run_time=0.55)
         self.play(head.animate.move_to([col_x(n_cols - 1) + 0.2, MID_Y, 0])
@@ -201,7 +201,7 @@ class WhatIsWer(Scene):
         eq = mono("=", 24, INK).move_to([FRAC_X - 2.05, -2.4, 0])
         wrong = ValueTracker(0.0)
         PCT_X = [FRAC_X - 3.45, -2.4, 0]
-        pct = counter(wrong, fmt=lambda v: f"{int(round(v))}%", s=42, c=INK, at=PCT_X)
+        pct = counter(wrong, fmt=lambda v: f"{v:.1f}%", s=42, c=INK, at=PCT_X)
         pct_tag = mono("wrong", 14, INK_FAINT).move_to([PCT_X[0], PCT_X[1] - 0.6, 0])
         self.add(pct)
         self.play(FadeIn(eq), FadeIn(pct_tag),

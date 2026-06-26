@@ -262,19 +262,20 @@ class TwoReaders(Scene):
         tally_label = mono("defences fired:", 16, INK_DIM)
         tally_label.move_to(np.array([-0.7, RAIL_Y, 0]))
         count_at = tally_label.get_right() + RIGHT * 0.42
-        tally_count = counter(tally_pt, fmt=lambda v: f"{int(round(v))}/5", s=16,
+        tally_count = counter(tally_pt, fmt=lambda v: f"{int(round(v))}/3", s=16,
                               c=INK, at=count_at)
         self.play(FadeIn(tally_label), FadeIn(tally_count), run_time=0.3)
 
-        # five defence chips in the narrow center gap.
-        defences = ["time-masking", "sensor dropout", "gentle noise",
-                    "frame rotation", "2nd audio teacher"]
+        # the report-accurate ways the twin differs (training/augment.py "p2",
+        # report §5.1): stronger jitter + dropout, plus a different audio teacher
+        # (BiLSTM frame-KL, distinct from reader A's WavLM-L9). NOT "abuse".
+        defences = ["stronger jitter", "heavier dropout", "a different audio teacher"]
         chips = VGroup(*[mono(d, 14, INK_DIM) for d in defences]).arrange(
             DOWN, buff=0.20, aligned_edge=LEFT)
         chips.move_to(np.array([-0.15, READER_Y, 0]))
         bullets = VGroup(*[Dot(radius=0.026, color=INK_FAINT).next_to(c, LEFT, buff=0.14)
                            for c in chips])
-        defence_title = mono("raised under abuse", 14, INK_FAINT).next_to(
+        defence_title = mono("trained differently", 14, INK_FAINT).next_to(
             chips, UP, buff=0.22)
         self.play(
             FadeIn(defence_title),

@@ -16,7 +16,9 @@ def paper(title_lines):
     head = VGroup(*[mono(t, 13, INK_DIM) for t in title_lines]).arrange(DOWN, buff=0.07)
     rows = VGroup(*[Line(ORIGIN, [(1.7 if k % 4 else 1.0), 0, 0], stroke_color=INK_FAINT, stroke_width=1.2)
                     for k in range(9)]).arrange(DOWN, buff=0.12, aligned_edge=LEFT)
-    eq = mono("Σ  p(w | E)", 13, INK)
+    # abstract notation marks (no real on-screen formula) — the dense-paper texture
+    eq = VGroup(Line(ORIGIN, [0.55, 0, 0]), Line(ORIGIN, [0.2, 0, 0]),
+                Line(ORIGIN, [0.7, 0, 0])).arrange(RIGHT, buff=0.14).set_stroke(INK_FAINT, 1.4)
     inner = VGroup(head, rows, eq).arrange(DOWN, buff=0.2)
     inner.set_width(pg.width - 0.5).move_to(pg.get_center())
     return VGroup(pg, inner)
@@ -59,14 +61,16 @@ class Why(Scene):
         # ---- BEAT 3: WE BUILD ON TOP ------------------------------------
         self.next_section("ontop")
         self.play(FadeOut(VGroup(papers, line)), plate.animate.scale(0.8).to_edge(UP, buff=1.0), run_time=0.7)
-        found = RoundedRectangle(width=5.2, height=0.95, corner_radius=0.08).set_stroke(INK_DIM, 2).set_fill(INK, 0.05)
-        found_t = mono("their foundation: the approach, the corpus, the features", 18, INK_DIM)
+        found = RoundedRectangle(width=6.8, height=0.95, corner_radius=0.08).set_stroke(INK_DIM, 2).set_fill(INK, 0.05)
+        found_t = mono("their foundation — approach · corpus · features", 16, INK_DIM)
+        if found_t.width > found.width - 0.5:
+            found_t.set_width(found.width - 0.5)
         found_t.move_to(found.get_center())
         found_g = VGroup(found, found_t).move_to([0, -1.4, 0])
         ours = RoundedRectangle(width=3.0, height=0.85, corner_radius=0.08).set_stroke("#ffffff", 2).set_fill(INK, 0.06)
         ours_t = mono("what we changed", 19, INK)
         ours_t.move_to(ours.get_center())
-        ours_g = VGroup(ours, ours_t).next_to(found_g, UP, buff=0.12)
+        ours_g = VGroup(ours, ours_t).next_to(found_g, UP, buff=0.3)
         arrow = mono("the next pages →", 17, INK_FAINT).next_to(ours_g, UP, buff=0.3)
         self.play(FadeIn(found_g, shift=UP * 0.1), run_time=0.6)
         self.play(FadeIn(ours_g, shift=DOWN * 0.1),

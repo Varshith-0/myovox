@@ -39,7 +39,7 @@ function TokenStream({
  */
 export function Caption() {
   const index = useStore((s) => s.stageIndex)
-  const narrationOn = useStore((s) => s.narrationOn)
+  const subtitlesOn = useStore((s) => s.subtitlesOn)
   const playing = useStore((s) => s.playing)
   const stage = STAGES[index]
   const isHero = index === 0
@@ -47,7 +47,7 @@ export function Caption() {
   // Only while actually narrating (armed *and* playing) do the word-synced
   // subtitles take over: hide the on-screen sub (no duplicate text) and lift
   // bottom captions clear of the subtitle band.
-  const captionsMode = narrationOn && playing
+  const captionsMode = subtitlesOn
   const lifted = captionsMode && !atTop
 
   return (

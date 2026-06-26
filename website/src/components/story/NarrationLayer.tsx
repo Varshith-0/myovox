@@ -78,17 +78,30 @@ export function NarrationLayer() {
         }
       }
 
-      // Keep speed + volume live; publish the playhead for the subtitles.
-      const cur = voiced.current ? audios.current.get(voiced.current) : undefined
-      if (cur) {
-        cur.volume = clamp01(volume)
-        cur.playbackRate = playSpeed
+      // Publish the playhead for the subtitles. In Play the audio is the clock;
+      // while reading (no audio), subtitles follow the SCROLL position mapped
+      // onto the active section's caption track, so captions are on by default.
+      if (shouldPlay && voiced.current) {
+        const cur = audios.current.get(voiced.current)
+        if (cur) {
+          cur.volume = clamp01(volume)
+          cur.playbackRate = playSpeed
+        }
+        narration.activeId = voiced.current
+        narration.time = cur ? cur.currentTime : 0
+        narration.duration = cur && Number.isFinite(cur.duration) ? cur.duration : 0
+        narration.playing = !!cur && !cur.paused && !cur.ended
+        narration.ended = !!cur && cur.ended
+      } else {
+        const sid = activeId && hasNarration(activeId) ? activeId : null
+        const audio = sid ? audios.current.get(sid) : undefined
+        const dur = audio && Number.isFinite(audio.duration) ? audio.duration : 0
+        narration.activeId = sid
+        narration.time = sid && dur > 0 ? clamp01(localProgressFor(sid)) * dur : 0
+        narration.duration = dur
+        narration.playing = false
+        narration.ended = false
       }
-      narration.activeId = voiced.current
-      narration.time = cur ? cur.currentTime : 0
-      narration.duration = cur && Number.isFinite(cur.duration) ? cur.duration : 0
-      narration.playing = !!cur && !cur.paused && !cur.ended
-      narration.ended = !!cur && cur.ended
 
       raf = requestAnimationFrame(tick)
     }

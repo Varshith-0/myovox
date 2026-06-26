@@ -96,7 +96,7 @@ class Windows(Scene):
             tr.set_stroke(INK, width=1.7, opacity=0.9)
             norm.add(tr)
 
-        scale_note = mono("same scale", 19, INK).move_to([0, -3.0, 0])
+        scale_note = mono("drawn at one scale, to compare", 19, INK).move_to([0, -3.0, 0])
 
         self.play(FadeOut(puzzle, shift=DOWN * 0.08),
                   ctx_tag.animate.set_opacity(0.35),
@@ -237,14 +237,14 @@ class Windows(Scene):
                       stroke_color=INK, stroke_width=1.2)
 
         # the inequality writes in the BOTTOM strip EXACTLY as overlap flashes.
-        take = mono("25 ms wide   >   20 ms step    →    slices overlap",
+        take = mono("25 ms wide   >   20 ms step    →    snapshots overlap",
                     22, INK_DIM)
         take.move_to([0, -3.0, 0])
 
         self.play(FadeIn(ov),
                   Flash(ov.get_center(), color="#ffffff", line_length=0.2,
                         num_lines=14, flash_radius=0.55),
-                  Write(take), run_time=0.7)
+                  FadeIn(take, shift=UP * 0.06), run_time=0.7)
         self.play(Create(ov_pin), Write(ov_lab), run_time=0.35)
         self.wait(0.1)
 

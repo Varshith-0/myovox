@@ -58,7 +58,7 @@ class CTC(Scene):
 
         f_lab = mono("~150 snapshots", 18, INK_DIM).next_to(ticks, DOWN, buff=0.12)
         f_lab.align_to(ticks, LEFT)
-        s_lab = mono("~30 sounds", 18, INK_DIM).next_to(ticks, DOWN, buff=0.12)
+        s_lab = mono("~40 sounds", 18, INK_DIM).next_to(ticks, DOWN, buff=0.12)
         s_lab.align_to(ticks, RIGHT)
 
         recap = mono("we know the word — not which snapshot is which sound",
@@ -261,7 +261,8 @@ class CTC(Scene):
         self.next_section("many")
 
         pipeline = VGroup(row, sq, tx, merged_row, m_sq, m_tx, word)
-        self.play(FadeOut(pipeline, shift=DOWN * 0.2), run_time=0.3)
+        self.play(FadeOut(pipeline, shift=DOWN * 0.2),
+                  FadeOut(recap), FadeOut(top_ruler), run_time=0.3)
 
         title = mono("many timings  →  one answer", 22, INK_DIM).move_to(UP * 2.55)
 

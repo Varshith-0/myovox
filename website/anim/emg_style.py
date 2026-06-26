@@ -20,8 +20,8 @@ def seed(n=7):
 BG = "#050505"
 INK = "#f5f4f1"  # primary white
 INK_DIM = "#b6b6b2"
-INK_FAINT = "#6c6c69"
-INK_GHOST = "#3a3a38"
+INK_FAINT = "#828280"  # WCAG: ~5.3:1 on BG (was #6c6c69, 3.87:1)
+INK_GHOST = "#606060"  # WCAG: ~3.2:1 on BG (was #3a3a38, 1.86:1)
 LINE = "#2a2a28"
 
 config.background_color = BG

@@ -1,6 +1,6 @@
 # I6 — Signal. Why muscles make electricity, what EMG is, what "31 channels"
 # means, and the dataset behind it all.
-# Beats (one per narration sentence):
+# Beats (roughly one per narration sentence; a couple span two):
 #   1 VOLT     muscle fibres fire to contract -> a faint ~1 mV pulse at the skin.
 #   2 READ     too faint to feel, but a skin sensor can read it.
 #   3 EMG      that recording has a name: EMG = electro (electricity) + myo
@@ -90,7 +90,7 @@ class Signal(Scene):
         plus = VGroup(mono("+", 30, INK_FAINT).move_to((parts[0].get_right() + parts[1].get_left()) / 2),
                       mono("+", 30, INK_FAINT).move_to((parts[1].get_right() + parts[2].get_left()) / 2))
         self.add(emg_g)
-        self.play(Write(emg), run_time=0.6)
+        self.play(FadeIn(emg, shift=UP * 0.06), run_time=0.6)
         self.play(LaggedStart(*[FadeIn(p, shift=UP * 0.1) for p in parts], lag_ratio=0.25),
                   FadeIn(plus), run_time=1.1)
         self.wait(0.4)
@@ -160,9 +160,9 @@ class Signal(Scene):
 
         # ---- BEAT 8: QUESTION -------------------------------------------
         self.next_section("question")
-        self.play(FadeOut(VGroup(big, big_lab, bar, lex)), traces.animate.set_stroke(opacity=0.5), run_time=0.5)
+        self.play(FadeOut(VGroup(big, big_lab, bar, lex)), traces.animate.set_stroke(opacity=0.5), run_time=0.35)
         q1 = serif("hidden in here is every word", 44).move_to([0, 0.5, 0])
         q2 = mono("how do we pull them back out?", 26, INK_DIM).move_to([0, -0.6, 0])
-        self.play(Write(q1, run_time=0.9))
+        self.play(FadeIn(q1, shift=UP * 0.08, run_time=0.7))
         self.play(FadeIn(q2, shift=UP * 0.1), run_time=0.5)
         self.wait(0.6)

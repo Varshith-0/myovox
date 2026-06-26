@@ -6,6 +6,8 @@
 #   3 SCALP     fill cap: no surgery, weak signal, no movement, safe.
 #   4 SKIN      fill EMG: no surgery, strong signal, needs movement, safe — the
 #               promising sweet spot.
+#   5 CAVEAT    the honesty line: EMG needs movement — not for the fully
+#               paralyzed, but the safe middle path for everyone who can move.
 from manim import *
 from emg_style import *
 import numpy as np
@@ -118,11 +120,29 @@ class Landscape(Scene):
 
         # ---- BEAT 4: SKIN -----------------------------------------------
         self.next_section("skin")
-        hl = RoundedRectangle(width=2.9, height=5.6, corner_radius=0.12).move_to([COLX[2], 0.0, 0])
+        hl = RoundedRectangle(width=2.9, height=5.6, corner_radius=0.12).move_to([COLX[2], 0.35, 0])
         hl.set_stroke("#ffffff", 1.8, opacity=0.8).set_fill(INK, 0.05)
         self.play(FadeOut(note1), Create(hl), Indicate(col_icon[2], scale_factor=1.12, color=WHITE), run_time=0.5)
         reveal(2)
         tag = mono("implant-grade access to the speech muscles — without opening the skull", 21, INK)
+        if tag.width > 12.6:
+            tag.set_width(12.6)
         tag.move_to([0, -3.35, 0])
         self.play(FadeIn(tag, shift=UP * 0.1), run_time=0.6)
+        self.wait(0.4)
+
+        # ---- BEAT 5: CAVEAT — the honesty line (must be able to move) ----
+        self.next_section("caveat")
+        # contrast the movement row: the implant works WITHOUT movement (its edge
+        # for the fully paralyzed); EMG needs movement (its one catch).
+        self.play(FadeOut(tag),
+                  Indicate(rlabels[2], scale_factor=1.18, color=WHITE),
+                  cells[2][2].animate.set_color(WHITE),
+                  run_time=0.5)
+        caveat = VGroup(
+            mono("the one catch: surface EMG needs movement", 21, INK),
+            mono("not for the fully paralyzed — but the safe middle path for anyone who can move",
+                 17, INK_FAINT),
+        ).arrange(DOWN, buff=0.16).move_to([0, -3.25, 0])
+        self.play(FadeIn(caveat, shift=UP * 0.1), run_time=0.6)
         self.wait(0.6)

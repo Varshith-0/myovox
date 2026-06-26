@@ -24,7 +24,7 @@
    offset in px so it always clears the caption regardless of viewport height. */
 @media (max-width: 820px), (max-height: 600px), (max-aspect-ratio: 7/5) {
   .stage {
-    top: max(20vh, 210px);
+    top: min(max(20vh, 210px), 40vh);
     bottom: 4vh;
   }
   .contain {
@@ -39,8 +39,15 @@
 }
 @media (max-width: 820px), (max-height: 600px), (max-aspect-ratio: 7/5) {
   .withCaptions .stage {
-    bottom: clamp(8.5rem, 16vh, 11rem);
+    bottom: min(clamp(8.5rem, 16vh, 11rem), 38vh);
   }
+}
+
+/* Very short landscape (phones rotated): shrink the top floor + caption band so
+   the 16:9 clip isn't starved into a thin marooned strip. */
+@media (max-height: 480px) and (orientation: landscape) {
+  .stage { top: max(15vh, 80px); bottom: 3vh; }
+  .withCaptions .stage { bottom: min(clamp(6.5rem, 13vh, 8.5rem), 34vh); }
 }
 
 .media {

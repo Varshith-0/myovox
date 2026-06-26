@@ -34,7 +34,7 @@ class ThreeHeads(Scene):
         ]).arrange(DOWN, buff=0.08).move_to(np.array([-6.05, TOP_Y, 0]))
         recap_lab = mono("the reader · Conformer", 17, INK_FAINT)
         recap_lab.next_to(recap_stack, RIGHT, buff=0.28).set_y(TOP_Y)
-        frame_line = mono("one slice in  →  three answers out", 18, INK_FAINT)
+        frame_line = mono("one snapshot in  →  three answers out", 18, INK_FAINT)
         frame_line.move_to(np.array([3.55, TOP_Y, 0]))
         rule = Line(LEFT * 6.6, RIGHT * 6.6, stroke_color=LINE, stroke_width=1.4)
         rule.set_y(RULE_Y)
@@ -58,7 +58,7 @@ class ThreeHeads(Scene):
                  stroke_color=INK_FAINT, stroke_width=2)
             for i in range(4)
         ])
-        rail_lab = mono("answers per slice", 16, INK_FAINT)
+        rail_lab = mono("answers per snapshot", 16, INK_FAINT)
         rail_lab.move_to(np.array([rail_l, RAIL_Y + 0.32, 0])).align_to(rail_track, LEFT)
 
         prog = ValueTracker(0)
@@ -91,7 +91,8 @@ class ThreeHeads(Scene):
             Line(ORIGIN, RIGHT * 0.42, stroke_color=INK_FAINT, stroke_width=3)
             for _ in range(5)
         ]).arrange(DOWN, buff=0.11).next_to(enc, LEFT, buff=0.32)
-        slice_lab = mono("one slice", 14, INK_FAINT).next_to(ticks, UP, buff=0.16)
+        slice_lab = mono("one snapshot", 14, INK_FAINT).next_to(ticks, UP, buff=0.16)
+        slice_lab.align_to(np.array([-6.9, 0, 0]), LEFT)  # keep the longer label on-frame
         self.play(
             FadeIn(enc_sub),
             LaggedStart(*[Create(t) for t in ticks], lag_ratio=0.10),
@@ -110,8 +111,8 @@ class ThreeHeads(Scene):
         # =================================================================
         self.next_section("three_answers")
         rows_meta = [
-            ("Units",      "100 + ∅",      ROW_Y[0]),
-            ("Phonemes",   "~40 + ∅",      ROW_Y[1]),
+            ("Units",      "100 + blank",  ROW_Y[0]),
+            ("Phonemes",   "~40 + blank",  ROW_Y[1]),
             ("Projection", "1024 numbers", ROW_Y[2]),
         ]
         bx = -1.55
@@ -173,7 +174,7 @@ class ThreeHeads(Scene):
         # =================================================================
         self.next_section("units_vote")
         u_peak = 17
-        units_strip = softmax_strip(60, u_peak, ROW_Y[0])
+        units_strip = softmax_strip(100, u_peak, ROW_Y[0])
         cap_units = mono("a vote over 100 fine units", 15, INK_FAINT)
         cap_units.next_to(units_strip, UP, buff=0.12, aligned_edge=LEFT)
         self.play(

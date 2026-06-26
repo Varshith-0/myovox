@@ -239,7 +239,7 @@ class WhatIsLm(Scene):
         self.next_section("chips")
 
         chip_small = mono("small one  ·  scores the map here", 15, INK_DIM)
-        chip_big = mono("a much bigger one  ·  chooses later", 15, INK_FAINT)
+        chip_big = mono("a much bigger one  ·  chooses later", 15, INK_DIM)
         chips = VGroup(chip_small, chip_big).arrange(DOWN, buff=0.20)
         chips.move_to([0, -1.05, 0])
         div = Line(chips.get_left() + LEFT * 0.1, chips.get_right() + RIGHT * 0.1,

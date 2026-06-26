@@ -132,7 +132,7 @@ class HowTrainingWorks(Scene):
 
         top_grp = VGroup(in_lbl, fp, box, dials, box_lbl, thread_in,
                          thread_out, out_lbl)
-        rule = Line([X_L, TOP_Y - 0.75, 0], [X_R, TOP_Y - 0.75, 0],
+        rule = Line([X_L, TOP_Y - 0.95, 0], [X_R, TOP_Y - 0.95, 0],
                     stroke_color=LINE, stroke_width=1.2)
 
         self.add(rule)

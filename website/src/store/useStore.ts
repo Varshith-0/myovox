@@ -28,6 +28,9 @@ export interface AppState {
   /** Narration ("Voice") armed — off until the user opts in (also the audio
    *  unlock gesture browsers require). Narration is only audible during Play. */
   narrationOn: boolean
+  /** Word-synced caption subtitles shown — ON by default (WCAG 1.2.2/1.2.4).
+   *  Driven by the scroll position while reading, by the audio playhead in Play. */
+  subtitlesOn: boolean
   /** Narration volume, 0..1 (only audible while {@link narrationOn}). */
   volume: number
   /** Hands-free playback is running (auto-advancing the story). */
@@ -40,6 +43,7 @@ export interface AppState {
   setElectrodesReady: (ready: boolean) => void
   setSpeechWord: (i: number) => void
   setNarrationOn: (on: boolean) => void
+  setSubtitlesOn: (on: boolean) => void
   setVolume: (v: number) => void
   setPlaying: (playing: boolean) => void
   setPlaySpeed: (speed: number) => void
@@ -56,6 +60,7 @@ export const useStore = create<AppState>((set) => ({
   electrodesReady: false,
   speechWord: 0,
   narrationOn: false,
+  subtitlesOn: true,
   volume: 1,
   playing: false,
   playSpeed: 1,
@@ -68,6 +73,7 @@ export const useStore = create<AppState>((set) => ({
   setSpeechWord: (speechWord) =>
     set((s) => (s.speechWord === speechWord ? s : { ...s, speechWord })),
   setNarrationOn: (narrationOn) => set((s) => (s.narrationOn === narrationOn ? s : { ...s, narrationOn })),
+  setSubtitlesOn: (subtitlesOn) => set((s) => (s.subtitlesOn === subtitlesOn ? s : { ...s, subtitlesOn })),
   setVolume: (volume) => set((s) => (s.volume === volume ? s : { ...s, volume })),
   setPlaying: (playing) => set((s) => (s.playing === playing ? s : { ...s, playing })),
   setPlaySpeed: (playSpeed) => set((s) => (s.playSpeed === playSpeed ? s : { ...s, playSpeed })),

@@ -11,9 +11,11 @@
 # Locked 6-beat sheet (one self.next_section per beat, timed to dur_sec):
 #   1 (1.48s) POSE   : one phoneme string -> two readings on a beam
 #   2 (4.07s) BUILD  : two enormous dials rise, needles at high default; WER meter
-#   3 (0.76s) DIAL 1 : acoustic scale 1.0 -> 0.25, WER 76% -> 18%
+#   3 (0.76s) DIAL 1 : acoustic scale 1.0 -> 0.25, WER 76% -> 64% (held slice)
 #   4 (3.76s) BLANK  : per-frame filmstrip, tall blank bars dominate
-#   5 (0.60s) DIAL 2 : blank penalty 0 -> 2.0, bars commit, WER 78% -> 61%
+#   5 (0.60s) DIAL 2 : blank penalty 0 -> 2.0, bars commit, WER 64% -> 48% (held slice)
+#   NOTE: the meter is a held DECODE-TUNING slice and must only ever FALL; it is
+#   NOT the final 18.5% (that is earned later by the encoder + ensemble + rerank).
 #   6 (1.41s) NAME   : chips lock, "ice cream" -> white, punchline, poster hold
 #
 # Canvas: full-bleed.  x in [-7.1,7.1], y in [-4,4].
@@ -193,7 +195,8 @@ class TwoDials(Scene):
         self.wait(0.87)
 
         # ================================================================
-        # BEAT 3 (0.76s) — DIAL ONE: acoustic scale 1.0 -> 0.25, WER 76 -> 18.
+        # BEAT 3 (0.76s) — DIAL ONE: acoustic scale 1.0 -> 0.25, WER 76 -> 64
+        #   on a held decode slice (scale only; NOT the final 18.5% pipeline result).
         #   Spotlight: left dial + WER meter only. Right dial dims to ghost.
         #   End labels fade in exactly as the needle moves.
         # ================================================================
@@ -203,7 +206,7 @@ class TwoDials(Scene):
         # dim the right dial's LABELS only — never fill its stroke-only arc face
         self.play(
             scale_t.animate.set_value(0.25),
-            wer_t.animate.set_value(0.18),
+            wer_t.animate.set_value(0.64),
             FadeIn(endL_lo), FadeIn(endL_hi),
             face_R.animate.set_stroke(opacity=0.30),
             name_R.animate.set_opacity(0.30),
@@ -258,10 +261,11 @@ class TwoDials(Scene):
 
         # ================================================================
         # BEAT 5 (0.60s) — DIAL TWO: blank penalty 0.0 -> 2.0.
-        #   needle (cause) -> bars commit -> WER's biggest leftward drop 78 -> 61.
+        #   needle (cause) -> bars commit -> WER's biggest leftward drop 64 -> 48.
+        #   Same held-slice meter as Beat 3 — it only ever falls (no silent reset),
+        #   and this is the single largest drop, matching the "biggest lever" line.
         # ================================================================
         self.next_section("dial_two")
-        wer_t.set_value(0.78)  # frame the blank lever as the big 78 -> 61 drop
         new_heights = [0.26, 0.62, 0.24, 0.62, 0.58, 0.26, 0.62, 0.22]
         bar_targets = []
         for i, h in enumerate(new_heights):
@@ -273,7 +277,7 @@ class TwoDials(Scene):
 
         self.play(
             blank_t.animate.set_value(2.0),
-            wer_t.animate.set_value(0.61),
+            wer_t.animate.set_value(0.48),
             *[Transform(bars[i], bar_targets[i]) for i in range(len(bars))],
             run_time=0.6, rate_func=smooth)
 

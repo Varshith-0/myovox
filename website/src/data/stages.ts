@@ -135,19 +135,19 @@ export const STAGES: readonly Stage[] = [
   act2(
     'hero', 'Intro',
     'We can read speech from the muscles of your face.',
-    'A bundle of 31 EMG traces scrolls in and collapses into one glowing line that resolves into the words "read speech from muscle"; the title EMG → TEXT settles in.',
+    'A bundle of 31 EMG traces scrolls in and collapses into one glowing line that resolves into the words "read speech from muscles"; the title EMG → TEXT settles in.',
     'No microphone, no sound — just the faint electricity of moving muscles, read back into text. By the end, four words in five come back right.',
   ),
   act2(
     'why', 'Why',
     'Why this exists.',
-    'A dense research-paper page of equations and tables dissolves into a clean moving diagram; a silent, mouthing face turns into typed text on a screen.',
-    'Research papers are a wall of math almost nobody reads. This is the same science — made to watch. The idea underneath: you can type by mouthing words, with no sound at all.',
+    'Three research-paper cards fan in and collapse onto a UC Davis name plate (Gowda, Miller, with Comstock and McNaughton); a "what we changed" block stacks onto a "their foundation" block; a fifty-tick timeline labelled "the same science — made to watch" lights up.',
+    'Research papers are a wall of math almost nobody reads. This is that same science — made to watch: about fifty short scenes, built on one UC Davis lab’s work, then pushed further.',
   ),
   act2(
     'landscape', 'Why this way',
     'Three ways to read speech from the body.',
-    'Three doors — a brain implant, a scalp cap, and skin sensors — each scored on three rows: needs surgery?, signal strength, and needs movement? Skin sensors win on surgery and signal.',
+    'Three doors — a brain implant, a scalp cap, and skin sensors — each scored on four rows: needs surgery?, signal strength, needs movement?, and safety. Skin sensors are surgery-free, strong-signal, and safe.',
     'A brain implant works even without movement, but it takes surgery. Scalp sensors need no surgery, but the signal is faint and smeared. Muscle sensors on the skin are strong and surgery-free — the practical sweet spot, as long as you can still move your face.',
   ),
   act2(
@@ -159,12 +159,12 @@ export const STAGES: readonly Stage[] = [
   act2(
     'muscles', 'Muscles',
     'Speech starts as movement.',
-    'A nerve spark spreads into a 2D face; named muscle groups — orbicularis oris, zygomaticus, masseter, genioglossus, sternohyoid — light in speech rhythm; a faint flicker rises on the skin.',
+    'A 2D face; a "brain" dot fires electrical pulses down nerves to named muscle markers — orbicularis oris, zygomaticus, masseter, genioglossus, sternohyoid — lighting each in turn.',
     'To shape one word your brain fires dozens of muscles — lips, cheeks, jaw, tongue and throat — each on its own rhythm. And every contraction leaks a faint flicker of electricity onto the skin.',
   ),
   act2(
     'signal', 'The signal',
-    'Thirty-one sensors, listening.',
+    'Listening, five thousand times a second.',
     'A one-millivolt pulse rises on a voltage axis; a grid of 31 skin sensors traces overlapping wiggly lines; a microphone marked "training only" fades in; the view zooms out to the corpus counts.',
     'Each faint pulse is read by a grid of 31 skin sensors, five thousand times a second, with the real voice recorded alongside — across 9,660 sentences from one speaker. Hidden inside that noise is every word; the rest of the story is pulling it back out.',
     245,
@@ -173,15 +173,15 @@ export const STAGES: readonly Stage[] = [
   // ---- Act 2: the machine (scrubbed Manim clips) ----
   act2(
     'features-window', 'Slicing the signal',
-    'First we chop each wiggly line into tiny overlapping slices — one every 20 milliseconds.',
-    'A 25 ms window slides along 31 stacked signal traces, dropping a tick every 20 ms onto a frame timeline that counts up to 50 frames per second.',
+    'First we chop each wiggly line into tiny overlapping snapshots — one every 20 milliseconds.',
+    'A 25 ms window slides along a stack of sample signal traces, dropping a tick every 20 ms onto a timeline that counts up to 50 snapshots per second.',
     'Those 31 wiggly lines are far too much to use raw. So we slide a tiny 25-millisecond window along them and take a snapshot every 20 ms — turning the stream into a steady 50 snapshots a second.',
   ),
   act2(
     'two-sensors-dancing', 'Two dancers',
     'What does "move together" actually mean? Watch just two sensors.',
-    'Two stacked traces wiggle while a moving dot plots one against the other; in-sync motion builds a tilted diagonal cloud, opposed motion tilts the other way, and unrelated motion fills a round blob.',
-    'Forget thirty-one. Take two sensors and ask one question: do they rise and fall on the same beat, or not? That agreement — not loudness — is the whole idea.',
+    'Two stacked traces wiggle while a vertical scan line sweeps them and dots accumulate into a scatter cloud, plotting B against A; in-sync motion builds a tilted diagonal cloud, opposed motion tilts the other way, and unrelated motion fills a round blob.',
+    'Forget 31. Take two sensors and ask one question: do they rise and fall on the same beat, or not? That agreement — not loudness — is the whole idea.',
   ),
   act2(
     'features-cov', 'Moving together',
@@ -192,24 +192,24 @@ export const STAGES: readonly Stage[] = [
   act2(
     'every-pair-grid', 'Everyone with everyone',
     'Now ask that for every pair — and lay the answers in a grid.',
-    'A single covariance value becomes one bright cell, then a scan-head fills a full 31 by 31 grid that is mirror-symmetric across a bright diagonal, and two different gestures light two clearly different patterns.',
+    'A single covariance value becomes one bright cell, then a scan-head fills a full 31 by 31 grid that is mirror-symmetric across a bright diagonal; the off-diagonal cells flash to show which sensors moved together.',
     'Thirty-one sensors, each checked against all the others. Each cell holds one "do these two agree?" value. The whole 31-by-31 grid is a portrait of how the face moved together, this instant.',
   ),
   act2(
     'features-embed', 'Fingerprint',
-    'We steady each matrix, then squeeze it down to 384 numbers — one fingerprint per slice.',
+    'We steady each matrix, then squeeze it down to 384 numbers — one fingerprint per snapshot.',
     'A speckled matrix blends 90% measured with 10% a plain pattern, then funnels into a row of 384 bars; the sentence becomes a filmstrip of fingerprints.',
-    'That grid is noisy and huge. We steady it, then squeeze it down to just 384 numbers — one compact fingerprint per snapshot. This filmstrip of fingerprints is what the network actually reads.',
+    'That grid is noisy and huge. We steady it, then squeeze it down to just 384 numbers — one compact fingerprint per snapshot. This filmstrip of fingerprints is what the reader actually reads.',
   ),
   act2(
     'what-is-a-net', 'What "the model" is',
     'We keep saying "the network reads it." So what is a network, really?',
     'A fingerprint flows left to right through several layers of a dial-filled box and out as a short vector; the dials sit at random angles and the first guess is shown garbled and dim.',
-    "It's a function: a deep stack of millions of tiny dials that turns numbers in into a guess out. Nothing is programmed by hand — everything it knows lives in how the dials are set.",
+    "It's a function: a deep stack of millions of tiny dials that turns numbers into a guess. Nothing is programmed by hand — everything it knows lives in how the dials are set.",
   ),
   act2(
     'how-training-works', 'Rolling downhill',
-    'Training is just this: guess, measure the miss, step downhill, repeat.',
+    'Training is just this: guess, measure the error, step downhill, repeat.',
     'An example flows through the dial-box to a guess; the error appears as height on a one-dimensional curve and a ball rolls downhill while the guessed letter sharpens toward the true one over repeated passes.',
     'Show it an example with a known answer. Measure how wrong the guess is. Nudge every dial a hair in the direction that shrinks the error — like a ball rolling down a hill — and do it millions of times.',
   ),
@@ -221,15 +221,15 @@ export const STAGES: readonly Stage[] = [
   ),
   act2(
     'targets-units', 'Finer sounds',
-    "We also use 100 finer sound-shapes a machine discovered on its own — plus a marker for 'nothing new yet.'",
+    "We also use 100 finer sound-shapes a model discovered on its own — plus a marker for 'nothing new yet.'",
     'About forty phonemes sit beside 100 finer self-discovered units; a blank symbol marks no new sound.',
-    "Phonemes are coarse, so we add a finer target: 100 sound-shapes a model discovered on its own from thousands of hours of audio — plus a 'blank' marker for 'nothing new yet'. Two views teach it more.",
+    "Phonemes are coarse, so we add a finer target: 100 sound-shapes a model discovered on its own from nearly a thousand hours of audio — plus a 'blank' marker for 'nothing new yet'. Two views teach it more.",
   ),
   act2(
     'where-units-from', 'Sounds nobody named',
     'Those hundred finer sounds — nobody handed the machine a list. Where from?',
-    'A scrolling waveform has a slice masked out; a model predicts the hidden piece, and over many clips the recurring snippets settle into a handful of representative bins tagged as one of a hundred.',
-    'Self-supervised learning: play a model thousands of hours of audio, hide a chunk, make it predict the missing piece. To do that well, it has to invent its own catalog of sound-shapes.',
+    'A scrolling waveform has a snapshot masked out; a model predicts the hidden piece, and over many clips the recurring snippets settle into a handful of representative bins tagged as one of a hundred.',
+    'Self-supervised learning: play a model nearly a thousand hours of audio, hide a chunk, make it predict the missing piece. To do that well, it has to invent its own catalog of sound-shapes.',
   ),
   act2(
     'two-answer-keys', 'Two answer keys',
@@ -240,7 +240,7 @@ export const STAGES: readonly Stage[] = [
   act2(
     'alignment-problem', 'Subtitles, no clock',
     'The real puzzle before any of this can train: you have the words, but no timestamps.',
-    'A filmstrip of many blank frames sits above the three-symbol word K A E T; dotted lines try to pair frames to sounds and dangle with question marks, the words known but every timestamp struck out.',
+    'A filmstrip of many blank frames sits above the three-sound word K-AE-T (cat); dotted lines try to pair frames to sounds and dangle with question marks, the words known but every timestamp struck out.',
     "Each second is fifty snapshots, but a word is only a handful of sounds — and nobody ever wrote down which snapshot is which. It's like a movie's subtitles with every timestamp erased.",
   ),
   act2(
@@ -263,15 +263,15 @@ export const STAGES: readonly Stage[] = [
   ),
   act2(
     'what-is-attention', 'A spotlight that reaches',
-    'To name a blurry moment, the reader "pays attention" to other moments. What does that mean?',
-    'From one highlighted frame, faint query lines fan out to all other frames; a few relevant lines thicken while the rest fade, and the weighted information from the strong ones flows back to update the asking frame.',
-    'Each moment asks every other moment "how relevant are you to me?", gets a weight back, and pulls hardest on the few that matter — near or far. That reaching-and-weighting is attention.',
+    'To name a blurry snapshot, the reader "pays attention" to other snapshots. What does that mean?',
+    'From one highlighted snapshot, faint query lines fan out to all other snapshots; a few relevant lines thicken while the rest fade, and the weighted information from the strong ones flows back to update the asking snapshot.',
+    'Each snapshot asks every other snapshot "how relevant are you to me?", gets a weight back, and pulls hardest on the few that matter — near or far. That reaching-and-weighting is attention.',
   ),
   act2(
     'what-is-convolution', 'The other lens',
-    'Attention is the telescope. You also need a magnifier.',
-    'Beside faint long-range attention lines, a small bracket window slides across a few adjacent frames, lighting only its local neighbors and emitting a sharpened local feature that the wide view missed.',
-    'Attention reaches far but blurs the fine grain. A small sliding window — a convolution — reads only a handful of neighbors, but closely, catching the local texture attention misses.',
+    'Attention is the wide lens. You also need a magnifier.',
+    'Beside faint long-range attention lines, a small bracket window slides across a few adjacent frames, lighting only its local neighbours and emitting a sharpened local feature that the wide view missed.',
+    'Attention reaches far but blurs the fine grain. A small sliding window — a convolution — reads only a handful of neighbours, but closely, catching the local texture attention misses.',
   ),
   act2(
     'memorize-trap', 'The memorizing trap',
@@ -287,7 +287,7 @@ export const STAGES: readonly Stage[] = [
   ),
   act2(
     'heads', 'Three outputs',
-    "The reader gives three answers per slice — and one of them isn't for reading text at all.",
+    "The reader gives three answers per snapshot — and one of them isn't for reading text at all.",
     'The encoder fans into three heads: units, phonemes (highlighted), and a projection of 1024 numbers that glows toward the next stage.',
     "It outputs three things per snapshot: the 100 fine units, the ~40 phonemes (what everything downstream uses), and a third 1024-number 'projection' that isn't for reading text at all — it exists to imitate a real voice.",
   ),
@@ -299,14 +299,14 @@ export const STAGES: readonly Stage[] = [
   ),
   act2(
     'voice-as-teacher', 'The recording in the room',
-    'Here the teacher is the real voice — a model that already learned to hear, recorded only while training.',
+    'Here the teacher is the real voice, captured only while training — read by a model that already learned to hear.',
     "Two time-aligned lanes of one sentence: a clean audio waveform feeds a tall layer stack whose highlighted middle layer pours a rich representation down into the noisy EMG lane's projection, stamped training only, with the microphone struck out at use time.",
     'While the data was collected, a microphone ran alongside the sensors. An audio model turns that voice into a rich middle-layer picture; the muscle model copies it. At real use, the mic is gone.',
   ),
   act2(
     'distillation', 'A teacher voice',
     'While training, the muscle model copies a model that listens to the real voice recorded at the same time.',
-    'A top audio lane (waveform into WavLM into a layer-9 representation) pours knowledge into the bottom EMG lane projection; a stamp reads training only.',
+    'Face-to-face teacher and student vector columns; dashed ties pull the student to match as a gap readout falls from 1.00 to 0.04; a flatten-to-gray detour warns against a dull average; then a contrastive step pulls each moment toward its partner and pushes rivals away, under a fork labelled 0.5 L2 (copy the numbers) and 0.5 InfoNCE (keep each moment distinct).',
     "During training only, we also recorded the real voice. A powerful audio model listens to it, and we pull the muscle model's projection to match what it hears — a teacher to copy. At real use there is no microphone.",
   ),
   act2(
@@ -330,8 +330,8 @@ export const STAGES: readonly Stage[] = [
   act2(
     'twin-warmstart', 'Two readers',
     'We give the reader a head start, then train a tougher twin that fails differently.',
-    "Weights copy from an old model's front-end and heads into a new one; a tougher twin adds masking, sensor dropout, noise and rotation; the two make different mistakes.",
-    'We give the new reader a head start from the old model, then train a tougher twin with heavier defences — masking moments, dropping sensors, adding noise. The two fail differently, which is exactly why averaging them helps.',
+    "Weights copy from an old model's front-end and heads into a new one; a tougher twin trains under stronger jitter, heavier dropout, and a different audio teacher; the two make different mistakes.",
+    'We give the new reader a head start from the old model, then train a tougher twin differently — stronger jitter, heavier dropout, and a different audio teacher. The two fail differently, which is exactly why averaging them helps.',
   ),
   act2(
     'second-opinion', 'Ask twice',
@@ -348,8 +348,8 @@ export const STAGES: readonly Stage[] = [
   act2(
     'sounds-to-words-search', 'Cheapest road',
     'Turning loose sounds into words is a search: find the cheapest road through a giant map.',
-    'A noisy stream of per-frame sounds feeds a branching node-and-edge map with small toll values; many candidate paths flicker faintly and one continuous lowest-cost route lights up from start to end, spelling a sentence.',
-    'Lay every legal route from sounds to real words on one map, give each step a toll — cheap when sound and grammar agree, dear when they fight — and the best sentence is the lowest-toll route end to end.',
+    'A noisy stream of per-frame sounds feeds a branching node-and-edge map with small toll values; candidate sentences flicker faintly above the stream, then one continuous lowest-cost route lights up start to end, spelling a sentence.',
+    'Lay every legal route from sounds to real words on one map, give each step a toll — cheap when sound and grammar agree, steep when they fight — and the best sentence is the lowest-toll route end to end.',
   ),
   act2(
     'knobs', 'Two dials',
@@ -367,31 +367,31 @@ export const STAGES: readonly Stage[] = [
     'ensemble-nbest', 'Many guesses',
     'Average two readers, keep dozens of guesses each, and pool them — until the right answer is almost always in there.',
     'Two readers average to about 20% wrong; a ranked n-best list and a multi-scale union pool guesses; a perfect oracle would be 9.30% wrong.',
-    'Now we combine: average the two readers for a steadier signal (26% to ~20% wrong), keep dozens of candidate sentences, and pool them across dial settings. A perfect chooser would be only 9.3% wrong — that gap is the prize.',
+    'Now we combine: average the two readers for a steadier signal (26% to ~20% wrong), keep dozens of candidate sentences, and pool them across dial settings. A perfect chooser would be only 9.30% wrong — that gap is the prize.',
   ),
   act2(
     'what-is-wer', 'Counting the misses',
     "We keep quoting \"percent wrong.\" Here's exactly how that's measured.",
-    'A reference sentence and a guess align word by word; one substitution, one insertion, and one deletion are marked and summed, then divided by the reference word count into an abstract fraction.',
+    'A reference sentence and a guess align word by word; one substitution, one insertion, and one deletion are marked and summed, then divided by the reference word count and read out as a percentage.',
     "Line your guess against the truth and count every word you'd swap, add, or delete to fix it; divide by the number of true words. Two edits in an eight-word sentence is a quarter wrong. Lower is better.",
   ),
   act2(
     'rerank', 'The chooser',
     'A language model reads the guesses and the raw sounds together — and chooses the sentence that makes the most sense.',
-    'A 7-billion-parameter model squeezed to 4-bit with small locked adapters reads about ten candidates plus the detected sounds and picks one final sentence; an audit reads 0.',
+    'A 7-billion-parameter model squeezed to 4-bit with small trained adapters reads about ten candidates plus the detected sounds and picks one final sentence; an audit confirms it only ever chooses from the pool, never beyond it.',
     'A language model reads every candidate and the detected sounds together, then picks the sentence that makes most sense — using the sounds to break ties between look-alikes. We audited it: it never invents words the evidence does not support.',
   ),
   act2(
     'binding-constraint', 'The honest ceiling',
     'Why it stops at eighteen and a half — and what would actually break through.',
-    'The reranker scans an n-best list and settles at 18.53, then on a hard sentence finds the correct word absent from every candidate; a sound-error gauge holds near 20.9 while the word-error gauge refuses to drop below 18.5.',
+    'The chooser scans an n-best list and settles at 18.53, then on a hard sentence finds the correct word absent from every candidate; a sound-error gauge holds near 20.9 while the word-error gauge refuses to drop below 18.5.',
     "The chooser can only pick from the list it's handed. For the hardest errors the right word was never in the sounds at all — so no language model can conjure it. The ceiling is the ears, not the chooser.",
   ),
   act2(
     'journey', 'The whole journey',
     'One sentence, from muscle to text.',
     'A left-to-right montage: speak, 31 sensors, fingerprint filmstrip, the reader, per-frame sounds, the word map, candidate sentences, the chooser, and the final sentence.',
-    'One sentence, end to end — speak, 31 sensors, fingerprints, the reader, sounds, the word-map, a pool of guesses, the chooser, text. Everything you have just seen, in order.',
+    'One sentence, end to end — speak, 31 sensors, fingerprints, the reader, sounds, the word-map, a pool of guesses, the chooser, text. Everything you have just learned, in order.',
   ),
   act2(
     'arc', 'The climb',
@@ -415,8 +415,8 @@ export const STAGES: readonly Stage[] = [
   act2(
     'foundation', 'Foundation',
     'None of this starts without the team at UC Davis.',
-    "Two foundation stones — the 'geometric perspective' paper and the 'emg2speech' corpus — bear a small 'our pipeline' block; a glowing name plate reads Harshavardhana T. Gowda, with Daniel C. Comstock and Lee M. Miller, UC Davis.",
-    'The corpus, the 31-channel sensor array, the SPD geometric features, and the first EMG-to-text decoder all came out of UC Davis — Harshavardhana T. Gowda, with Daniel C. Comstock and Lee M. Miller. Our pipeline is a small block resting on that foundation; we only built upward.',
+    "Two foundation stones — the 'geometric perspective' paper and the 'emg2speech' corpus — bear a small 'our pipeline' block; a glowing name plate reads Harshavardhana T. Gowda, with Zachary D. McNaughton, Daniel C. Comstock and Lee M. Miller, UC Davis.",
+    'The corpus, the 31-channel sensor array, the SPD geometric features, and the EMG-to-text decoder all came out of UC Davis — Harshavardhana T. Gowda, with Zachary D. McNaughton, Daniel C. Comstock and Lee M. Miller. Our pipeline is a small block resting on that foundation; we only built upward.',
   ),
   act2(
     'credits', 'Credits',
@@ -433,7 +433,7 @@ export const STAGES: readonly Stage[] = [
   act2(
     'end', 'The end',
     'The end.',
-    'A cinematic finale: one last EMG signal traces across the dark, shatters into a cloud of particles, and they stream together to spell THE END — which ignites with a light-sweep and a halo before settling as embers drift away.',
+    'A cinematic finale: one last EMG signal traces across the dark, shatters into a cloud of particles, and they stream together to spell THE END — which ignites with a light-sweep and a halo, then holds steady as faint motes hang in the dark.',
   ),
 ] as const
 

@@ -4,6 +4,7 @@ import { STAGES, STAGE_COUNT } from '@/data/stages'
 import { useStore } from '@/store/useStore'
 import { narration } from '@/store/narration'
 import { SpeakerControl } from './SpeakerControl'
+import { CaptionsToggle } from './CaptionsToggle'
 import styles from './PlayButton.module.css'
 
 /**
@@ -157,6 +158,7 @@ export function PlayButton() {
 
   return (
     <div className={styles.bar}>
+      <CaptionsToggle />
       {playing && <SpeakerControl />}
 
       <button

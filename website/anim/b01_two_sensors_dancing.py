@@ -85,7 +85,7 @@ class TwoSensorsDancing(Scene):
         # ============================================================
         self.next_section("watch_two")
 
-        title = mono("forget thirty-one — watch just TWO sensors", 22, INK_DIM)
+        title = mono("forget 31", 22, INK_DIM)
         title.move_to([0, 3.5, 0])
         self.play(FadeIn(title, shift=DOWN * 0.12), run_time=0.4)
 
@@ -266,7 +266,7 @@ class TwoSensorsDancing(Scene):
         self.play(FadeOut(left_grp, shift=LEFT * 0.2),
                   FadeOut(plot_grp),
                   FadeOut(track_grp), FadeOut(sign_dot),
-                  cov_read.animate.move_to([0, -0.55, 0]),
+                  FadeOut(cov_read),
                   cov_tag.animate.set_opacity(0.0),
                   run_time=0.5)
 
@@ -280,8 +280,7 @@ class TwoSensorsDancing(Scene):
                   Flash([0, 0.5, 0], color=WHITE, line_length=0.2, num_lines=14,
                         flash_radius=1.5, time_width=0.4),
                   run_time=0.55)
-        self.play(FadeIn(sub, shift=UP * 0.08),
-                  cov_read.animate.set_color(INK_DIM), run_time=0.4)
+        self.play(FadeIn(sub, shift=UP * 0.08), run_time=0.4)
 
         # poster hold
         self.wait(0.6)

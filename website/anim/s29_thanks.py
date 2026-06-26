@@ -48,7 +48,7 @@ class Thanks(Scene):
                   FadeOut(sub, shift=UP * 0.1), run_time=0.4)
 
         # ============================================================== #
-        #  BEAT 2 — "Thank you for reading all the way to the end."        #
+        #  BEAT 2 — "Thank you for making it all the way to the end."        #
         #  "Thank you" writes in with a single soft white Flash.          #
         # ============================================================== #
         self.next_section("thanks")

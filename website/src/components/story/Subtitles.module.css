@@ -54,7 +54,7 @@
 
 @media (max-width: 600px) {
   .wrap {
-    width: 92vw;
+    width: min(56ch, 86vw);
     bottom: clamp(4.5rem, 8vh, 6rem);
   }
   .line {

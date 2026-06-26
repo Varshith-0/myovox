@@ -108,7 +108,7 @@ class Chooser(Scene):
         ).move_to([0, CY, 0])
         name = mono("Qwen2.5-7B", 26, INK).move_to(brain.get_center() + UP * 0.26)
         sub = mono("the chooser", 16, INK_FAINT).next_to(name, DOWN, buff=0.12)
-        scale_cue = mono("7 billion learned patterns", 15, INK_GHOST).next_to(sub, DOWN, buff=0.14)
+        scale_cue = mono("7 billion learned patterns", 15, INK_GHOST).next_to(brain, DOWN, buff=0.16)
         self.play(Create(brain), FadeIn(name, shift=UP * 0.08), FadeIn(sub),
                   FadeIn(scale_cue), run_time=0.5)
 
@@ -248,20 +248,21 @@ class Chooser(Scene):
         # ============================================================== #
         self.next_section("audit")
         stage6 = mono("AUDIT", 22, INK, w=BOLD).move_to(stage).align_to(stage, RIGHT)
-        keep_brain = VGroup(brain, name, sub, padlock)
+        keep_brain = VGroup(brain, name, padlock)
         self.play(
             ReplacementTransform(stage, stage6),
             FadeOut(cand_box), FadeOut(cand_label),
             FadeOut(phon), FadeOut(phon_label),
             FadeOut(u0), FadeOut(u1), FadeOut(tie_q), FadeOut(kmark),
             keep_brain.animate.scale(0.6).move_to([0, CY + 1.55, 0]).set_opacity(0.30),
+            FadeOut(sub),
             VGroup(final_g, final).animate.move_to([0, CY + 0.30, 0]),
             run_time=0.5,
         )
         stage = stage6
 
         # the audit counter ticks down to a hard white 0 — the only bright accent.
-        audit_lbl = mono("verbatim-recall audit", 18, INK).move_to([0, CY - 1.55, 0])
+        audit_lbl = mono("out-of-pool answers", 18, INK).move_to([0, CY - 1.55, 0])
         eq = mono("=", 20, INK_FAINT).next_to(audit_lbl, RIGHT, buff=0.26)
         digit_x = eq.get_right()[0] + 0.32
 
@@ -280,7 +281,7 @@ class Chooser(Scene):
         zero_g = glow(zero)
         self.remove(cnt)
         self.add(zero_g)
-        sub_line = mono("never invents unsupported words", 14, INK_DIM)
+        sub_line = mono("it only ever picks from the pool", 14, INK_DIM)
         sub_line.next_to(audit_lbl, DOWN, buff=0.18).align_to(audit_lbl, LEFT)
         self.play(Indicate(zero, scale_factor=1.12, color=WHITE),
                   Flash(zero, color=WHITE, line_length=0.12, num_lines=10, flash_radius=0.30),

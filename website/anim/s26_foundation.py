@@ -120,7 +120,7 @@ class Foundation(Scene):
         slabs = VGroup(left[0], right[0], our)
         inner_bits = VGroup(left[1], right[1], our_lbl, loadL, loadR)
         name = serif("Harshavardhana T. Gowda", 34, WHITE).move_to([0, 2.05, 0])
-        affil = mono("with Daniel C. Comstock & Lee M. Miller   ·   University of California, Davis",
+        affil = mono("with Zachary D. McNaughton, Daniel C. Comstock & Lee M. Miller   ·   UC Davis",
                      13, INK_FAINT).next_to(name, DOWN, buff=0.16)
         name_g = glow(name)
         self.add(name_g)

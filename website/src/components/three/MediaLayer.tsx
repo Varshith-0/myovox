@@ -66,7 +66,7 @@ export function MediaLayer() {
   const reduced = useStore((s) => s.reducedMotion)
   // While narrating (armed + playing) → lift the clip to free a band at the
   // bottom for the subtitles.
-  const captionsMode = useStore((s) => s.narrationOn && s.playing)
+  const captionsMode = useStore((s) => s.subtitlesOn)
   const posters = useRef(new Map<string, HTMLImageElement>())
   const videos = useRef(new Map<string, HTMLVideoElement>())
   const baseOp = useRef(new Map<string, number>())

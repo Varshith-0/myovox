@@ -144,7 +144,10 @@ class MemorizeTrap(Scene):
         test_dot = Circle(radius=0.10, stroke_color=WHITE, stroke_width=3.0,
                           fill_opacity=0).move_to(to_screen(test_x, test_y))
         test_tag = mono("one example it never saw", 14, INK_DIM)
-        test_tag.next_to(test_dot, DOWN, buff=0.30)
+        # below the plot band so the bright overfit curve never crosses the glyphs
+        test_tag.move_to([to_screen(test_x, test_y)[0], -1.05, 0])
+        test_leader = Line(test_dot.get_bottom(), test_tag.get_top() + UP * 0.05,
+                           stroke_color=INK_GHOST, stroke_width=1.0)
 
         t_at = (test_x + 2.6) / 5.2
         giant_pred = overfit_point(t_at)
@@ -154,6 +157,7 @@ class MemorizeTrap(Scene):
         err_tag = mono("wildly off", 15, WHITE).next_to(err, RIGHT, buff=0.22)
 
         self.play(FadeIn(test_dot, scale=0.4),
+                  Create(test_leader),
                   FadeIn(test_tag, shift=DOWN * 0.05), run_time=0.45)
         self.play(Create(err), FadeIn(miss_dot),
                   Flash(giant_pred, color=WHITE, line_length=0.16, num_lines=12,
@@ -206,7 +210,7 @@ class MemorizeTrap(Scene):
             ReplacementTransform(giant_tag, small_tag),
             ReplacementTransform(giant_curve, small_curve),
             FadeOut(err), FadeOut(err_tag), FadeOut(miss_dot),
-            FadeOut(mem_tag), FadeOut(test_tag),
+            FadeOut(mem_tag), FadeOut(test_tag), FadeOut(test_leader),
             dots.animate.set_opacity(0.5),
             run_time=1.6,
         )

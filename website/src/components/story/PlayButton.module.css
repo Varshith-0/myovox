@@ -3,7 +3,7 @@
    only the buttons are interactive. */
 .bar {
   position: fixed;
-  bottom: clamp(1.1rem, 3.5vh, 2rem);
+  bottom: calc(clamp(1.1rem, 3.5vh, 2rem) + var(--safe-b));
   left: 50%;
   transform: translateX(-50%);
   z-index: var(--z-nav);
@@ -38,6 +38,13 @@
 .btn {
   gap: 0.6rem;
   padding: 0.5rem 1.1rem 0.5rem 0.95rem;
+}
+
+@media (pointer: coarse) {
+  .btn,
+  .speed {
+    min-height: 44px;
+  }
 }
 
 /* Speed toggle: a compact pill with a fast-forward glyph + the current multiplier. */

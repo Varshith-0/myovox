@@ -5,6 +5,10 @@
  */
 
 :root {
+  /* notch / home-indicator safe-area insets (0 on non-notched devices) */
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
   /* ---- Color: pure monochrome ------------------------------------ */
   --bg: #050505;
   --bg-raise: #0b0b0c;

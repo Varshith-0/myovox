@@ -139,7 +139,7 @@ class ManyGuesses(Scene):
 
         m20 = Line([xpos(20.0), ry - 0.17, 0], [xpos(20.0), ry + 0.17, 0],
                    stroke_color=INK, stroke_width=3.4)
-        cap20 = num("~20%", 22, INK).move_to([xpos(20.0), ry - 0.42, 0])
+        cap20 = mono("~20%", 22, INK).move_to([xpos(20.0), ry - 0.42, 0])
         cap20_t = mono("+ average", 15, INK_FAINT).move_to([xpos(20.0), ry + 0.40, 0])
         pulse = Dot(color=INK, radius=0.06).move_to([xpos(26.0), ry, 0])
         self.add(pulse)
@@ -150,8 +150,10 @@ class ManyGuesses(Scene):
             run_time=0.55, rate_func=smooth,
         )
         self.remove(pulse)
-        self.play(FadeIn(cap20), FadeIn(cap20_t),
-                  Indicate(cap20, scale_factor=1.12, color=INK), run_time=0.4)
+        # FadeIn first, THEN Indicate in a separate play — combining them lets
+        # Indicate's there-and-back restore cap20 to its pre-FadeIn opacity (0).
+        self.play(FadeIn(cap20), FadeIn(cap20_t), run_time=0.3)
+        self.play(Indicate(cap20, scale_factor=1.12, color=INK), run_time=0.35)
 
         # ============================================================== #
         #  BEAT 4 — TURN: still demanding ONE answer; peel into n-best     #

@@ -77,7 +77,7 @@ class Hero(Scene):
         self.remove(bundle)
         gone = glow(one)
         self.add(gone)
-        phrase = serif("read speech from muscle", 56).move_to([0, 0.1, 0])
+        phrase = serif("read speech from muscles", 56).move_to([0, 0.1, 0])
         self.play(FadeOut(gone, run_time=0.5), Write(phrase, run_time=1.0))
         self.wait(0.4)
 

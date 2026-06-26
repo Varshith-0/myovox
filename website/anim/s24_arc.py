@@ -224,7 +224,7 @@ class Climb(Scene):
             run_time=0.7,
         )
         # PER value labels — below their dots, nudged clear of the WER labels
-        per_v0 = mono("39", 13, INK_FAINT).next_to(per_pts[0], DOWN, buff=0.13)
+        per_v0 = mono("39", 13, INK_FAINT).next_to(per_pts[0], DOWN, buff=0.13).shift(RIGHT * 0.55)
         per_v2 = mono("22.34", 13, INK_FAINT).next_to(per_pts[2], DOWN, buff=0.16).shift(LEFT * 0.10)
         per_v3 = mono("20.90", 13, INK_FAINT).next_to(per_pts[3], DOWN, buff=0.18).shift(LEFT * 0.55)
         self.play(FadeIn(per_v0), FadeIn(per_v2), FadeIn(per_v3), run_time=0.5)

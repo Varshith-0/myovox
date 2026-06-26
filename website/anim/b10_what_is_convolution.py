@@ -178,7 +178,7 @@ class WhatIsConvolution(Scene):
                 self.play(smear.animate.set_opacity(0.0), Create(sharp), run_time=0.28)
             else:
                 self.play(Create(mark), run_time=0.10)
-        winT.set_value(edge_i)
+        self.play(winT.animate.set_value(edge_i), run_time=0.2)
         self.add(out_marks)
         self.wait(0.15)
 

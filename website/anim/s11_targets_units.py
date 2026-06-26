@@ -175,7 +175,7 @@ class FinerSounds(Scene):
         for f, v in zip(tl, seq):
             if v is not None:
                 tl_ids.add(num(v, 16, INK_DIM).move_to(f))
-        tl_label = mono("unit per time-slice", 15, INK_FAINT).next_to(tl, UP, buff=0.22)
+        tl_label = mono("unit per snapshot", 15, INK_FAINT).next_to(tl, UP, buff=0.22)
 
         self.play(
             FadeIn(tl_label, shift=UP * 0.1),
@@ -286,12 +286,12 @@ class FinerSounds(Scene):
         )
         # coupling caption tucked just left of the curved link, clear of bars.
         couple = mono("P(phone | unit)", 14, INK_DIM)
-        couple.next_to(link, UP, buff=0.10).shift(LEFT * 0.15)
+        couple.next_to(link, UP, buff=0.20).shift(LEFT * 0.15)
         self.play(Create(link), FadeIn(couple, shift=UP * 0.08), run_time=0.45)
 
         # single serif #fff payoff, lower-RIGHT under the grid, clear of bars.
-        payoff = serif("two answer keys", 34, WHITE)
-        payoff.move_to(RIGHT * 3.4 + DOWN * 2.85)
+        payoff = serif("two answer keys", 30, WHITE)
+        payoff.move_to([3.5, -2.48, 0])
         payoff_glow = glow(payoff.copy())
         self.play(FadeIn(payoff_glow), FadeIn(payoff, shift=UP * 0.1), run_time=0.45)
         self.play(Indicate(payoff, scale_factor=1.06, color=WHITE), run_time=0.35)

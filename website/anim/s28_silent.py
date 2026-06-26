@@ -73,7 +73,7 @@ class Silent(Scene):
         self.next_section("b2_head")
         FY = 0.95
         face = ImageMobject(HEAD_IMG).scale_to_fit_height(1.95).move_to([-4.3, 0.88, 0])
-        face_lbl = mono("you mouth the words", 13, INK_FAINT).move_to([-4.3, 0.02, 0])
+        face_lbl = mono("silent", 13, INK_FAINT).move_to([-4.3, 0.02, 0])
         self.play(FadeIn(face, scale=1.04), FadeIn(face_lbl), run_time=0.55)
         # one subtle silent-breath pulse
         self.play(face.animate.scale(1.035), rate_func=there_and_back, run_time=0.85)
@@ -159,9 +159,11 @@ class Silent(Scene):
         #  cross-subject brightens; closing serif resolves on the future #
         # ============================================================== #
         self.next_section("b8_road")
-        cross = mono("cross-subject — the road still ahead", 14, INK)
-        cross.move_to(note.get_center())
-        self.play(FadeOut(note, shift=UP * 0.06),
+        cross = mono("cross-subject — not there yet", 14, INK)
+        cross.move_to([0, -2.05, 0])
+        # keep the "not a medical device" disclaimer persistent (dim) through the close
+        self.play(FadeOut(note_a, shift=UP * 0.06), FadeOut(note[1]),
+                  note_b.animate.set_opacity(0.55).move_to([0, -2.42, 0]),
                   FadeIn(cross, shift=UP * 0.06), run_time=0.45)
         closing = serif("the road still ahead", 26, INK).move_to([0, -3.18, 0])
         closing_g = glow(closing)

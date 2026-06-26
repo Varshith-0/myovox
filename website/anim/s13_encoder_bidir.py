@@ -176,7 +176,8 @@ class BothWays(Scene):
             mono("T?", 24, INK_DIM),
         ).arrange(RIGHT, buff=0.42)
         guess.move_to(np.array([fsq.get_center()[0], ROW_Y - 1.15, 0]))
-        self.play(FadeOut(qmark, scale=0.6), FadeIn(guess), run_time=0.4)
+        self.play(FadeOut(qmark, scale=0.6), FadeIn(guess),
+                  FadeOut(needle), FadeOut(now_tag), run_time=0.4)
         # flicker — neither candidate wins
         self.play(
             guess[0].animate.set_opacity(0.95), guess[1].animate.set_opacity(0.4),

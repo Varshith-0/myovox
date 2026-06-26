@@ -223,7 +223,7 @@ class VoiceAsTeacher(Scene):
 
         heads_x = 3.7
         head_ys = [-0.45, -1.25, -2.05]
-        head_names = ["100 units", "40 phonemes", "1024-num projection"]
+        head_names = ["100 units", "40 phonemes", "1024-number projection"]
         heads = VGroup()
         head_boxes = []
         for i, (hy, hn) in enumerate(zip(head_ys, head_names)):
@@ -291,7 +291,11 @@ class VoiceAsTeacher(Scene):
                            field, field_box, field_cap, stream, heads,
                            muscle_lab, dist_track, dist_fill, dist_lab,
                            emg, m_lab)
-        self.play(apparatus.animate.set_opacity(0.12), run_time=0.55)
+        # Fade the whole apparatus fully out (not to 0.12): this both clears the
+        # caveat chips of any bleed-through AND ensures the audio teacher +
+        # TRAINING-ONLY stamp are GONE at use-time (beat 6 restores only the
+        # surviving muscle path: emg + the third output + the struck mic).
+        self.play(apparatus.animate.set_opacity(0.0), run_time=0.55)
 
         # two chips, centered.
         per_box = RoundedRectangle(width=2.7, height=1.0, corner_radius=0.10,
@@ -335,10 +339,13 @@ class VoiceAsTeacher(Scene):
         self.play(FadeOut(caveat_grp, shift=DOWN * 0.1), run_time=0.4)
 
         # bring back the surviving muscle path (EMG + shaped third output).
-        third_grp = heads[2]
-        surv = VGroup(emg, third_grp)
+        third_box = head_boxes[2]
+        third_lab = heads[2][1]
+        # restore the third output WITHOUT set_opacity(1) clobbering the box fill
+        # into a solid block that hides its "1024-number projection" label.
         self.play(emg.animate.set_opacity(0.9),
-                  third_grp.animate.set_opacity(1.0),
+                  third_box.animate.set_stroke(WHITE, width=2.2, opacity=1.0).set_fill(INK, 0.14),
+                  third_lab.animate.set_opacity(1.0),
                   m_lab.animate.set_opacity(0.6), run_time=0.3)
 
         # strike the mic; the audio apparatus stays near-zero (it's gone at use).

@@ -8,13 +8,11 @@
 # scenes. Strict monochrome; depth from opacity/size; the single pure-#fff accents
 # are the ignition flash and the shimmer along the letters.
 #
-# Six beats — one spoken sentence each (re-paced; same four visuals):
-#   1 trace      "watch a whisper of muscle turn into light"   (2.27s)
-#   2 shatter    "it breaks apart ... a scatter of tiny pieces" (3.25s)
-#   3 reform     "those pieces find each other and become words" (3.45s)
-#   4 ignite     "from silent muscle to readable text"          (1.55s)
-#   5 hold       "that was the whole idea"                       (0.93s)
-#   6 settle     "the end"                                       (0.60s)
+# CINEMATIC FINALE — plays at constant scroll, NOT narration-paced. The short
+# narration ("From silent muscle to readable text - that was the whole idea.
+# The end.") plays over it; the morph is COMPRESSED so THE END ignites early
+# (~6s) and holds, roughly overlapping the spoken "the end" instead of landing
+# ~5s after it. Visual beats: trace -> shatter -> reform -> ignite -> hold -> settle.
 from manim import *
 from emg_style import *
 import numpy as np
@@ -62,7 +60,7 @@ class End(Scene):
         for _ in range(72):
             bg.add(Dot([uniform(-6.8, 6.8), uniform(-3.7, 3.7), 0],
                        radius=uniform(0.008, 0.03), color=INK).set_opacity(uniform(0.05, 0.32)))
-        self.play(LaggedStart(*[FadeIn(d) for d in bg], lag_ratio=0.008), run_time=0.9)
+        self.play(LaggedStart(*[FadeIn(d) for d in bg], lag_ratio=0.008), run_time=0.6)
         bg.add_updater(lambda m, dt: m.rotate(0.05 * dt, about_point=ORIGIN))
 
         # ===============================================================
@@ -78,7 +76,7 @@ class End(Scene):
         scan = Dot(wave_pts[0], radius=0.07, color=WHITE)
         self.add(wglow)
         self.play(Create(wave), MoveAlongPath(scan, wave),
-                  run_time=1.7, rate_func=rate_functions.ease_in_out_sine)
+                  run_time=1.1, rate_func=rate_functions.ease_in_out_sine)
         self.play(FadeOut(scan), run_time=0.25)
         self.remove(scan)
         self.wait(0.3)
@@ -98,8 +96,8 @@ class End(Scene):
         self.play(*[p.animate.shift([uniform(-0.6, 0.6), uniform(-0.85, 0.85), 0])
                     .set_opacity(uniform(0.4, 0.7))
                     for p in parts],
-                  run_time=1.5, rate_func=rate_functions.ease_out_quad)
-        self.wait(1.1)
+                  run_time=0.8, rate_func=rate_functions.ease_out_quad)
+        self.wait(0.4)
 
         # ===============================================================
         # BEAT 3 (3.45s) — "those pieces find each other and become words"
@@ -109,7 +107,7 @@ class End(Scene):
         self.play(
             LaggedStart(*[p.animate.move_to(t).set_opacity(0.95)
                           for p, t in zip(parts, targets)], lag_ratio=0.0032),
-            run_time=2.9, rate_func=rate_functions.ease_in_out_sine)
+            run_time=1.6, rate_func=rate_functions.ease_in_out_sine)
         self.wait(0.5)
 
         # ===============================================================
@@ -132,7 +130,7 @@ class End(Scene):
         # the sweep finishes; THE END holds steady and bright
         # ===============================================================
         self.next_section("hold")
-        self.wait(0.93)
+        self.wait(0.6)
 
         # ===============================================================
         # BEAT 6 (0.6s) — "the end"

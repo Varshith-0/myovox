@@ -295,8 +295,10 @@ class CtcManyTimings(Scene):
         sub = mono("sum over all valid alignments", 16, INK_DIM)\
             .next_to(payoff, DOWN, buff=0.35)
         self.add(payoff_g)
-        self.play(GrowFromCenter(payoff), run_time=0.6)
-        self.play(FadeIn(sub, shift=UP * 0.08), Indicate(payoff, scale_factor=1.06, color=WHITE),
+        self.play(FadeIn(payoff, shift=UP * 0.1), run_time=0.6)
+        self.play(FadeIn(sub, shift=UP * 0.08),
+                  Flash(payoff.get_center(), color=WHITE, line_length=0.18, num_lines=12,
+                        flash_radius=1.4, time_width=0.4),
                   run_time=0.5)
         self.wait(0.6)
 

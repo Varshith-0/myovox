@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useStore } from '@/store/useStore'
 import { narration } from '@/store/narration'
 import styles from './Subtitles.module.css'
@@ -42,11 +42,12 @@ function lastBefore<T extends { t: number }>(items: T[], time: number): number {
   return found
 }
 
-/** No leading space before a word that begins with closing punctuation. */
-const NO_LEAD = /^[.,!?;:’'")\]…—-]/
+/** No leading space before a word that begins with closing punctuation. (A
+ *  standalone em-dash token IS spaced — "word — next" — so it is excluded.) */
+const NO_LEAD = /^[.,!?;:’'")\]…]/
 
 export function Subtitles() {
-  const on = useStore((s) => s.narrationOn)
+  const on = useStore((s) => s.subtitlesOn)
   const [cues, setCues] = useState<Cue[]>([])
   const [cueIdx, setCueIdx] = useState(-1)
   const [wordIdx, setWordIdx] = useState(-1)
@@ -109,21 +110,44 @@ export function Subtitles() {
 
   if (!on || cueIdx < 0 || cueIdx >= cues.length) return null
   const cue = cues[cueIdx]
+  // The whole sentence as one string — announced once per cue by the live region
+  // below (the visible word-by-word line is decorative, so AT isn't spammed).
+  const sentence = cue.words
+    .map((w, i) => (i > 0 && !NO_LEAD.test(w.w) ? ' ' : '') + w.w)
+    .join('')
 
   return (
-    <div className={styles.wrap} aria-hidden="true">
-      <p className={styles.line}>
-        {cue.words.map((word, i) => {
-          const cls = i === wordIdx ? styles.now : i < wordIdx ? styles.spoken : styles.ahead
-          const lead = i > 0 && !NO_LEAD.test(word.w) ? ' ' : ''
-          return (
-            <span key={i} className={cls}>
-              {lead}
-              {word.w}
-            </span>
-          )
-        })}
+    <>
+      <div className={styles.wrap} data-subtitles aria-hidden="true">
+        <p className={styles.line}>
+          {cue.words.map((word, i) => {
+            const cls = i === wordIdx ? styles.now : i < wordIdx ? styles.spoken : styles.ahead
+            const lead = i > 0 && !NO_LEAD.test(word.w) ? ' ' : ''
+            return (
+              <span key={i} className={cls}>
+                {lead}
+                {word.w}
+              </span>
+            )
+          })}
+        </p>
+      </div>
+      <p aria-live="polite" style={SR_ONLY}>
+        {sentence}
       </p>
-    </div>
+    </>
   )
+}
+
+/** Visually hidden, but present in the accessibility tree (a polite live region). */
+const SR_ONLY: CSSProperties = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  margin: -1,
+  padding: 0,
+  border: 0,
+  overflow: 'hidden',
+  clip: 'rect(0 0 0 0)',
+  whiteSpace: 'nowrap',
 }

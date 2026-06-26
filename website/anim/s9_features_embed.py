@@ -110,7 +110,7 @@ class Fingerprint(Scene):
         frame_box.move_to(mat.get_center())
 
         noisy_lbl = mono("noisy", 17, INK_DIM).next_to(matrix, UP, buff=0.14)
-        size_lbl = mono("31 x 31 covariance  ·  ~961 numbers", 17, INK_FAINT)
+        size_lbl = mono("31 x 31 covariance  ·  961 numbers", 17, INK_FAINT)
         size_lbl.next_to(matrix, DOWN, buff=0.24)
 
         cnt = ValueTracker(961.0)

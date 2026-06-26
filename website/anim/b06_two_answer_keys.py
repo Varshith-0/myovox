@@ -156,7 +156,7 @@ class TwoAnswerKeys(Scene):
         # ============================================================
         self.next_section("bottom_key")
 
-        un_labels = ["u17", "u17", "u88", "u88", "u04", "u52", "u52", "u91"]
+        un_labels = ["u17", "u17", "u88", "u04", "u31", "u52", "u52", "u91"]
         un_row, un_cells, un_tx = token_row(un_labels, UN_Y, RAIL_X0 + 0.3, RAIL_X1,
                                             sq=0.42, fs=15)
         un_name = mono("units", 22, INK)
@@ -235,7 +235,7 @@ class TwoAnswerKeys(Scene):
         self.next_section("symmetry")
 
         # reset trial 1, restore distinct units, and play the symmetric trial fast.
-        for i, lab in zip(blur_idx, ("u88", "u04", "u52")):
+        for i, lab in zip(blur_idx, ("u88", "u04", "u31")):
             un_tx[i].generate_target()
             un_tx[i].target = mono(lab, 15, INK_DIM).move_to(un_cells[i])
         # coarse rail flags the slip (cross); fine rail shrugs (check).

@@ -1,7 +1,7 @@
 # website/anim/b05_where_units_from.py  —  B05 "Where the 100 units came from"
 #
 # The "aha": the 100 finer sound-units were never handed to the machine. They
-# fell out of SELF-SUPERVISED LEARNING — play a model thousands of hours of plain
+# fell out of SELF-SUPERVISED LEARNING — play a model nearly a thousand hours of plain
 # audio, hide a slice, make it guess the hidden piece. To do that well it has to
 # quietly sort sounds into bins of its own. Those recurring shapes ARE the 100
 # units (HuBERT-style). Zero human labels.
@@ -10,7 +10,7 @@
 #   1 puzzle (1.45) open on the 100-bin catalogue, spotlit; serif '?' hovers
 #   2 nobody (0.60) the '?' pulses once; nothing answers; bins dim
 #   3 trick  (0.60) title -> "self-supervised learning"; bins fade to ghost
-#   4 audio  (2.20) long waveform draws; read-pulse sweeps; "thousands of hours"
+#   4 audio  (2.20) long waveform draws; read-pulse sweeps; "nearly a thousand hours"
 #   5 mask   (4.71) hatched mask + '?' over a slice; arrows point inward
 #   6 practice (2.97) wrong guess (error high) -> morph to true slice (error 0)
 #   7 sort   (0.93) snippets fly off the wave into ~7 ghost bins; each pops
@@ -149,7 +149,7 @@ class WhereUnitsFrom(Scene):
         wave.set_points_as_corners(pts)
         baseline = Line([wx0, wy, 0], [wx1, wy, 0], stroke_color=INK_GHOST,
                         stroke_width=1.0)
-        audio_lbl = mono("thousands of hours of plain audio — no labels", 16,
+        audio_lbl = mono("nearly a thousand hours of plain audio — no labels", 16,
                          INK_FAINT)
         audio_lbl.next_to(baseline, UP, buff=0.55).set_x(0)
 
@@ -169,7 +169,9 @@ class WhereUnitsFrom(Scene):
         # =================================================================
         self.next_section("mask")
 
-        self.play(audio_lbl.animate.set_opacity(0.28), run_time=0.3)
+        # fade the label fully out before the opaque mask drops, so no text is
+        # ever clipped/covered behind it (it stays gone through the practice beat)
+        self.play(audio_lbl.animate.set_opacity(0.0), run_time=0.3)
 
         mx0, mx1 = -0.7, 1.0
         mcx = (mx0 + mx1) / 2
@@ -190,7 +192,7 @@ class WhereUnitsFrom(Scene):
 
         aL = flat_arrow([mx0 - 1.1, wy, 0], [mx0 - 0.14, wy, 0], INK_FAINT, 2.0)
         aR = flat_arrow([mx1 + 1.1, wy, 0], [mx1 + 0.14, wy, 0], INK_FAINT, 2.0)
-        ctx_lbl = mono("hide a slice — guess it from what surrounds it", 16, INK_DIM)
+        ctx_lbl = mono("hide a snapshot — guess it from what surrounds it", 16, INK_DIM)
         ctx_lbl.next_to(mask_grp, DOWN, buff=0.7).set_x(0)
         self.play(Create(aL), Create(aR), run_time=0.55)
         self.play(FadeIn(ctx_lbl, shift=UP * 0.06), run_time=0.5)

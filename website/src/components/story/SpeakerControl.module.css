@@ -119,3 +119,19 @@
   outline: 1px solid var(--line-bright);
   outline-offset: 4px;
 }
+
+/* Coarse pointers (touch): meet the 44px WCAG tap target + a grabbable thumb. */
+@media (pointer: coarse) {
+  .btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .vol input[type='range']::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+  }
+  .vol input[type='range']::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+  }
+}

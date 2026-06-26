@@ -72,7 +72,8 @@ class Muscles(Scene):
         targets = ["oris", "zyg_l", "zyg_r", "mas_l", "mas_r", "genio", "sth"]
         nerves = VGroup(*[Line(BRAIN, M[k], stroke_color=INK_GHOST, stroke_width=1.4) for k in targets])
         nerve_lab = mono("nerve", 17, INK_FAINT)
-        nerve_lab.next_to(nerves[4].point_from_proportion(0.5), RIGHT, buff=0.18)
+        # sit clear of the head outline (a midpoint label crosses the ellipse stroke)
+        nerve_lab.move_to([2.35, 1.7, 0])
         note = mono("the brain fires electrical commands down the nerves", 20, INK_DIM).move_to([0, -3.4, 0])
 
         self.play(FadeIn(brain, scale=1.6), FadeIn(brain_lab),
@@ -98,7 +99,7 @@ class Muscles(Scene):
         # ---- BEAT 4: CHEEK + JAW ----------------------------------------
         self.next_section("cheekjaw")
         l_zyg, ld_zyg = callout(markers["zyg_l"], "zygomaticus", "cheek · lifts", -3.6, 0.35, "L")
-        l_mas, ld_mas = callout(markers["mas_r"], "masseter", "jaw · open/close", 3.6, -1.55, "R")
+        l_mas, ld_mas = callout(markers["mas_r"], "masseter", "jaw · closes", 3.6, -1.55, "R")
         self.play(*glow_on("zyg_l", "zyg_r"), Create(ld_zyg), FadeIn(l_zyg, shift=LEFT * 0.1), run_time=0.6)
         self.play(*glow_on("mas_l", "mas_r"), Create(ld_mas), FadeIn(l_mas, shift=RIGHT * 0.1), run_time=0.6)
         self.wait(0.2)
@@ -106,7 +107,7 @@ class Muscles(Scene):
         # ---- BEAT 5: TONGUE + THROAT ------------------------------------
         self.next_section("tonguethroat")
         l_gen, ld_gen = callout(markers["genio"], "genioglossus", "tongue · under chin", -3.6, -1.25, "L")
-        l_sth, ld_sth = callout(markers["sth"], "sternohyoid", "larynx · pitch", 3.6, -2.5, "R")
+        l_sth, ld_sth = callout(markers["sth"], "sternohyoid", "larynx · steadies", 3.6, -2.5, "R")
         self.play(*glow_on("genio"), Create(ld_gen), FadeIn(l_gen, shift=LEFT * 0.1), run_time=0.6)
         self.play(*glow_on("sth"), Create(ld_sth), FadeIn(l_sth, shift=RIGHT * 0.1), run_time=0.6)
         self.wait(0.2)

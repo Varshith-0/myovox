@@ -60,7 +60,7 @@ class Sounds(Scene):
         self.next_section("plain-letters")
 
         words = ["though", "tough", "through"]
-        sounds_hint = ["OH", "UH F", "R UW"]
+        sounds_hint = ["OW", "UH F", "R UW"]
 
         rows = VGroup()
         for w in words:
