@@ -56,7 +56,7 @@ the produced numbers next to the paper targets (`python -m emg2text.report`).
 **Honest finding.** Reranking is exhausted: the binding constraint is the EMG acoustic PER (~20.9%),
 not the language model — the correct words are absent from the acoustic posteriors, so no reranker can
 close the gap to the 9.30 n-best oracle. `<10%` WER is not reached. (See `docs/technical_report.md`;
-its §3 baseline is historical context — this repo reproduces the 26.14 + 18.53 numbers.)
+its Section 3 baseline is historical context — this repo reproduces the 26.14 + 18.53 numbers.)
 
 ---
 

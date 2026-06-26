@@ -17,7 +17,7 @@
 #   7  on move three it barely budges     — flat move-3 PER + slopes + punchline
 # Strict monochrome (emg_style inks + a single pure-#fff peak accent). No LaTeX.
 #
-# Ground truth (Technical report §1, §12):
+# Ground truth (Technical report Section 1, Section 12):
 #   WER 51.17 -> 40.63 -> 26.14 -> 18.53; PER 39.02 -> 22.34 -> 20.90; the EMG-only
 #   full-context encoder (not the teacher) moved WER on move two; PER barely moved on
 #   move three (only the word-chooser got smarter).

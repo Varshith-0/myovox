@@ -1,6 +1,6 @@
 # Story Page — Perfection Pass · Handoff Brief for the Next Session
 
-> Paste-and-go brief. Read this top to bottom **first**, then follow §6 (Process).
+> Paste-and-go brief. Read this top to bottom **first**, then follow Section 6 (Process).
 > Scope is the **Story page only**. Technical & Code pages are out of scope for
 > editing (but `src/content/technical_report.md` is a *source of truth* you must read).
 
@@ -18,11 +18,11 @@ Hard rules:
 1. **Do not assume — ask.** The previous session repeatedly assumed what the reader
    knows (e.g. assumed "EMG" needs no definition). That was wrong. Whenever a
    content/scope/taste decision is genuinely the user's, **stop and ask** (see the
-   question bank in §7). Default to asking when unsure.
+   question bank in Section 7). Default to asking when unsure.
 2. **Science = Narration = Animation, exactly.** Every spoken sentence must match
    what is on screen at that moment, and every on-screen claim must be true per the
    papers / technical report. If any of the three disagree, it's a bug.
-3. **Define every term before it's used,** at the audience's level (§1).
+3. **Define every term before it's used,** at the audience's level (Section 1).
 4. **Cite your evidence.** For every scientific claim you write or verify, note the
    paper + section (or `technical_report.md` line) it comes from, in the task notes.
    If a claim can't be sourced, flag it to the user — do not ship it.
@@ -178,7 +178,7 @@ For **every one of the 50 stages**, and for the page as a whole, check:
 - **B. Narration ↔ visual sync** — does the spoken sentence match what's on screen
   *at that scrub position*? Beat count == sentence count? Any clip where the voice
   describes something not yet (or no longer) visible?
-- **C. Narration quality** — clarity for the §1 audience; define-before-use; tone;
+- **C. Narration quality** — clarity for the Section 1 audience; define-before-use; tone;
   no undefined jargon; grammar; pronunciation traps for TTS (numbers, acronyms,
   symbols → spell out, e.g. "5 kHz" → "five kilohertz").
 - **D. Animation quality & legibility** — text overlaps, off-screen elements, text
@@ -239,8 +239,8 @@ These were observed but **not** all fixed — verify and add to tasks:
    `src/components/story/` + `MediaLayer.tsx` + their CSS; `StoryPage.tsx`, `App.tsx`,
    `Layout`, `Loader`; the **3 PDFs**; `technical_report.md`; `tokens.css`/`globals.css`.
    Also actually **watch** representative clips (extract frames) — don't audit from code alone.
-2. **Confirm open questions with the user** (§7) before deciding anything subjective.
-3. **Run the audit** as an ultracode workflow: fan out over §4 dimensions × the 50
+2. **Confirm open questions with the user** (Section 7) before deciding anything subjective.
+3. **Run the audit** as an ultracode workflow: fan out over Section 4 dimensions × the 50
    stages; each finding adversarially verified (is it really wrong? cite proof).
    Dedup and rank by severity (blocker / major / minor / polish).
 4. **Write `STORY_TASKS.md`** — exhaustive, categorized, severity-ranked. Each task:
@@ -252,13 +252,13 @@ These were observed but **not** all fixed — verify and add to tasks:
    checking the live page after each. Re-run `narrate.py` for changed narration.
    Re-verify any changed science against the papers.
 7. Keep a running **CHANGELOG** in `STORY_TASKS.md` (check off + note verification).
-8. Final gate: run the §8 definition-of-done checklist as a last adversarial sweep.
+8. Final gate: run the Section 8 definition-of-done checklist as a last adversarial sweep.
 
 ---
 
 ## 7. Question bank — ASK the user before deciding (don't assume)
 
-Already decided (see §1/§1a): audience = CS + light ML; 50-stage cap with full
+Already decided (see Section 1/Section 1a): audience = CS + light ML; 50-stage cap with full
 reshape freedom; clarity over length. Still confirm/ask:
 
 - **Tone:** how playful vs. serious/academic? Any humor allowed?
@@ -283,7 +283,7 @@ reshape freedom; clarity over length. Still confirm/ask:
 
 - [ ] Every scientific claim is **true and sourced** (paper/section or report line in notes).
 - [ ] Every clip: **narration matches the on-screen beat**, sentence-count == beat-count,
-      and a §1 reader needs no external lookup.
+      and a Section 1 reader needs no external lookup.
 - [ ] No undefined jargon; every term defined before first use.
 - [ ] No text overlap / off-screen / clipped / illegible elements at target viewports
       (incl. letterboxed-on-page and mobile); reduced-motion path works.
@@ -301,6 +301,6 @@ reshape freedom; clarity over length. Still confirm/ask:
 
 ### Kickoff line for the next chat
 > "Read `STORY_PAGE_PERFECTION_BRIEF.md`, then read the whole Story page + the 3
-> papers + technical_report.md. Ask me the §7 questions. Then run an ultracode audit
-> over §4 and write `STORY_TASKS.md` for my sign-off before fixing anything. Attention
+> papers + technical_report.md. Ask me the Section 7 questions. Then run an ultracode audit
+> over Section 4 and write `STORY_TASKS.md` for my sign-off before fixing anything. Attention
 > to detail — assume it goes viral; no silly mistakes."

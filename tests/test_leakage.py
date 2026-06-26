@@ -1,4 +1,4 @@
-"""Leakage controls from technical_report.md §5.3, as runnable assertions:
+"""Leakage controls from technical_report.md Section 5.3, as runnable assertions:
   (a) LIFT trains on TRAIN only, via a 2-fold cross-decode that partitions TRAIN disjointly.
   (b) the 6 test-train duplicate sentences are reported in AND out (18.53 / 18.75).
   (c) free-generation verbatim-recall of refs absent from the candidate set == 0.

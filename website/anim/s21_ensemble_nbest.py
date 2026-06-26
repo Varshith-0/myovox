@@ -15,7 +15,7 @@
 #   8 prize    headroom band + double-arrow fill the gap; serif #fff "the prize"
 #
 # Strict monochrome (emg_style inks + a single pure-#fff peak accent). No LaTeX.
-# Ground truth (§9): ensemble averages per-frame log-probs -> ~20.1% WER; n-best via
+# Ground truth (Section 9): ensemble averages per-frame log-probs -> ~20.1% WER; n-best via
 # k2; multi-scale union -> oracle 9.30%; 1-best stays ~20%.
 from manim import *
 from emg_style import *

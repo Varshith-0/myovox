@@ -2,7 +2,7 @@
 # We slice the continuous EMG into tiny overlapping 25 ms windows, hopping every
 # 20 ms (5 ms overlap), giving a steady 50 snapshots / second.
 # Ground truth: 25 ms window (125 samples @ 5 kHz), 20 ms hop (100 samples),
-# 5 ms overlap, 50 fps, 3 s sentence ~= 150 frames. (Explanation §4.1-4.2.)
+# 5 ms overlap, 50 fps, 3 s sentence ~= 150 frames. (Explanation Section 4.1-4.2.)
 #
 # Beat sheet (clip_T ~= 12.0s): one self.next_section() per spoken sentence.
 #   1 PUZZLE   endless stream of traces — you can't compare an endless stream.

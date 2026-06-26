@@ -267,7 +267,7 @@ class TwoReaders(Scene):
         self.play(FadeIn(tally_label), FadeIn(tally_count), run_time=0.3)
 
         # the report-accurate ways the twin differs (training/augment.py "p2",
-        # report §5.1): stronger jitter + dropout, plus a different audio teacher
+        # report Section 5.1): stronger jitter + dropout, plus a different audio teacher
         # (BiLSTM frame-KL, distinct from reader A's WavLM-L9). NOT "abuse".
         defences = ["stronger jitter", "heavier dropout", "a different audio teacher"]
         chips = VGroup(*[mono(d, 14, INK_DIM) for d in defences]).arrange(

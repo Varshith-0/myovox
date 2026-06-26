@@ -33,7 +33,7 @@ changes; keep CHANGELOG). Do NOT git commit/push unless asked.
       in `stages.ts` + `narration.json`; edit/author scene `.py`; re-render via
       `MENV=/opt/anaconda3 MEDIA_DIR=/tmp/emg_media ./encode.sh <file>.py <Class> <id>`; poster via
       homebrew cwebp; **read frames to verify**. Re-narrate changed ids.
-- [ ] **E. Final §8 sweep**: definition-of-done checklist; build clean; write status summary.
+- [ ] **E. Final Section 8 sweep**: definition-of-done checklist; build clean; write status summary.
 - [ ] **Orphan cleanup** (safe, anytime): remove `public/anim/{articulation,electricity,recording,sensors}.{mp3,captions.json}`.
 
 ## Conventions (from brief)

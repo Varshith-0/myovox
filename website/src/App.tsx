@@ -28,7 +28,7 @@ function ScrollSync() {
 }
 
 /**
- * Dev-only handles for the Playwright screenshot harness (§8.3 / §9). Lets the
+ * Dev-only handles for the Playwright screenshot harness (Section 8.3 / Section 9). Lets the
  * harness drive scroll deterministically: to a raw progress, to a stage's top,
  * or to a precise sub-progress within an Act-2 stage (to verify video scrub).
  */

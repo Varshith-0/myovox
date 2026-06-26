@@ -20,18 +20,18 @@ test. PER is the decoder-independent greedy CTC phone error rate.*
 
 ## 1. Results overview
 
-| # | System | val WER | val PER | **TEST WER** | **TEST PER** | §|
+| # | System | val WER | val PER | **TEST WER** | **TEST PER** | Section |
 |---|---|---|---|---|---|---|
 | — | Gowda et al., Appendix D.4 (target) [1] | — | — | 51.17 | 38.19 | — |
-| 1 | Baseline: causal TDS + dual-CTC + **corrected** open-vocab WFST decode | 53.12 | 45.31 | **40.63** | **39.02** | §3 |
-| 2 | Acoustic: **bidirectional Conformer + WavLM-L9** 4-term distillation | 35.54 | 27.47 | **26.14** | **22.34** | §4 |
-| 3 | Final: ensemble → n-best **union** → **LIFT** rerank | — | — | **18.53** | 20.90 | §5 |
+| 1 | Baseline: causal TDS + dual-CTC + **corrected** open-vocab WFST decode | 53.12 | 45.31 | **40.63** | **39.02** | Section 3 |
+| 2 | Acoustic: **bidirectional Conformer + WavLM-L9** 4-term distillation | 35.54 | 27.47 | **26.14** | **22.34** | Section 4 |
+| 3 | Final: ensemble → n-best **union** → **LIFT** rerank | — | — | **18.53** | 20.90 | Section 5 |
 
-The story is three moves. **§3** recovers the decode-time hyperparameters missing from the public
+The story is three moves. **Section 3** recovers the decode-time hyperparameters missing from the public
 release, taking 51.17 → 40.63 WER *while matching PER* — establishing that the acoustic model
-reproduces faithfully. **§4** makes the offline encoder full-context and trains it with cross-modal
+reproduces faithfully. **Section 4** makes the offline encoder full-context and trains it with cross-modal
 distillation against the parallel audio, reaching 26.14 / 22.34 acoustic-only (−14.5 WER / −16.7 PER).
-**§5** ensembles two acoustic models, unions their multi-scale n-best lists (oracle 9.30), and reranks
+**Section 5** ensembles two acoustic models, unions their multi-scale n-best lists (oracle 9.30), and reranks
 with a QLoRA-fine-tuned 7B LLM, reaching 18.53 — then shows why that is where this approach saturates.
 
 ---
@@ -90,7 +90,7 @@ Tuned `(scale, blank)` on val, applied `(1.0, 2.0)` once to test.
 We beat the published WER by **10.5 points while matching PER** (39.0 vs 38.2). Matched PER is the
 credibility argument: the acoustic model reproduces faithfully (decoder-independent error is
 identical), so the WER gain is attributable to a correctly specified open-vocabulary decode, not to
-any model change. This checkpoint warm-starts the headline encoder (§4).
+any model change. This checkpoint warm-starts the headline encoder (Section 4).
 
 ---
 
@@ -104,7 +104,7 @@ The upstream TDS is **causal** (left-pads by `kernelWidth−1`) — correct for 
 the offline task. We replace it with a **bidirectional Conformer** [15] (`models/conformer.py`):
 4 layers, multi-head self-attention + depthwise conv (`conf_layers=4`, `conf_heads=4`, `conf_ffn=1024`,
 `conf_kernel=31`), keeping the same front-end, two CTC heads, and WavLM projection. The front-end and
-heads warm-start from §3.4; the Conformer trains fresh.
+heads warm-start from Section 3.4; the Conformer trains fresh.
 
 ### 4.2 The four-term objective (`training/distill.py`, `losses.py`)
 PER is decoder-independent: only a better acoustic model lowers it. We pull the EMG encoder toward the
@@ -129,7 +129,7 @@ smooth-but-non-decodable blur.
 
 | | val WER | val PER | TEST WER | TEST PER |
 |---|---|---|---|---|
-| baseline (causal TDS, §3) | 53.12 | 45.31 | 40.63 | 39.02 |
+| baseline (causal TDS, Section 3) | 53.12 | 45.31 | 40.63 | 39.02 |
 | **bidirectional Conformer + WavLM-L9** | 35.54 | 27.47 | **26.14** | **22.34** |
 | Conformer, **EMG-only** (no audio crutch) | — | — | 26.10 | 23.71 |
 
@@ -144,11 +144,11 @@ for the silent-speech setting, where the parallel audio is unavailable.
 ## 5. Final pipeline: ensemble → n-best union → LIFT rerank → 18.53
 
 ### 5.1 Acoustic ensemble
-We average per-frame phone log-probs of two encoders: the WavLM-L9-distilled Conformer (§4) and an
+We average per-frame phone log-probs of two encoders: the WavLM-L9-distilled Conformer (Section 4) and an
 **anti-overfit augmented** Conformer (`training/augment.py`, "p2": stronger jitter/dropout, BiLSTM
 audio-teacher frame-KL via `training/recognizer.py`). Ensembling alone: 26.14 → **~20.1 WER**.
 Notably, the augmented model's **PER is unchanged** from the distilled one (~20.9%) — the ensemble
-gain is decode-level diversity, not better phonetics (foreshadowing §5.4).
+gain is decode-level diversity, not better phonetics (foreshadowing Section 5.4).
 
 ### 5.2 Multi-scale n-best union (`nbest.py`, `union.py`)
 From the ensemble's HLG lattice we extract n-best lists at several acoustic scales (k2 `random_paths`
@@ -185,10 +185,10 @@ Both CIs exclude 0 — the rerank gain is significant.
 
 ### 5.4 The binding constraint (negative finding)
 **Reranking is exhausted at 18.5%, and the limit is acoustic, not linguistic.** Evidence:
-- **PER is invariant to the interventions that helped WER.** Anti-overfit augmentation (§5.1) and the
-  10%-PER audio-teacher distillation (§4.2) leave the EMG **greedy PER pinned at ~20.9%**. The model's
+- **PER is invariant to the interventions that helped WER.** Anti-overfit augmentation (Section 5.1) and the
+  10%-PER audio-teacher distillation (Section 4.2) leave the EMG **greedy PER pinned at ~20.9%**. The model's
   phonetic quality does not move; only decode-level diversity and word-level priors do.
-- **EMG-only ≈ WavLM-distilled at the word level** (26.10 ≈ 26.14, §4.3): the audio teacher — itself a
+- **EMG-only ≈ WavLM-distilled at the word level** (26.10 ≈ 26.14, Section 4.3): the audio teacher — itself a
   ~10% PER recognizer — cannot transfer its phonetic quality to the EMG encoder.
 - **A 9-point oracle gap no reranker closes.** The union oracle is 9.30; the reranker reaches 18.53.
   The residual exists because the reference words are **absent from the acoustic posteriors** for those
@@ -206,9 +206,9 @@ Both CIs exclude 0 — the rerank gain is significant.
 - **val > test split gap.** Test scores *better* than val for both systems (a ~9-point property of the
   fixed sequential split, not test-overfitting); both columns are reported.
 - **Audio crutch (training only).** WavLM distillation uses the parallel audio, unavailable at
-  silent-speech inference; at the word level the EMG-only encoder matches it (§4.3).
+  silent-speech inference; at the word level the EMG-only encoder matches it (Section 4.3).
 - **Test duplicates.** 6 / 400 test sentences duplicate train text; reported in/out (18.53 / 18.75).
-- **Reranking saturates (§5.4).** The headline 18.53 is acoustic-PER-bound; this is a negative result
+- **Reranking saturates (Section 5.4).** The headline 18.53 is acoustic-PER-bound; this is a negative result
   about LLM reranking for EMG, not a claim that reranking is unhelpful (it is worth −4.7 WER).
 
 ---

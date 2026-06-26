@@ -3,7 +3,7 @@
 # cheapest-path search must pick one, and two decode dials tip the scale.
 # Land acoustic scale near 0.25, blank penalty at 2.0.
 #
-# Ground truth (§8.3, decode.py):
+# Ground truth (Section 8.3, decode.py):
 #   untuned acoustic scale 1.0 -> ~75% WER;  tuned scale ~= 0.25 (Conformer)
 #   CTC blank peaks ~0.92 (model is "blank-happy")
 #   blank penalty 0 -> 2 moved WER 77.6 -> 60.6 on a slice (single biggest lever)
