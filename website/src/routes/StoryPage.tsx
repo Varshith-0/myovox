@@ -2,7 +2,6 @@ import { useRef } from 'react'
 import { StorySections } from '@/components/story/StorySections'
 import { Caption } from '@/components/story/Caption'
 import { ProgressRail } from '@/components/story/ProgressRail'
-import { SpokenSentence } from '@/components/story/SpokenSentence'
 import { MediaLayer } from '@/components/media/MediaLayer'
 import { NarrationLayer } from '@/components/story/NarrationLayer'
 import { Subtitles } from '@/components/story/Subtitles'
@@ -29,7 +28,6 @@ export function StoryPage() {
       </div>
       <Caption />
       <ProgressRail />
-      <SpokenSentence />
       <NarrationLayer />
       <Subtitles />
       <PlayButton />

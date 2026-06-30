@@ -16,8 +16,6 @@ export interface AppState {
   reducedMotion: boolean
   /** Initial load gate for the loader overlay. */
   ready: boolean
-  /** Index of the word currently being "spoken" on the Talking stage. */
-  speechWord: number
   /** Narration ("Voice") armed — off until the user opts in (also the audio
    *  unlock gesture browsers require). Narration is only audible during Play. */
   narrationOn: boolean
@@ -33,7 +31,6 @@ export interface AppState {
 
   setStageIndex: (i: number) => void
   setReady: (ready: boolean) => void
-  setSpeechWord: (i: number) => void
   setNarrationOn: (on: boolean) => void
   setSubtitlesOn: (on: boolean) => void
   setVolume: (v: number) => void
@@ -47,7 +44,6 @@ export const useStore = create<AppState>((set) => ({
   isMobile: false,
   reducedMotion: false,
   ready: true, // no WebGL scene to wait on — the story is Manim clips
-  speechWord: 0,
   narrationOn: false,
   subtitlesOn: true,
   volume: 1,
@@ -57,8 +53,6 @@ export const useStore = create<AppState>((set) => ({
   setStageIndex: (stageIndex) =>
     set((s) => (s.stageIndex === stageIndex ? s : { ...s, stageIndex })),
   setReady: (ready) => set({ ready }),
-  setSpeechWord: (speechWord) =>
-    set((s) => (s.speechWord === speechWord ? s : { ...s, speechWord })),
   setNarrationOn: (narrationOn) => set((s) => (s.narrationOn === narrationOn ? s : { ...s, narrationOn })),
   setSubtitlesOn: (subtitlesOn) => set((s) => (s.subtitlesOn === subtitlesOn ? s : { ...s, subtitlesOn })),
   setVolume: (volume) => set((s) => (s.volume === volume ? s : { ...s, volume })),
