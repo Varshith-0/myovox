@@ -12,10 +12,10 @@ export function Footer() {
         </a>
       </div>
       <p className={styles.fine}>
-        A surface-EMG speech-decoding pipeline — 18.53% word error rate, reported honestly. Built by
-        Varshith Madishetty, MIT-licensed. The 3D head is a point cloud sampled from the
-        &ldquo;Lee Perry-Smith&rdquo; head scan (Infinite-Realities), used under CC-BY 3.0. All
-        numbers are drawn from the project&rsquo;s technical report.
+        Myovox is a cinematic, scroll-driven explainer of surface-EMG speech decoding: how
+        facial-muscle electrical signals are transformed into text with an 18.53% word error
+        rate. Built by Varshith Madishetty, open-sourced under MIT, and paired with a full
+        technical report and reproducible pipeline so every claim on this site is auditable.
       </p>
     </footer>
   )
