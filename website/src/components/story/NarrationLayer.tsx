@@ -41,6 +41,7 @@ export function NarrationLayer() {
   const voiced = useRef<string | null>(null)
 
   useEffect(() => {
+    const audioMap = audios.current
     let raf = 0
     const tick = () => {
       const { stageIndex, narrationOn, playing, volume, playSpeed } = useStore.getState()
@@ -50,7 +51,7 @@ export function NarrationLayer() {
       const target = shouldPlay && activeId && hasNarration(activeId) ? activeId : null
 
       // Fetch the active clip and its immediate neighbours only.
-      for (const [id, audio] of audios.current) {
+      for (const [id, audio] of audioMap) {
         if (Math.abs((INDEX.get(id) ?? -1) - stageIndex) <= 1) {
           const url = audioUrl(id)
           if (audio.getAttribute('src') !== url) audio.setAttribute('src', url)
@@ -61,13 +62,13 @@ export function NarrationLayer() {
       // the point that matches the current scroll, so pressing Play mid-stage (or
       // arming Voice mid-play) picks the voice up from that moment, like a video.
       if (target !== voiced.current) {
-        const prev = voiced.current ? audios.current.get(voiced.current) : undefined
+        const prev = voiced.current ? audioMap.get(voiced.current) : undefined
         if (prev) {
           prev.pause()
           prev.currentTime = 0
         }
         voiced.current = target
-        const next = target ? audios.current.get(target) : undefined
+        const next = target ? audioMap.get(target) : undefined
         if (next) {
           const dur = next.duration
           next.currentTime =
@@ -82,7 +83,7 @@ export function NarrationLayer() {
       // while reading (no audio), subtitles follow the SCROLL position mapped
       // onto the active section's caption track, so captions are on by default.
       if (shouldPlay && voiced.current) {
-        const cur = audios.current.get(voiced.current)
+        const cur = audioMap.get(voiced.current)
         if (cur) {
           cur.volume = clamp01(volume)
           cur.playbackRate = playSpeed
@@ -94,7 +95,7 @@ export function NarrationLayer() {
         narration.ended = !!cur && cur.ended
       } else {
         const sid = activeId && hasNarration(activeId) ? activeId : null
-        const audio = sid ? audios.current.get(sid) : undefined
+        const audio = sid ? audioMap.get(sid) : undefined
         const dur = audio && Number.isFinite(audio.duration) ? audio.duration : 0
         narration.activeId = sid
         narration.time = sid && dur > 0 ? clamp01(localProgressFor(sid)) * dur : 0
@@ -108,7 +109,7 @@ export function NarrationLayer() {
     raf = requestAnimationFrame(tick)
     return () => {
       cancelAnimationFrame(raf)
-      for (const a of audios.current.values()) a.pause()
+      for (const a of audioMap.values()) a.pause()
     }
   }, [])
 

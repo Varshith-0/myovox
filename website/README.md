@@ -67,13 +67,13 @@ src/
   routes/                 StoryPage · TechnicalPage · CodePage (the last two lazy-loaded)
   components/
     layout/               Nav · Footer · Layout · Loader
-    media/                MediaLayer (the scroll-scrubbed Manim-clip player)
-    story/                StorySections · Caption · ProgressRail · SpokenSentence ·
+    media/                MediaLayer + useMediaScrubber + mediaMath/mediaLifecycle/mediaDomFx
+    story/                StorySections · Caption · ProgressRail ·
                           NarrationLayer · Subtitles · PlayButton · SpeakerControl · CaptionsToggle
     ui/                   CodeBlock · LogoMark · codeTheme
   hooks/                  useLenis (RAF bridge) · useScrollProgress · useResponsive
   store/                  useStore (zustand UI state) · scroll (hot-path progress) · narration (audio playhead)
-  data/                   stages.ts (the narrative spine) · site.ts · speech.ts · muscles.ts ·
+  data/                   stages.ts (the narrative spine) · site.ts ·
                           narration.ts (+ narration.json — the spoken-script source for narrate.py)
   content/                technical_report.md · snippets.ts
   styles/                 tokens.css · globals.css
@@ -105,3 +105,28 @@ Respects `prefers-reduced-motion` (no scrubbing — static posters, instant scro
 subtitles are on by default; semantic headings, a skip link, and a text alternative for each clip.
 The reading pages (react-markdown + the syntax highlighter) are code-split out of the initial Story
 bundle, and only clips near the active stage are loaded/decoded.
+
+Quick performance checklist while iterating:
+
+- Verify Story scrub feels stable end-to-end (no visible frame-jumps at stage boundaries).
+- Keep high-frequency updates off React state (`store/scroll.ts` + `store/narration.ts` stay hot-path).
+- In DevTools, confirm far video stages are hidden and very-far clips are detached/released.
+- Check reduced-motion mode uses posters (no video scrubbing).
+- Validate autoplay handoff: voice-on (audio-clocked) and voice-off (constant velocity) both stop immediately on user input.
+
+## Media subsystem contract
+
+The media stack under `src/components/media/` follows strict ownership rules:
+
+- `MediaLayer.tsx` is the React shell (refs + render only).
+- `useMediaScrubber.ts` owns the RAF hot path (no per-frame React state writes).
+- `mediaLifecycle.ts` owns attach/detach/preload/seek policy.
+- `mediaDomFx.ts` owns caption/hero/canvas DOM-side visual effects.
+- `mediaMath.ts` owns pure scroll/easing helpers.
+
+Safe knobs live in `mediaConfig.ts`:
+
+- `visibilityDistance` / `warmDistance` (memory vs smoothness tradeoff)
+- `seekEpsSeconds` (seek cadence)
+- `holdStart` / `revealEnd` (title-card reveal timing)
+- `sceneFadeLerp` / `stagePresenceLerp` (visual smoothing)

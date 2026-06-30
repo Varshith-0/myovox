@@ -73,21 +73,23 @@ export function PlayButton() {
       const max = maxScroll()
       const onLast = st.stageIndex >= STAGE_COUNT - 1
       const activeId = STAGES[st.stageIndex]?.id
+      const useNarrationClock = st.narrationOn && !onLast && !!activeId
 
-      if (st.narrationOn && !onLast && activeId) {
+      const stepNarrationSynced = () => {
+        if (!activeId) return false
         const rect = sectionRect(activeId)
         const matched = narration.activeId === activeId && narration.duration > 0
         const done = matched && (narration.ended || narration.time >= narration.duration - 0.04)
+
         if (rect) {
           if (done) {
-            lenis.scrollTo(rect.top + rect.height + 6, { immediate: true, force: true }) // step into next
+            lenis.scrollTo(rect.top + rect.height + 6, { immediate: true, force: true })
           } else if (matched) {
             const p = clamp01(narration.time / narration.duration)
             lenis.scrollTo(rect.top + p * rect.height, { immediate: true, force: true })
           }
-          // else: clip not ready yet → hold (the stall guard below covers a hang)
         }
-        // Stall guard: if scroll is frozen too long, step to the next section.
+
         if (Math.abs(lenis.scroll - lastScroll.current) > 0.5) {
           lastScroll.current = lenis.scroll
           stallSince.current = t
@@ -95,19 +97,20 @@ export function PlayButton() {
           lenis.scrollTo(rect.top + rect.height + 6, { immediate: true, force: true })
           stallSince.current = t
         }
-        if (lenis.scroll >= max - 1) {
-          stop()
-          return
-        }
-      } else {
-        // Voice off (any stage) or the cinematic finale: gentle constant scroll.
+        return lenis.scroll >= max - 1
+      }
+
+      const stepConstantVelocity = () => {
         const next = lenis.scroll + SPEED * st.playSpeed * dt
         lenis.scrollTo(Math.min(max, next), { immediate: true, force: true })
-        if (next >= max - 1) {
-          stop()
-          return
-        }
+        return next >= max - 1
       }
+
+      if (useNarrationClock ? stepNarrationSynced() : stepConstantVelocity()) {
+        stop()
+        return
+      }
+
       rafRef.current = requestAnimationFrame((ts) => frameRef.current(ts))
     },
     [lenis, stop],
