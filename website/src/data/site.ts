@@ -5,6 +5,8 @@ export const SITE = {
   title: 'Myovox',
   repoUrl: 'https://github.com/Varshith-0/myovox',
   tagline: 'Reading speech from the muscles of the face.',
+  author: 'Varshith Madishetty',
+  authorUrl: 'https://github.com/Varshith-0',
 } as const
 
 export interface NavLinkDef {

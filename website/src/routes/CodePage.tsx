@@ -1,23 +1,21 @@
-import { SNIPPETS } from '@/content/snippets'
 import { SITE } from '@/data/site'
-import { CodeBlock } from '@/components/ui/CodeBlock'
 import styles from './CodePage.module.css'
 
 /**
- * The implementation showcase: a prominent repository link, then curated,
- * faithful excerpts of the pipeline (objective, encoder, contrastive term,
- * decode config, reproduce commands), each with a monochrome syntax block.
+ * Not a code tour — a pointer to the source and a note on who built it. The
+ * full pipeline, this website, and the technical report are open source; this
+ * page leads with the repository and credits the author.
  */
 export function CodePage() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <span className="label">The implementation</span>
+        <span className="label">Open source</span>
         <h1 className={`display ${styles.title}`}>Code</h1>
         <p className={styles.lede}>
-          The full pipeline — features, the Conformer, the four-term distillation, the WFST decode,
-          and the LLM reranker — is open source. Below are the load-bearing pieces; the repository has
-          the rest, with one idempotent command to reproduce every number.
+          Everything here — the EMG-to-text pipeline, this website, and the technical report — is
+          open source under the MIT license, with one idempotent command to reproduce every number.
+
         </p>
         <a className={styles.repo} href={SITE.repoUrl} target="_blank" rel="noreferrer noopener">
           <span className={styles.repoIcon} aria-hidden="true" />
@@ -31,19 +29,21 @@ export function CodePage() {
         </a>
       </header>
 
-      <section className={styles.snippets}>
-        {SNIPPETS.map((s) => (
-          <article key={s.id} className={styles.snippet}>
-            <div className={styles.snippetHead}>
-              <h2 className={styles.snippetTitle}>{s.title}</h2>
-              <code className={styles.snippetSource}>{s.source}</code>
-            </div>
-            <p className={styles.snippetDesc}>{s.description}</p>
-            <div className={styles.codeWrap}>
-              <CodeBlock code={s.code} language={s.language} />
-            </div>
-          </article>
-        ))}
+      <section className={styles.author}>
+        <span className="label">The author</span>
+        <h2 className={styles.authorName}>{SITE.author}</h2>
+        <p className={styles.authorBio}>Built with the help of Claude.</p>
+        <a
+          className={styles.authorLink}
+          href={SITE.authorUrl}
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          {SITE.authorUrl.replace('https://', '')}
+          <span className={styles.authorArrow} aria-hidden="true">
+            →
+          </span>
+        </a>
       </section>
     </div>
   )
