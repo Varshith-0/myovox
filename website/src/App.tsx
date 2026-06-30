@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
-import { HashRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { ReactLenis, useLenis } from 'lenis/react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -20,6 +20,11 @@ const TechnicalPage = lazy(() =>
 const CodePage = lazy(() => import('@/routes/CodePage').then((m) => ({ default: m.CodePage })))
 
 gsap.registerPlugin(ScrollTrigger)
+
+// GitHub Pages serves the site under /<repo>/; the router needs that prefix
+// (trailing slash stripped, so "/" still matches the served root) to produce
+// clean URLs like /myovox/code. See vite `base` and public/404.html.
+const ROUTER_BASENAME = import.meta.env.BASE_URL.replace(/\/$/, '') || '/'
 
 /** Lives inside <ReactLenis> so it can wire Lenis into the GSAP ticker. */
 function ScrollSync() {
@@ -68,8 +73,8 @@ function DevScrollHooks() {
   return null
 }
 
-/** Per-route document title (HashRouter doesn't change it on its own) — so shared
- *  links and browser tabs read meaningfully instead of all saying the same thing. */
+/** Per-route document title (client-side routing doesn't change it on its own) — so
+ *  shared links and browser tabs read meaningfully instead of all saying the same thing. */
 const ROUTE_TITLES: Record<string, string> = {
   '/': 'Myovox — reading speech from the muscles of the face',
   '/technical': 'Technical report — Myovox',
@@ -83,7 +88,7 @@ function DocumentTitle() {
   return null
 }
 
-/** Reset scroll + story state on route change (HashRouter keeps the offset). */
+/** Reset scroll + story state on route change (the router keeps the offset). */
 function ScrollReset() {
   const { pathname } = useLocation()
   const lenis = useLenis()
@@ -98,9 +103,10 @@ function ScrollReset() {
 }
 
 /**
- * Root: HashRouter (reliable on GitHub Pages — no refresh-404) wrapping the
- * Lenis smooth-scroll provider, the layout shell (fixed nav + footer), and the
- * three routes.
+ * Root: BrowserRouter for clean URLs (no #). On GitHub Pages, public/404.html
+ * redirects deep links back through index.html so refreshes/shared links resolve.
+ * Wraps the Lenis smooth-scroll provider, the layout shell (fixed nav + footer),
+ * and the three routes.
  */
 export default function App() {
   useResponsive()
@@ -108,7 +114,7 @@ export default function App() {
   const [reduceMotion] = useState(getInitialReducedMotion)
 
   return (
-    <HashRouter>
+    <BrowserRouter basename={ROUTER_BASENAME}>
       <ReactLenis
         root
         options={{
@@ -133,6 +139,6 @@ export default function App() {
           </Suspense>
         </Layout>
       </ReactLenis>
-    </HashRouter>
+    </BrowserRouter>
   )
 }
