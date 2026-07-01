@@ -1,5 +1,5 @@
 /** Imperative media element lifecycle helpers for the scroll-scrub hot path. */
-import { MEDIA_CONFIG } from './mediaConfig'
+import { MEDIA_CONFIG } from './core'
 
 const SEEK_EPS = MEDIA_CONFIG.seekEpsSeconds
 

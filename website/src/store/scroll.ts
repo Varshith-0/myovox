@@ -6,8 +6,7 @@
  * and never re-renders the React tree — the hot-path seam any per-frame consumer
  * can read imperatively instead of through React state.
  */
-
-const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v)
+import { clamp01 } from '@/lib/num'
 
 const state = { progress: 0 }
 

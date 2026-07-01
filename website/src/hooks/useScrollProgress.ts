@@ -3,9 +3,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { RefObject } from 'react'
 import { scroll } from '@/store/scroll'
 import { useStore } from '@/store/useStore'
+import { clamp01 } from '@/lib/num'
 import { STAGES, STAGE_COUNT } from '@/data/stages'
-
-const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v)
 
 /**
  * Fractional stage index (0..STAGE_COUNT-1) read from the live DOM rects, so the

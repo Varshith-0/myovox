@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
-import { STAGES, stageMedia } from '@/data/stages'
+import { STAGES } from '@/data/stages'
 import { useStore } from '@/store/useStore'
 import styles from './MediaLayer.module.css'
 import { useMediaScrubber } from './useMediaScrubber'
-import { type VideoStage } from './mediaTypes'
+import { type VideoStage } from './core'
 
 /**
  * The Act-2 video scrubber. A fixed, full-viewport layer above the 3D canvas and
@@ -23,18 +23,7 @@ import { type VideoStage } from './mediaTypes'
  * the canvas), and src is loaded only near the active stage.
  */
 
-const BASE = import.meta.env.BASE_URL
-// Cache-bust the clips/posters: their filenames are stable, so a re-rendered
-// clip would otherwise keep serving from the browser cache. In dev, bust per
-// page-load (always see the latest render while iterating); in prod, bust per
-// build (cacheable, but a deploy invalidates it).
-const ASSET_VER = import.meta.env.DEV ? String(Date.now()) : __BUILD_ID__
-const mediaUrl = (p: string) => `${BASE}${p.replace(/^\//, '')}?v=${ASSET_VER}`
-
-const VIDEO_STAGES: VideoStage[] = STAGES.flatMap((stage, index) => {
-  const m = stageMedia(stage)
-  return m.kind === 'video' ? [{ stage, index, media: m }] : []
-})
+const VIDEO_STAGES: VideoStage[] = STAGES.map((stage, index) => ({ stage, index, media: stage.media }))
 
 const ACT2_INDICES = new Set(VIDEO_STAGES.map((v) => v.index))
 
@@ -53,7 +42,6 @@ export function MediaLayer() {
 
   useMediaScrubber({
     reduced,
-    mediaUrl,
     videoStages: VIDEO_STAGES,
     act2Indices: ACT2_INDICES,
     refs: {

@@ -9,24 +9,18 @@
  */
 
 /**
- * What renders behind a stage's caption. Today every stage is a `video` — a Manim
- * clip scrubbed by the stage's local scroll. `src` and `poster` are paths
- * *relative to BASE_URL* (e.g. `anim/ctc.mp4`); the MediaLayer prefixes
- * `import.meta.env.BASE_URL` so they resolve under `/myovox/`. `poster` is shown
- * for reduced-motion / while loading; `alt` is a one-sentence description of the
- * animation for assistive tech. (`scene`/`svg` remain in the union as the contract
- * for any future live stage.)
+ * What renders behind a stage's caption: a Manim clip scrubbed by the stage's
+ * local scroll. `src` and `poster` are paths *relative to BASE_URL* (e.g.
+ * `anim/ctc.mp4`); the MediaLayer resolves them via {@link assetUrl}. `poster` is
+ * shown for reduced-motion / while loading; `alt` is a one-sentence description of
+ * the animation for assistive tech.
  */
-export type StageMedia =
-  | { readonly kind: 'scene' }
-  | {
-      readonly kind: 'video'
-      readonly src: string
-      readonly poster: string
-      readonly fit?: 'contain' | 'cover'
-      readonly alt?: string
-    }
-  | { readonly kind: 'svg'; readonly component: string }
+export interface StageMedia {
+  readonly src: string
+  readonly poster: string
+  readonly fit?: 'contain' | 'cover'
+  readonly alt?: string
+}
 
 export interface Stage {
   /** Stable id, also used as the section's DOM id / anchor. */
@@ -37,8 +31,8 @@ export interface Stage {
   readonly caption: string
   /** Optional sub-line under the caption. */
   readonly sub?: string
-  /** What renders behind the caption. Defaults to `{ kind: 'scene' }`. */
-  readonly media?: StageMedia
+  /** The scrubbed Manim clip that renders behind the caption. */
+  readonly media: StageMedia
   /** Section height in vh (scroll length). Defaults to 100; video stages want
    *  ~140–245 so the clip has comfortable scrub range. */
   readonly scrollVh?: number
@@ -52,8 +46,7 @@ export interface Stage {
   readonly captionPosition?: 'top' | 'bottom'
 }
 
-/** Accessors that apply the schema defaults (video media, 100vh). */
-export const stageMedia = (s: Stage): StageMedia => s.media ?? { kind: 'scene' }
+/** Section scroll length in vh (defaults to a full viewport). */
 export const stageScrollVh = (s: Stage): number => s.scrollVh ?? 100
 
 /** A Manim video stage scrubbed by its section's local scroll. */
@@ -64,7 +57,6 @@ function act2(id: string, rail: string, caption: string, alt: string, sub?: stri
     caption,
     sub,
     media: {
-      kind: 'video',
       src: `anim/${id}.mp4`,
       poster: `anim/${id}.poster.webp`,
       fit: 'contain',

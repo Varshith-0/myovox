@@ -1,8 +1,16 @@
 import { useEffect } from 'react'
 import { useStore } from '@/store/useStore'
-import { HOLD, REVEAL, localProgressFor, setOpacity, smooth } from './mediaMath'
-import { MEDIA_CONFIG } from './mediaConfig'
-import { type MediaScrubberRefs, type MediaUrl, type VideoStage } from './mediaTypes'
+import { smooth } from '@/lib/num'
+import { assetUrl } from '@/lib/asset'
+import {
+  HOLD,
+  REVEAL,
+  MEDIA_CONFIG,
+  localProgressFor,
+  setOpacity,
+  type MediaScrubberRefs,
+  type VideoStage,
+} from './core'
 import {
   detachVideoSrc,
   ensureImageSrc,
@@ -24,7 +32,6 @@ import {
 
 interface UseMediaScrubberArgs {
   reduced: boolean
-  mediaUrl: MediaUrl
   videoStages: readonly VideoStage[]
   act2Indices: ReadonlySet<number>
   refs: MediaScrubberRefs
@@ -40,7 +47,6 @@ function runReducedStageFrame(
   stage: VideoStage,
   active: number,
   section: HTMLElement,
-  mediaUrl: MediaUrl,
 ): number {
   const img = refs.posters.current.get(stage.stage.id)
   if (!img) return -1
@@ -53,7 +59,7 @@ function runReducedStageFrame(
   const bn = isActive ? 1 : 0
   refs.baseOp.current.set(stage.stage.id, bn)
 
-  ensureImageSrc(img, mediaUrl(stage.media.poster))
+  ensureImageSrc(img, assetUrl(stage.media.poster))
   setOpacity(img, bn)
   return isActive ? local : -1
 }
@@ -63,7 +69,6 @@ function runVideoStageFrame(
   stage: VideoStage,
   active: number,
   section: HTMLElement,
-  mediaUrl: MediaUrl,
 ): number {
   const video = refs.videos.current.get(stage.stage.id)
   if (!video) return -1
@@ -80,7 +85,7 @@ function runVideoStageFrame(
   }
 
   const visible = updateStageVisibility(video, distance, VISIBLE_DISTANCE)
-  ensureVideoSrc(video, mediaUrl(stage.media.src))
+  ensureVideoSrc(video, assetUrl(stage.media.src))
   if (!visible) return -1
 
   const isActive = stage.index === active
@@ -104,15 +109,14 @@ function runMediaPhase(
   refs: MediaScrubberRefs,
   videoStages: readonly VideoStage[],
   active: number,
-  mediaUrl: MediaUrl,
 ): FrameState {
   let activeLocal = -1
   for (const stage of videoStages) {
     const section = document.getElementById(stage.stage.id)
     if (!section) continue
     const local = reduced
-      ? runReducedStageFrame(refs, stage, active, section, mediaUrl)
-      : runVideoStageFrame(refs, stage, active, section, mediaUrl)
+      ? runReducedStageFrame(refs, stage, active, section)
+      : runVideoStageFrame(refs, stage, active, section)
     if (local >= 0) activeLocal = local
   }
   return { active, activeLocal }
@@ -134,7 +138,6 @@ function runFxPhase(
 /** Hot-path RAF loop that scrubs active stage media and applies title-card FX. */
 export function useMediaScrubber({
   reduced,
-  mediaUrl,
   videoStages,
   act2Indices,
   refs,
@@ -144,7 +147,7 @@ export function useMediaScrubber({
     let raf = 0
     const tick = () => {
       const active = useStore.getState().stageIndex
-      const frame = runMediaPhase(reduced, refs, videoStages, active, mediaUrl)
+      const frame = runMediaPhase(reduced, refs, videoStages, active)
       runFxPhase(reduced, act2Indices, refs, frame)
 
       raf = requestAnimationFrame(tick)
@@ -155,5 +158,5 @@ export function useMediaScrubber({
       cancelAnimationFrame(raf)
       resetDomFx(refs.sceneRoot, refs.captionWrap)
     }
-  }, [reduced, mediaUrl, videoStages, act2Indices, refs])
+  }, [reduced, videoStages, act2Indices, refs])
 }

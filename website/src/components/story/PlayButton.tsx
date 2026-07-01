@@ -3,6 +3,7 @@ import { useLenis } from 'lenis/react'
 import { STAGES, STAGE_COUNT } from '@/data/stages'
 import { useStore } from '@/store/useStore'
 import { narration } from '@/store/narration'
+import { clamp01 } from '@/lib/num'
 import { SpeakerControl } from './SpeakerControl'
 import { CaptionsToggle } from './CaptionsToggle'
 import styles from './PlayButton.module.css'
@@ -26,7 +27,6 @@ const SPEED = 95 // base px per second at 1× (voice-off mode); the speed contro
 const SPEEDS = [1, 1.5, 2, 3] as const
 
 const PAUSE_KEYS = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' ']
-const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v)
 // If the scroll hasn't budged this long while playing (a clip that never loaded,
 // a boundary that didn't tick over), step to the next section so we never hang.
 const STALL_MS = 2500

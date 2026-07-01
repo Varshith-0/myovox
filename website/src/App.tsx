@@ -10,6 +10,7 @@ import { useLenisGsapSync } from '@/hooks/useLenis'
 import { useResponsive, getInitialReducedMotion } from '@/hooks/useResponsive'
 import { scroll } from '@/store/scroll'
 import { useStore } from '@/store/useStore'
+import { clamp01 } from '@/lib/num'
 import { STAGES } from '@/data/stages'
 
 // The reading pages pull in react-markdown + the syntax highlighter; load them
@@ -41,7 +42,6 @@ function DevScrollHooks() {
   const lenis = useLenis()
   useEffect(() => {
     if (!import.meta.env.DEV || !lenis) return
-    const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v)
     const w = window as unknown as Record<string, unknown>
     const sectionEl = (k: string | number) => {
       const id = typeof k === 'number' ? STAGES[k]?.id : k

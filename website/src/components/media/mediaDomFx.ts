@@ -1,6 +1,6 @@
 import type { MutableRefObject } from 'react'
-import { smooth, RISE_VH } from './mediaMath'
-import { MEDIA_CONFIG } from './mediaConfig'
+import { smooth } from '@/lib/num'
+import { RISE_VH, MEDIA_CONFIG } from './core'
 
 function queryCached(ref: MutableRefObject<HTMLElement | null>, selector: string): HTMLElement | null {
   if (!ref.current) ref.current = document.querySelector(selector)

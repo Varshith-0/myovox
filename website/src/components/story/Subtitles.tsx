@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useStore } from '@/store/useStore'
 import { narration } from '@/store/narration'
+import { assetUrl } from '@/lib/asset'
+import { lastBefore, needsLeadingSpace, joinWords, type Cue } from '@/lib/cues'
 import styles from './Subtitles.module.css'
 
 /**
@@ -10,41 +12,6 @@ import styles from './Subtitles.module.css'
  * hot-state) and reads the sentence cues baked beside each clip
  * (`<id>.captions.json`, from `scripts/narrate.py`).
  */
-
-const BASE = import.meta.env.BASE_URL
-const ASSET_VER = import.meta.env.DEV ? String(Date.now()) : __BUILD_ID__
-const capsUrl = (id: string) => `${BASE}anim/${id}.captions.json?v=${ASSET_VER}`
-
-interface CueWord {
-  w: string
-  t: number
-}
-interface Cue {
-  t: number
-  end: number | null
-  words: CueWord[]
-}
-
-/** Index of the last item whose start time has passed `time` (or -1). */
-function lastBefore<T extends { t: number }>(items: T[], time: number): number {
-  let lo = 0
-  let hi = items.length - 1
-  let found = -1
-  while (lo <= hi) {
-    const mid = (lo + hi) >> 1
-    if (items[mid].t <= time) {
-      found = mid
-      lo = mid + 1
-    } else {
-      hi = mid - 1
-    }
-  }
-  return found
-}
-
-/** No leading space before a word that begins with closing punctuation. (A
- *  standalone em-dash token IS spaced — "word — next" — so it is excluded.) */
-const NO_LEAD = /^[.,!?;:’'")\]…]/
 
 export function Subtitles() {
   const on = useStore((s) => s.subtitlesOn)
@@ -69,7 +36,7 @@ export function Subtitles() {
         return
       }
       try {
-        const res = await fetch(capsUrl(clipId))
+        const res = await fetch(assetUrl(`anim/${clipId}.captions.json`))
         const data = res.ok ? ((await res.json()).cues as Cue[]) : []
         cache.current.set(clipId, data)
         if (!cancelled && idRef.current === clipId) {
@@ -112,9 +79,7 @@ export function Subtitles() {
   const cue = cues[cueIdx]
   // The whole sentence as one string — announced once per cue by the live region
   // below (the visible word-by-word line is decorative, so AT isn't spammed).
-  const sentence = cue.words
-    .map((w, i) => (i > 0 && !NO_LEAD.test(w.w) ? ' ' : '') + w.w)
-    .join('')
+  const sentence = joinWords(cue.words)
 
   return (
     <>
@@ -122,7 +87,7 @@ export function Subtitles() {
         <p className={styles.line}>
           {cue.words.map((word, i) => {
             const cls = i === wordIdx ? styles.now : i < wordIdx ? styles.spoken : styles.ahead
-            const lead = i > 0 && !NO_LEAD.test(word.w) ? ' ' : ''
+            const lead = needsLeadingSpace(word.w, i) ? ' ' : ''
             return (
               <span key={i} className={cls}>
                 {lead}

@@ -3,6 +3,8 @@ import { STAGES } from '@/data/stages'
 import { NARRATED_IDS, hasNarration } from '@/data/narration'
 import { useStore } from '@/store/useStore'
 import { narration } from '@/store/narration'
+import { clamp01 } from '@/lib/num'
+import { assetUrl } from '@/lib/asset'
 
 /**
  * The narration engine. One hidden `<audio>` per stage; it plays the active
@@ -18,11 +20,6 @@ import { narration } from '@/store/narration'
  * Each frame it publishes the playhead to the {@link narration} hot-state for
  * the {@link Subtitles} overlay.
  */
-
-const BASE = import.meta.env.BASE_URL
-const ASSET_VER = import.meta.env.DEV ? String(Date.now()) : __BUILD_ID__
-const audioUrl = (id: string) => `${BASE}anim/${id}.mp3?v=${ASSET_VER}`
-const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v)
 
 // Stage id → index, so the "load only near the active stage" check is O(1).
 const INDEX = new Map(STAGES.map((s, i) => [s.id, i]))
@@ -53,7 +50,7 @@ export function NarrationLayer() {
       // Fetch the active clip and its immediate neighbours only.
       for (const [id, audio] of audioMap) {
         if (Math.abs((INDEX.get(id) ?? -1) - stageIndex) <= 1) {
-          const url = audioUrl(id)
+          const url = assetUrl(`anim/${id}.mp3`)
           if (audio.getAttribute('src') !== url) audio.setAttribute('src', url)
         }
       }
