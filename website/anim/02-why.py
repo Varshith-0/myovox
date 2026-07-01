@@ -68,7 +68,7 @@ class Why(Scene):
         found_t.move_to(found.get_center())
         found_g = VGroup(found, found_t).move_to([0, -1.4, 0])
         ours = RoundedRectangle(width=3.0, height=0.85, corner_radius=0.08).set_stroke("#ffffff", 2).set_fill(INK, 0.06)
-        ours_t = mono("what we changed", 19, INK)
+        ours_t = mono("what I changed", 19, INK)
         ours_t.move_to(ours.get_center())
         ours_g = VGroup(ours, ours_t).next_to(found_g, UP, buff=0.3)
         arrow = mono("the next pages →", 17, INK_FAINT).next_to(ours_g, UP, buff=0.3)

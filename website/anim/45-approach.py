@@ -41,7 +41,7 @@ class Approach(Scene):
         LY = -3.18
 
         # ----- persistent frame mobjects (built up across beats 1-2) -----
-        top1 = mono("WHAT WE CHANGED", 26, INK_DIM, w=BOLD).move_to([0, 3.18, 0])
+        top1 = mono("WHAT I CHANGED", 26, INK_DIM, w=BOLD).move_to([0, 3.18, 0])
         top2 = mono("three changes on a published 51% baseline", 17, INK_FAINT).move_to(
             [0, 2.66, 0])
         rule = Line([-6.4, 2.34, 0], [6.4, 2.34, 0], stroke_color=LINE, stroke_width=1.2)
@@ -52,7 +52,7 @@ class Approach(Scene):
         read_tag.add_updater(lambda m: m.next_to(readout, LEFT, buff=0.18))
 
         # bottom recipe rail — held at ghost throughout
-        recipe_title = mono("how we trained", 14, INK_GHOST).move_to([0, LY + 0.46, 0])
+        recipe_title = mono("how I trained", 14, INK_GHOST).move_to([0, LY + 0.46, 0])
         recipe_title.align_to(LEFT * 6.5, LEFT)
         led_rule = Line([-6.6, LY + 0.66, 0], [6.6, LY + 0.66, 0],
                         stroke_color=LINE, stroke_width=1.0)
@@ -159,7 +159,7 @@ class Approach(Scene):
                   Flash([0, 0.55, 0], color=WHITE, line_length=0.2, num_lines=14,
                         flash_radius=1.4, time_width=0.4), run_time=0.55)
 
-        closing = serif("we built on top", 26, INK).move_to([0, -1.45, 0])
+        closing = serif("I built on top", 26, INK).move_to([0, -1.45, 0])
         self.play(Write(closing), run_time=0.5)
         self.wait(0.7)
 

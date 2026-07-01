@@ -1,13 +1,13 @@
 # Surface-EMG-to-Text: From a 51% Baseline to 18.5% WER
 
-**A technical report.** We decode open-vocabulary English text from 31-channel surface
+**A technical report.** I decode open-vocabulary English text from 31-channel surface
 electromyography (sEMG) of vocalized speech, on the single-subject *emg2speech* General Corpus.
-Starting from the published 51.17% WER of Gowda et al. (Appendix D.4), we (i) recover the missing
+Starting from the published 51.17% WER of Gowda et al. (Appendix D.4), I (i) recover the missing
 open-vocabulary decode hyperparameters to reach a faithful **40.63% WER / 39.02% PER** baseline;
 (ii) replace the causal encoder with a **bidirectional Conformer trained by four-term cross-modal
 distillation** against the parallel audio's WavLM-Large layer-9 features, for **26.14% WER /
 22.34% PER** acoustic-only; and (iii) add a **two-model acoustic ensemble → multi-scale n-best union
-→ LLM reranker (LIFT)** to reach **18.53% WER**. We also report a negative result that bounds the
+→ LLM reranker (LIFT)** to reach **18.53% WER**. I also report a negative result that bounds the
 approach: reranking is exhausted at 18.5% because the binding constraint is the EMG **acoustic** PER
 (~20.9%), not the language model — the correct words are absent from the acoustic posteriors, so no
 reranker can close the gap to the 9.30% n-best oracle.
@@ -69,7 +69,7 @@ floor). EMG is vocalized (not silent) speech with time-aligned audio — the par
 Phoneme posteriors → words with `HLG = H ∘ L ∘ G` via k2 / icefall [9] (`decode.py`) — the same
 graph the authors use, so PER matches the paper directly.
 
-### 3.3 What was missing, and what we added
+### 3.3 What was missing, and what I added
 The public notebooks omit the decode-time hyperparameters that turn good posteriors into good words:
 1. **Acoustic scale** — notebooks decode at scale 1.0, over-weighting the LM (~75% WER); must be tuned.
 2. **Blank penalty** — CTC posteriors are blank-dominant (peak ≈ 0.92). On val[:200] at scale 1.0,
@@ -85,9 +85,9 @@ Tuned `(scale, blank)` on val, applied `(1.0, 2.0)` once to test.
 | System | val WER | val PER | TEST WER | TEST PER |
 |---|---|---|---|---|
 | Gowda et al., Appendix D.4 [1] | — | — | 51.17 | 38.19 |
-| **Ours — TDS+CTC, corrected decode** | 53.12 | 45.31 | **40.63** | **39.02** |
+| **This work — TDS+CTC, corrected decode** | 53.12 | 45.31 | **40.63** | **39.02** |
 
-We beat the published WER by **10.5 points while matching PER** (39.0 vs 38.2). Matched PER is the
+I beat the published WER by **10.5 points while matching PER** (39.0 vs 38.2). Matched PER is the
 credibility argument: the acoustic model reproduces faithfully (decoder-independent error is
 identical), so the WER gain is attributable to a correctly specified open-vocabulary decode, not to
 any model change. This checkpoint warm-starts the headline encoder (Section 4).
@@ -101,13 +101,13 @@ four-term cross-modal distillation objective against the parallel audio.
 
 ### 4.1 Full-context encoding
 The upstream TDS is **causal** (left-pads by `kernelWidth−1`) — correct for streaming, a handicap for
-the offline task. We replace it with a **bidirectional Conformer** [15] (`models/conformer.py`):
+the offline task. I replace it with a **bidirectional Conformer** [15] (`models/conformer.py`):
 4 layers, multi-head self-attention + depthwise conv (`conf_layers=4`, `conf_heads=4`, `conf_ffn=1024`,
 `conf_kernel=31`), keeping the same front-end, two CTC heads, and WavLM projection. The front-end and
 heads warm-start from Section 3.4; the Conformer trains fresh.
 
 ### 4.2 The four-term objective (`training/distill.py`, `losses.py`)
-PER is decoder-independent: only a better acoustic model lowers it. We pull the EMG encoder toward the
+PER is decoder-independent: only a better acoustic model lowers it. I pull the EMG encoder toward the
 parallel audio's **WavLM-Large layer-9** features [8] (precomputed for all 9,660 sentences,
 `ssl/extract.py`) through one linear projection into WavLM's 1,024-dim space (construction inspired by
 MONA [4]):
@@ -144,20 +144,20 @@ for the silent-speech setting, where the parallel audio is unavailable.
 ## 5. Final pipeline: ensemble → n-best union → LIFT rerank → 18.53
 
 ### 5.1 Acoustic ensemble
-We average per-frame phone log-probs of two encoders: the WavLM-L9-distilled Conformer (Section 4) and an
+I average per-frame phone log-probs of two encoders: the WavLM-L9-distilled Conformer (Section 4) and an
 **anti-overfit augmented** Conformer (`training/augment.py`, "p2": stronger jitter/dropout, BiLSTM
 audio-teacher frame-KL via `training/recognizer.py`). Ensembling alone: 26.14 → **~20.1 WER**.
 Notably, the augmented model's **PER is unchanged** from the distilled one (~20.9%) — the ensemble
 gain is decode-level diversity, not better phonetics (foreshadowing Section 5.4).
 
 ### 5.2 Multi-scale n-best union (`nbest.py`, `union.py`)
-From the ensemble's HLG lattice we extract n-best lists at several acoustic scales (k2 `random_paths`
+From the ensemble's HLG lattice I extract n-best lists at several acoustic scales (k2 `random_paths`
 + `Nbest.intersect`) and **union** them. The union lowers the **n-best oracle WER to 9.30%** (the best
 achievable by picking the single best candidate per utterance) while the 1-best stays ~20%. The gap
 between 9.30 (oracle) and 20 (1-best) is the headroom a reranker can in principle recover.
 
 ### 5.3 LIFT reranker (`rerank/`)
-We fine-tune **Qwen2.5-7B-Instruct** with **QLoRA** (4-bit nf4 + LoRA r=16) to map *(n-best candidates
+I fine-tune **Qwen2.5-7B-Instruct** with **QLoRA** (4-bit nf4 + LoRA r=16) to map *(n-best candidates
 + detected phonemes) → reference* (DCoND-LIFT-style [4]). Two variants, selected on val: **free**
 (generate the correction — can recover oracle misses but can hallucinate) and **constrained** (pick
 the highest-scored candidate — cannot hallucinate). Leakage controls:

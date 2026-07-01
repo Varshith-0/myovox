@@ -46,7 +46,7 @@ class Foundation(Scene):
         #  BEAT 1 — "look at the ground all of this stood on"  (1.87s)    #
         # ============================================================== #
         self.next_section("cap")
-        top1 = mono("THE GROUND WE STOOD ON", 26, INK_DIM, w=BOLD).move_to([0, 3.16, 0])
+        top1 = mono("THE GROUND I STOOD ON", 26, INK_DIM, w=BOLD).move_to([0, 3.16, 0])
         rule = Line([-6.4, 2.64, 0], [6.4, 2.64, 0], stroke_color=LINE, stroke_width=1.2)
         self.play(FadeIn(top1, shift=DOWN * 0.14), Create(rule), run_time=0.6)
         self.wait(1.27)
@@ -88,7 +88,7 @@ class Foundation(Scene):
                                stroke_color=INK, stroke_width=2.2,
                                fill_color=BG, fill_opacity=0)
         our_lbl = VGroup(
-            mono("our pipeline", 17, INK),
+            mono("my pipeline", 17, INK),
             mono("bidirectional Conformer · ensemble · rerank", 12.5, INK_FAINT),
         ).arrange(DOWN, buff=0.10)
         our_block = VGroup(our, our_lbl)
@@ -145,7 +145,7 @@ class Foundation(Scene):
         #  BEAT 6 — "we only built upward"  (0.68s)                      #
         # ============================================================== #
         self.next_section("upward")
-        upward = mono("all from UC Davis — we only built upward", 15, INK_FAINT).next_to(
+        upward = mono("all from UC Davis — I only built upward", 15, INK_FAINT).next_to(
             credit, DOWN, buff=0.12)
         self.play(FadeIn(upward), run_time=0.38)
         self.wait(0.3)

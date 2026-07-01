@@ -86,7 +86,7 @@ export const STAGES: readonly Stage[] = [
   act2(
     'why', 'Why',
     'Why this exists.',
-    'Three research-paper cards fan in and collapse onto a UC Davis name plate (Gowda, Miller, with Comstock and McNaughton); a "what we changed" block stacks onto a "their foundation" block; a fifty-tick timeline labelled "the same science — made to watch" lights up.',
+    'Three research-paper cards fan in and collapse onto a UC Davis name plate (Gowda, Miller, with Comstock and McNaughton); a "what I changed" block stacks onto a "their foundation" block; a fifty-tick timeline labelled "the same science — made to watch" lights up.',
     'Research papers are a wall of math almost nobody reads. This is that same science — made to watch: about fifty short scenes, built on one UC Davis lab’s work, then pushed further.',
   ),
   act2(
@@ -344,12 +344,12 @@ export const STAGES: readonly Stage[] = [
     'Four descending markers 51.17, 40.63, 26.14, 18.53 percent word-error, with a phoneme-error track that drops then barely moves on the last move.',
     'Three moves: fix the decode, look both ways while copying the teacher voice, then combine readers and add the chooser. The sound-error fell on move two — it truly heard better — but barely moved on move three.',
   ),
-  // ---- Closing: what we changed, who we built on, and thanks ----
+  // ---- Closing: what I changed, who I built on, and thanks ----
   act2(
-    'approach', 'What we changed',
-    'What we changed — and how we trained.',
-    "A 'what we changed' ledger: three before→after rows — scale-1.0 decode → tuned open-vocab decode, causal TDS → bidirectional Conformer + distillation, single 1-best → ensemble/n-best/7B rerank — while a word-error readout ticks 51.17 down to 18.53 and a training recipe runs along the bottom.",
-    'On top of a published 51% baseline we made three changes: a tuned open-vocabulary decode, a full-context bidirectional Conformer distilled from the parallel voice (training only), and a two-model ensemble pooled into n-best lists that a QLoRA-tuned 7B language model reranks — 51% → 18.5% word error.',
+    'approach', 'What I changed',
+    'What I changed — and how I trained.',
+    "A 'what I changed' ledger: three before→after rows — scale-1.0 decode → tuned open-vocab decode, causal TDS → bidirectional Conformer + distillation, single 1-best → ensemble/n-best/7B rerank — while a word-error readout ticks 51.17 down to 18.53 and a training recipe runs along the bottom.",
+    'On top of a published 51% baseline I made three changes: a tuned open-vocabulary decode, a full-context bidirectional Conformer distilled from the parallel voice (training only), and a two-model ensemble pooled into n-best lists that a QLoRA-tuned 7B language model reranks — 51% → 18.5% word error.',
   ),
   act2(
     'silent', 'Silent speech',
@@ -360,14 +360,14 @@ export const STAGES: readonly Stage[] = [
   act2(
     'foundation', 'Foundation',
     'None of this starts without the team at UC Davis.',
-    "Two foundation stones — the 'geometric perspective' paper and the 'emg2speech' corpus — bear a small 'our pipeline' block; a glowing name plate reads Harshavardhana T. Gowda, with Zachary D. McNaughton, Daniel C. Comstock and Lee M. Miller, UC Davis.",
-    'The corpus, the 31-channel sensor array, the SPD geometric features, and the EMG-to-text decoder all came out of UC Davis — Harshavardhana T. Gowda, with Zachary D. McNaughton, Daniel C. Comstock and Lee M. Miller. Our pipeline is a small block resting on that foundation; we only built upward.',
+    "Two foundation stones — the 'geometric perspective' paper and the 'emg2speech' corpus — bear a small 'my pipeline' block; a glowing name plate reads Harshavardhana T. Gowda, with Zachary D. McNaughton, Daniel C. Comstock and Lee M. Miller, UC Davis.",
+    'The corpus, the 31-channel sensor array, the SPD geometric features, and the EMG-to-text decoder all came out of UC Davis — Harshavardhana T. Gowda, with Zachary D. McNaughton, Daniel C. Comstock and Lee M. Miller. My pipeline is a small block resting on that foundation; I only built upward.',
   ),
   act2(
     'credits', 'Credits',
     'Every method here was borrowed — and credited.',
     'A two-column credit ledger pairing each method with the work it came from — Conformer (Gulati), WavLM (Chen), HuBERT (Hsu), CTC (Graves), TDS (Hannun), cross-modal distillation + LLM rerank (Benster / MONA), WFST decode (Povey, k2/icefall), LibriSpeech (Panayotov), Qwen2.5, and QLoRA (Dettmers) — closing on "composition, not invention".',
-    'We invented none of the building blocks. The Conformer, WavLM, HuBERT units, CTC, the TDS front-end, the MONA-style cross-modal distillation and LLM reranking, the k2/icefall decode, the LibriSpeech lexicon, Qwen2.5 and QLoRA — each came from someone else’s work. This is composition, not invention.',
+    'I invented none of the building blocks. The Conformer, WavLM, HuBERT units, CTC, the TDS front-end, the MONA-style cross-modal distillation and LLM reranking, the k2/icefall decode, the LibriSpeech lexicon, Qwen2.5 and QLoRA — each came from someone else’s work. This is composition, not invention.',
   ),
   act2(
     'thanks', 'Thank you',
