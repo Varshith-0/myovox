@@ -1,0 +1,101 @@
+/* Reel end-card: fixed over the lower third the final MYOVOX clip leaves clear.
+   Hidden (and non-interactive) until `.shown`, then it fades and rises in. */
+.wrap {
+  position: fixed;
+  left: 50%;
+  bottom: calc(clamp(4.5rem, 12vh, 8rem) + var(--safe-b));
+  transform: translate(-50%, 12px);
+  z-index: var(--z-nav);
+  width: min(92vw, 34rem);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--dur-slow, 0.6s) var(--ease-out),
+    transform var(--dur-slow, 0.6s) var(--ease-out);
+}
+
+.shown {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+}
+
+.kicker {
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.line {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  color: var(--ink);
+  text-shadow: var(--glow-text);
+  margin-bottom: 0.5rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.primary,
+.ghost {
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2rem;
+  padding: 0.7rem 1.3rem;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.primary {
+  color: var(--bg);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+}
+.primary:hover {
+  background: #fff;
+  border-color: #fff;
+}
+
+.ghost {
+  color: var(--ink-dim);
+  background: rgba(11, 11, 12, 0.66);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--line-strong);
+}
+.ghost:hover {
+  color: var(--ink);
+  border-color: var(--line-bright);
+}
+
+.primary:focus-visible,
+.ghost:focus-visible {
+  outline: 1px solid var(--line-bright);
+  outline-offset: 3px;
+}
+
+@media (pointer: coarse) {
+  .primary,
+  .ghost {
+    min-height: 44px;
+  }
+}

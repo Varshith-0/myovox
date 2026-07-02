@@ -27,6 +27,11 @@ export interface AppState {
   /** The active clip's frames aren't ready to draw yet (fast-scrolled past the
    *  preload window) — drives the "rendering…" overlay and gates Play. */
   mediaLoading: boolean
+  /** Bumped to ask the PlayButton to (re)start hands-free playback — the seam the
+   *  reel's end-card "Replay" uses without reaching into PlayButton internals. */
+  playNonce: number
+  /** The reel's end-card is showing — subtitles hide so the CTA reads cleanly. */
+  endCardShown: boolean
 
   setStageIndex: (i: number) => void
   setReducedMotion: (reduced: boolean) => void
@@ -36,6 +41,8 @@ export interface AppState {
   setPlaying: (playing: boolean) => void
   setPlaySpeed: (speed: number) => void
   setMediaLoading: (loading: boolean) => void
+  requestPlay: () => void
+  setEndCardShown: (shown: boolean) => void
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -47,6 +54,8 @@ export const useStore = create<AppState>((set) => ({
   playing: false,
   playSpeed: 1,
   mediaLoading: false,
+  playNonce: 0,
+  endCardShown: false,
 
   setStageIndex: (stageIndex) =>
     set((s) => (s.stageIndex === stageIndex ? s : { ...s, stageIndex })),
@@ -59,4 +68,7 @@ export const useStore = create<AppState>((set) => ({
   setPlaySpeed: (playSpeed) => set((s) => (s.playSpeed === playSpeed ? s : { ...s, playSpeed })),
   setMediaLoading: (mediaLoading) =>
     set((s) => (s.mediaLoading === mediaLoading ? s : { ...s, mediaLoading })),
+  requestPlay: () => set((s) => ({ ...s, playNonce: s.playNonce + 1 })),
+  setEndCardShown: (endCardShown) =>
+    set((s) => (s.endCardShown === endCardShown ? s : { ...s, endCardShown })),
 }))

@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { STAGES, STAGE_COUNT } from '@/data/stages'
+import { useStages } from '@/story/StagesContext'
 import { useStore } from '@/store/useStore'
 import styles from './Caption.module.css'
 
@@ -38,11 +38,15 @@ function TokenStream({
  * remounts the block on stage change to replay the entrance.
  */
 export function Caption() {
+  const stages = useStages()
+  const stageCount = stages.length
   const index = useStore((s) => s.stageIndex)
   const subtitlesOn = useStore((s) => s.subtitlesOn)
-  const playing = useStore((s) => s.playing)
-  const stage = STAGES[index]
-  const isHero = index === 0
+  // Guard the index: switching routes can leave a stale (out-of-range) index for
+  // one frame before ScrollReset zeroes it.
+  const safeIndex = index < stageCount ? index : 0
+  const stage = stages[safeIndex]
+  const isHero = safeIndex === 0
   const atTop = stage.captionPosition === 'top'
   // Only while actually narrating (armed *and* playing) do the word-synced
   // subtitles take over: hide the on-screen sub (no duplicate text) and lift
@@ -57,9 +61,9 @@ export function Caption() {
         className={`${styles.wrap} ${atTop ? styles.wrapTop : ''} ${lifted ? styles.lifted : ''}`}
         aria-live="polite"
       >
-        <div key={index} className={`${styles.block} ${isHero ? styles.hero : ''}`}>
+        <div key={safeIndex} className={`${styles.block} ${isHero ? styles.hero : ''}`}>
           <span className={styles.rail}>
-            {String(index + 1).padStart(2, '0')} / {String(STAGE_COUNT).padStart(2, '0')} ·{' '}
+            {String(safeIndex + 1).padStart(2, '0')} / {String(stageCount).padStart(2, '0')} ·{' '}
             {stage.rail}
           </span>
           <h2 data-hero-title={isHero ? '' : undefined} className={`${styles.caption} display`}>
@@ -77,15 +81,6 @@ export function Caption() {
           />
         </div>
       </div>
-
-      {/* The scroll cue lives OUTSIDE the caption wrap so the wrap's title-card
-          transform can't drag it off-screen; MediaLayer fades it as you scroll. */}
-      {isHero && !playing && (
-        <div data-scroll-cue className={styles.scrollCue} aria-hidden="true">
-          <span className={styles.scrollLine} />
-          scroll or press play
-        </div>
-      )}
     </>
   )
 }

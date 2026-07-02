@@ -15,6 +15,8 @@ import styles from './Subtitles.module.css'
 
 export function Subtitles() {
   const on = useStore((s) => s.subtitlesOn)
+  // The reel's end-card owns the lower third when it's up — don't overlap it.
+  const endCardShown = useStore((s) => s.endCardShown)
   const [cues, setCues] = useState<Cue[]>([])
   const [cueIdx, setCueIdx] = useState(-1)
   const [wordIdx, setWordIdx] = useState(-1)
@@ -75,7 +77,7 @@ export function Subtitles() {
     }
   }, [on])
 
-  if (!on || cueIdx < 0 || cueIdx >= cues.length) return null
+  if (!on || endCardShown || cueIdx < 0 || cueIdx >= cues.length) return null
   const cue = cues[cueIdx]
   // The whole sentence as one string — announced once per cue by the live region
   // below (the visible word-by-word line is decorative, so AT isn't spammed).

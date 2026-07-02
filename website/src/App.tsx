@@ -6,13 +6,19 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 import { Layout } from '@/components/layout/Layout'
 import { ErrorBoundary } from '@/components/layout/ErrorBoundary'
-import { StoryPage } from '@/routes/StoryPage'
+import { StoryExperience } from '@/routes/StoryPage'
+import { ChooserPage } from '@/routes/ChooserPage'
 import { useLenisGsapSync } from '@/hooks/useLenis'
 import { useResponsive, getInitialReducedMotion } from '@/hooks/useResponsive'
 import { scroll } from '@/store/scroll'
 import { useStore } from '@/store/useStore'
 import { clamp01 } from '@/lib/num'
 import { STAGES } from '@/data/stages'
+import { REEL_STAGES } from '@/data/reelStages'
+
+/** Route paths for the two ways into the story. */
+export const DEEP_DIVE_PATH = '/story/under-the-hood'
+export const REEL_PATH = '/story/one-breath'
 
 // The reading pages pull in react-markdown + the syntax highlighter; load them
 // only when visited so they stay out of the initial (Story) bundle.
@@ -78,6 +84,8 @@ function DevScrollHooks() {
  *  shared links and browser tabs read meaningfully instead of all saying the same thing. */
 const ROUTE_TITLES: Record<string, string> = {
   '/': 'Myovox — reading speech from the muscles of the face',
+  '/story/one-breath': 'In One Breath — Myovox',
+  '/story/under-the-hood': 'Under the Hood — Myovox',
   '/technical': 'Technical report — Myovox',
   '/code': 'Code — Myovox',
 }
@@ -133,7 +141,21 @@ export default function App() {
           <ErrorBoundary>
             <Suspense fallback={null}>
               <Routes>
-                <Route path="/" element={<StoryPage />} />
+                <Route path="/" element={<ChooserPage />} />
+                <Route
+                  path="/story/under-the-hood"
+                  element={<StoryExperience stages={STAGES} autoPlay />}
+                />
+                <Route
+                  path="/story/one-breath"
+                  element={
+                    <StoryExperience
+                      stages={REEL_STAGES}
+                      autoPlay
+                      endCardDeepDivePath={DEEP_DIVE_PATH}
+                    />
+                  }
+                />
                 <Route path="/technical" element={<TechnicalPage />} />
                 <Route path="/code" element={<CodePage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,6 +1,5 @@
-import { useEffect, useRef } from 'react'
-import { STAGES } from '@/data/stages'
-import { NARRATED_IDS, hasNarration } from '@/data/narration'
+import { useEffect, useMemo, useRef } from 'react'
+import { useStages } from '@/story/StagesContext'
 import { useStore } from '@/store/useStore'
 import { narration } from '@/store/narration'
 import { clamp01 } from '@/lib/num'
@@ -21,9 +20,6 @@ import { assetUrl } from '@/lib/asset'
  * the {@link Subtitles} overlay.
  */
 
-// Stage id → index, so the "load only near the active stage" check is O(1).
-const INDEX = new Map(STAGES.map((s, i) => [s.id, i]))
-
 /** Local scroll progress through a section: 0 at its top, 1 once scrolled out. */
 function localProgressFor(id: string): number {
   const el = document.getElementById(id)
@@ -33,6 +29,16 @@ function localProgressFor(id: string): number {
 }
 
 export function NarrationLayer() {
+  const stages = useStages()
+  // Stage ids in order + an id→index map (O(1) "near the active stage" check).
+  // Every stage carries a narration clip, so membership == has-narration.
+  const narratedIds = useMemo(() => stages.map((s) => s.id), [stages])
+  const index = useMemo(() => new Map(narratedIds.map((id, i) => [id, i])), [narratedIds])
+  const hasNarration = useMemo(() => {
+    const set = new Set(narratedIds)
+    return (id: string) => set.has(id)
+  }, [narratedIds])
+
   const audios = useRef(new Map<string, HTMLAudioElement>())
   // The clip currently playing — switched only when the active stage changes.
   const voiced = useRef<string | null>(null)
@@ -42,14 +48,14 @@ export function NarrationLayer() {
     let raf = 0
     const tick = () => {
       const { stageIndex, narrationOn, playing, volume, playSpeed } = useStore.getState()
-      const activeId = STAGES[stageIndex]?.id ?? null
+      const activeId = stages[stageIndex]?.id ?? null
       // Voice is part of Play: only sound while both are on.
       const shouldPlay = narrationOn && playing
       const target = shouldPlay && activeId && hasNarration(activeId) ? activeId : null
 
       // Fetch the active clip and its immediate neighbours only.
       for (const [id, audio] of audioMap) {
-        if (Math.abs((INDEX.get(id) ?? -1) - stageIndex) <= 1) {
+        if (Math.abs((index.get(id) ?? -1) - stageIndex) <= 1) {
           const url = assetUrl(`anim/${id}.mp3`)
           if (audio.getAttribute('src') !== url) audio.setAttribute('src', url)
         }
@@ -108,11 +114,11 @@ export function NarrationLayer() {
       cancelAnimationFrame(raf)
       for (const a of audioMap.values()) a.pause()
     }
-  }, [])
+  }, [stages, index, hasNarration])
 
   return (
     <div aria-hidden="true" style={{ display: 'none' }}>
-      {NARRATED_IDS.map((id) => (
+      {narratedIds.map((id) => (
         <audio
           key={id}
           ref={(el) => {

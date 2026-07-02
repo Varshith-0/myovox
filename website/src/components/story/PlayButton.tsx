@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useLenis } from 'lenis/react'
-import { STAGES, STAGE_COUNT } from '@/data/stages'
+import { useStages } from '@/story/StagesContext'
 import { useStore } from '@/store/useStore'
 import { narration } from '@/store/narration'
 import { clamp01 } from '@/lib/num'
@@ -31,7 +31,9 @@ const PAUSE_KEYS = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End',
 // a boundary that didn't tick over), step to the next section so we never hang.
 const STALL_MS = 2500
 
-export function PlayButton() {
+export function PlayButton({ autoPlay = false }: { autoPlay?: boolean }) {
+  const stages = useStages()
+  const stageCount = stages.length
   const lenis = useLenis()
   const playing = useStore((s) => s.playing)
   const speed = useStore((s) => s.playSpeed)
@@ -73,8 +75,8 @@ export function PlayButton() {
       lastT.current = t
       if (!stallSince.current) stallSince.current = t
       const max = maxScroll()
-      const onLast = st.stageIndex >= STAGE_COUNT - 1
-      const activeId = STAGES[st.stageIndex]?.id
+      const onLast = st.stageIndex >= stageCount - 1
+      const activeId = stages[st.stageIndex]?.id
       const useNarrationClock = st.narrationOn && !onLast && !!activeId
 
       const stepNarrationSynced = () => {
@@ -115,7 +117,7 @@ export function PlayButton() {
 
       rafRef.current = requestAnimationFrame((ts) => frameRef.current(ts))
     },
-    [lenis, stop],
+    [lenis, stop, stages, stageCount],
   )
 
   useEffect(() => {
@@ -136,6 +138,27 @@ export function PlayButton() {
     setPlaying(true)
     rafRef.current = requestAnimationFrame((ts) => frameRef.current(ts))
   }, [lenis, setPlaying, setNarrationOn])
+
+  // Reel auto-start: entering via the chooser card is itself the user gesture that
+  // unlocks audio, so the reel plays the moment it can. Fire exactly once, and only
+  // after the first clip's frames are ready (mediaLoading false) so it never
+  // auto-scrolls into black. Any real scroll/tap before that pauses as usual.
+  const didAutoStart = useRef(false)
+  useEffect(() => {
+    if (!autoPlay || didAutoStart.current || !lenis || mediaLoading) return
+    didAutoStart.current = true
+    start()
+  }, [autoPlay, lenis, mediaLoading, start])
+
+  // The end-card "Replay" bumps playNonce; start playback when it changes (but not
+  // on the initial value, which would auto-play every mount).
+  const playNonce = useStore((s) => s.playNonce)
+  const lastNonce = useRef(playNonce)
+  useEffect(() => {
+    if (playNonce === lastNonce.current) return
+    lastNonce.current = playNonce
+    if (lenis) start()
+  }, [playNonce, lenis, start])
 
   // Any real user scroll input pauses auto-play. (Programmatic scrolls above do
   // not fire wheel/touch/key events, so they never self-pause; nor does clicking

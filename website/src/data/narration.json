@@ -48,5 +48,16 @@
   "foundation": "Before we say goodbye, look at the ground all of this stood on. The recording corpus, the thirty-one channel sensor array, the geometric features, the E M G to text decoder — every one of those came out of U C Davis. My whole pipeline is just one small block resting on that work. So the credit goes to Harshavardhana T Gowda, with Zachary D McNaughton, Daniel C Comstock, and Lee M Miller. I didn't start from zero. I only built upward.",
   "credits": "Look back at every piece I just used. The Conformer, WavLM, the HuBERT units, the C T C training — each one came from someone else's published work. So did the decoder, the language model, Qwen, and QLoRA. I invented none of them. What I did was choose them, and fit them together. This is composition, not invention. And the look of these animations is an homage to 3Blue1Brown, who showed that ideas can be watched, not just read.",
   "thanks": "That's the whole journey — from faint electricity on the skin to words on a screen. Thank you for making it all the way to the end. This was made by Varshith Madishetty. And built with the help of Claude.",
-  "end": "From silent muscle to readable text — that was the whole idea. The end."
+  "end": "From silent muscle to readable text — that was the whole idea. The end.",
+
+  "reel-spark": "Every word you speak begins as movement — and every moving muscle leaks a faint pulse of electricity onto the skin. Even if you make no sound at all.",
+  "reel-sensors": "Thirty-one sensors resting on the face and neck catch those pulses — five thousand readings a second, from every sensor at once. No microphone. No sound. Just electricity.",
+  "reel-fingerprints": "That raw signal is a storm — far too much to read. So, fifty times every second, we take one snapshot and ask a single question: which muscles are moving together? Each answer is a fingerprint of the face at that instant.",
+  "reel-reader": "A small neural network learns to read that filmstrip of fingerprints. While it trains, it also listens to the person's real voice — a teacher it copies, then never needs again.",
+  "reel-words": "The network guesses sounds, not spelling. A map of thirty-four thousand English words then turns those sounds into sentences — by finding the cheapest path through it.",
+  "reel-chooser": "Dozens of candidate sentences survive. A language model reads them all, alongside the detected sounds — and picks the one that makes the most sense.",
+  "reel-score": "Where the published baseline got half the words wrong, this pipeline gets four out of five right — eighteen and a half percent word error, from muscles alone.",
+  "reel-foundation": "None of this starts from zero. A lab at UC Davis built the sensors, the data, and the whole approach. I built upward from their foundation, using proven ideas from across the field — composition, not invention.",
+  "reel-silent": "So what is it for? Silent speech. Mouth the words and they become text — in a crowd, in a meeting, anywhere a voice can't go.",
+  "reel-end": "That's the whole idea — in one breath. And if you want to see how every piece really works — fifty short scenes are waiting under the hood."
 }

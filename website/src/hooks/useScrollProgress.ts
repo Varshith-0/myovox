@@ -4,24 +4,24 @@ import type { RefObject } from 'react'
 import { scroll } from '@/store/scroll'
 import { useStore } from '@/store/useStore'
 import { clamp01 } from '@/lib/num'
-import { STAGES, STAGE_COUNT } from '@/data/stages'
+import type { Stage } from '@/data/stages'
 
 /**
- * Fractional stage index (0..STAGE_COUNT-1) read from the live DOM rects, so the
+ * Fractional stage index (0..count-1) read from the live DOM rects, so the
  * mapping stays correct even when stages have different heights (the video stages
  * are taller). The section whose top has crossed the viewport top is the current
  * one; the fraction scrolled into it eases toward the next stage. It is normalized
  * into `scroll.progress` (a 0..1 over all stages) for the hot path.
  */
-function stageFloatFromDom(): number {
-  for (let i = 0; i < STAGE_COUNT; i++) {
-    const el = document.getElementById(STAGES[i].id)
+function stageFloatFromDom(stages: readonly Stage[]): number {
+  for (let i = 0; i < stages.length; i++) {
+    const el = document.getElementById(stages[i].id)
     if (!el) continue
     const r = el.getBoundingClientRect()
     if (r.top <= 0 && r.bottom > 0) return i + clamp01(-r.top / (r.height || 1))
     if (r.top > 0) return i // viewport top hasn't reached section i yet
   }
-  return STAGE_COUNT - 1
+  return stages.length - 1
 }
 
 /**
@@ -34,9 +34,11 @@ function stageFloatFromDom(): number {
  * reads `scroll.progress`, never the DOM, keeping the scene fully decoupled.
  *
  * @param ref the tall story container spanning all stage sections.
+ * @param stages the active stage list (deep dive or reel).
  */
-export function useScrollProgress(ref: RefObject<HTMLElement | null>): void {
+export function useScrollProgress(ref: RefObject<HTMLElement | null>, stages: readonly Stage[]): void {
   const setStageIndex = useStore((s) => s.setStageIndex)
+  const count = stages.length
 
   useGSAP(
     () => {
@@ -52,13 +54,13 @@ export function useScrollProgress(ref: RefObject<HTMLElement | null>): void {
           // stage is the section you are currently in (floor, not nearest) so the
           // caption/clip don't flip to the next stage halfway through a tall video
           // section.
-          const f = stageFloatFromDom()
-          scroll.progress = f / Math.max(1, STAGE_COUNT - 1)
-          setStageIndex(Math.min(STAGE_COUNT - 1, Math.floor(f)))
+          const f = stageFloatFromDom(stages)
+          scroll.progress = f / Math.max(1, count - 1)
+          setStageIndex(Math.min(count - 1, Math.floor(f)))
         },
       })
       return () => trigger.kill()
     },
-    { scope: ref, dependencies: [setStageIndex] },
+    { scope: ref, dependencies: [setStageIndex, stages, count] },
   )
 }

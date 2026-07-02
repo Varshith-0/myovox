@@ -50,7 +50,18 @@
     { "seq": 47, "file": "47-foundation.py", "class": "Foundation", "id": "foundation" },
     { "seq": 48, "file": "48-credits.py", "class": "Credits", "id": "credits" },
     { "seq": 49, "file": "49-thanks.py", "class": "Thanks", "id": "thanks" },
-    { "seq": 50, "file": "50-end.py", "class": "End", "id": "end" }
+    { "seq": 50, "file": "50-end.py", "class": "End", "id": "end" },
+
+    { "seq": 101, "file": "reel-01-spark.py", "class": "Spark", "id": "reel-spark" },
+    { "seq": 102, "file": "reel-02-sensors.py", "class": "Sensors", "id": "reel-sensors" },
+    { "seq": 103, "file": "reel-03-fingerprints.py", "class": "Fingerprints", "id": "reel-fingerprints" },
+    { "seq": 104, "file": "reel-04-reader.py", "class": "Reader", "id": "reel-reader" },
+    { "seq": 105, "file": "reel-05-words.py", "class": "Words", "id": "reel-words" },
+    { "seq": 106, "file": "reel-06-chooser.py", "class": "Chooser", "id": "reel-chooser" },
+    { "seq": 107, "file": "reel-07-score.py", "class": "Score", "id": "reel-score" },
+    { "seq": 108, "file": "reel-08-foundation.py", "class": "Foundation", "id": "reel-foundation" },
+    { "seq": 109, "file": "reel-09-silent.py", "class": "Silent", "id": "reel-silent" },
+    { "seq": 110, "file": "reel-10-end.py", "class": "ReelEnd", "id": "reel-end" }
   ],
   "og": { "file": "og-card.py", "class": "OG", "out": "public/og.png", "size": "1200x630" }
 }

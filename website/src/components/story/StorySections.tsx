@@ -1,4 +1,5 @@
-import { STAGES, stageScrollVh } from '@/data/stages'
+import { stageScrollVh } from '@/data/stages'
+import { useStages } from '@/story/StagesContext'
 import styles from './StorySections.module.css'
 
 /**
@@ -8,9 +9,10 @@ import styles from './StorySections.module.css'
  * declare a taller `scrollVh` so their clip has room to scrub.
  */
 export function StorySections() {
+  const stages = useStages()
   return (
     <div className={styles.sections}>
-      {STAGES.map((stage) => {
+      {stages.map((stage) => {
         const vh = stageScrollVh(stage)
         return (
           <section

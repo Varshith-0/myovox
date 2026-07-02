@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLenis } from 'lenis/react'
 import { useStore } from '@/store/useStore'
-import { STAGES } from '@/data/stages'
+import { useStages } from '@/story/StagesContext'
 import styles from './ProgressRail.module.css'
 
 /**
@@ -10,6 +10,7 @@ import styles from './ProgressRail.module.css'
  * screens where it would crowd the caption.
  */
 export function ProgressRail() {
+  const stages = useStages()
   const setPlaying = useStore((s) => s.setPlaying)
   const lenis = useLenis()
 
@@ -37,7 +38,7 @@ export function ProgressRail() {
   return (
     <nav className={styles.rail} aria-label="Story stages">
       <ol className={styles.list}>
-        {STAGES.map((stage, i) => (
+        {stages.map((stage, i) => (
           <li key={stage.id}>
             <button
               type="button"

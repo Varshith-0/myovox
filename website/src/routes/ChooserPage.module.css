@@ -1,0 +1,152 @@
+/* Landing chooser: brand + tagline over two large cards. Monochrome, calm. */
+.page {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(2rem, 5vh, 3.5rem);
+  padding: calc(var(--nav-h) + 2rem) clamp(1rem, 4vw, 2.5rem) clamp(2rem, 6vh, 4rem);
+  text-align: center;
+  overflow-x: clip; /* the tagline must never push the page sideways on phones */
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 44rem;
+}
+
+.title,
+.tagline,
+.prompt {
+  max-width: 100%;
+}
+
+.mark {
+  margin-bottom: 0.4rem;
+}
+
+.title {
+  font-family: var(--font-mono);
+  font-size: var(--t-h2);
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
+  color: var(--ink);
+  text-shadow: var(--glow-text);
+}
+
+.tagline {
+  font-family: var(--font-display);
+  font-size: var(--t-lead);
+  color: var(--ink-dim);
+}
+
+.prompt {
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-top: 0.5rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 3vw, 1.75rem);
+  width: min(100%, 62rem);
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 0.6rem;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  min-height: 15rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 1rem;
+  background: rgba(11, 11, 12, 0.5);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.card:hover {
+  border-color: var(--line-bright);
+  background: rgba(11, 11, 12, 0.8);
+  transform: translateY(-3px);
+}
+
+.card:focus-visible {
+  outline: 1px solid var(--line-bright);
+  outline-offset: 4px;
+}
+
+/* The reel is the primary path — a hair brighter. */
+.reel {
+  border-color: var(--line-bright);
+}
+
+.motif {
+  position: absolute;
+  inset: auto -10% -14% auto;
+  width: 62%;
+  height: 45%;
+  color: var(--ink);
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+.badge {
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  color: var(--ink);
+  text-shadow: var(--glow-text);
+}
+
+.cardDesc {
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+  line-height: 1.6;
+  color: var(--ink-dim);
+  max-width: 30ch;
+}
+
+.cta {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+@media (max-width: 640px) {
+  .cards {
+    grid-template-columns: 1fr;
+    width: min(100%, 30rem);
+  }
+  .card {
+    min-height: auto;
+  }
+}

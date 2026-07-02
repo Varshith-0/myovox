@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
-import { STAGES } from '@/data/stages'
+import { useEffect, useMemo, useRef } from 'react'
+import { useStages } from '@/story/StagesContext'
 import { useStore } from '@/store/useStore'
 import { assetUrl } from '@/lib/asset'
 import styles from './MediaLayer.module.css'
@@ -34,14 +34,19 @@ import {
  * reduced-motion static. Clips beyond the preload ring have their frames released.
  */
 
-const CLIP_STAGES: ClipStage[] = STAGES.map((stage, index) => ({ stage, index, media: stage.media }))
-
-const ACT2_INDICES = new Set(CLIP_STAGES.map((v) => v.index))
-
 /** Matches the mobile CSS that anchors a contained clip to the top of its band. */
 const TOP_ANCHOR_QUERY = '(max-width: 820px), (max-height: 600px), (max-aspect-ratio: 7/5)'
 
 export function MediaLayer() {
+  const stages = useStages()
+  // Every stage is a scrubbed clip; derive the clip list (and the "all clips are
+  // Act-2" index set) from the active stage list.
+  const clipStages = useMemo<ClipStage[]>(
+    () => stages.map((stage, index) => ({ stage, index, media: stage.media })),
+    [stages],
+  )
+  const act2Indices = useMemo(() => new Set(clipStages.map((v) => v.index)), [clipStages])
+
   const reduced = useStore((s) => s.reducedMotion)
   // While narrating → lift the clip to free a band for the subtitles.
   const captionsMode = useStore((s) => s.subtitlesOn)
@@ -60,8 +65,8 @@ export function MediaLayer() {
 
   useMediaScrubber({
     reduced,
-    clipStages: CLIP_STAGES,
-    act2Indices: ACT2_INDICES,
+    clipStages,
+    act2Indices,
     refs: {
       posters,
       canvas,
@@ -125,14 +130,14 @@ export function MediaLayer() {
     if (canvas.current) setOpacity(canvas.current, 0)
   }, [reduced])
 
-  if (CLIP_STAGES.length === 0) return null
+  if (clipStages.length === 0) return null
 
   return (
     <div className={`${styles.layer} ${captionsMode ? styles.withCaptions : ''}`}>
       {/* Reduced motion: a static poster per stage — the clip's FINAL frame (the
           composed result), which is the informative still. No canvas, no scrub. */}
       {reduced &&
-        CLIP_STAGES.map((vs) => {
+        clipStages.map((vs) => {
           const fitClass = vs.media.fit === 'cover' ? styles.cover : styles.contain
           return (
             <div key={vs.stage.id} className={styles.stage}>
