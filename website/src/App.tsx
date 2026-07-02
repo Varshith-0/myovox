@@ -5,6 +5,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 import { Layout } from '@/components/layout/Layout'
+import { ErrorBoundary } from '@/components/layout/ErrorBoundary'
 import { StoryPage } from '@/routes/StoryPage'
 import { useLenisGsapSync } from '@/hooks/useLenis'
 import { useResponsive, getInitialReducedMotion } from '@/hooks/useResponsive'
@@ -129,14 +130,16 @@ export default function App() {
         <DocumentTitle />
         <DevScrollHooks />
         <Layout>
-          <Suspense fallback={null}>
-            <Routes>
-              <Route path="/" element={<StoryPage />} />
-              <Route path="/technical" element={<TechnicalPage />} />
-              <Route path="/code" element={<CodePage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={null}>
+              <Routes>
+                <Route path="/" element={<StoryPage />} />
+                <Route path="/technical" element={<TechnicalPage />} />
+                <Route path="/code" element={<CodePage />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
+          </ErrorBoundary>
         </Layout>
       </ReactLenis>
     </BrowserRouter>

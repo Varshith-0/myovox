@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { Nav } from './Nav'
 import { Footer } from './Footer'
 import { Loader } from './Loader'
+import { OfflineBanner } from './OfflineBanner'
 import styles from './Layout.module.css'
 
 /**
@@ -27,6 +28,7 @@ export function Layout({ children }: { children: ReactNode }) {
       >
         Skip to content
       </a>
+      <OfflineBanner />
       <Nav />
       <main id="main" tabIndex={-1} className={styles.main}>
         {children}

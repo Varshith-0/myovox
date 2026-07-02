@@ -73,5 +73,7 @@
   --z-content: 10;
   --z-rail: 20;
   --z-nav: 40;
+  --z-banner: 50; /* offline bar, above the nav */
   --z-loader: 60;
+  --z-error: 70; /* full-screen error, above everything */
 }

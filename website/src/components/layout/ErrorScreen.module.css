@@ -1,0 +1,86 @@
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-error);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  padding: var(--space-8);
+  text-align: center;
+  background: var(--bg-sink);
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 46ch;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--t-h2);
+  font-weight: 400;
+  color: var(--ink);
+  text-shadow: var(--glow-text);
+}
+
+.body {
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+  line-height: 1.6;
+  color: var(--ink-dim);
+}
+
+.action {
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-8);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.action:hover {
+  border-color: var(--line-bright);
+  background: var(--bg-raise);
+}
+
+.action:focus-visible {
+  outline: 1px solid var(--line-bright);
+  outline-offset: 3px;
+}
+
+/* --- Offline banner (shares this module) --------------------------------- */
+.banner {
+  position: fixed;
+  inset: var(--nav-h) 0 auto 0; /* sit just below the nav so it never blocks nav clicks */
+  z-index: var(--z-banner);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  letter-spacing: 0.12em;
+  color: var(--ink);
+  background: var(--bg-raise);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink-faint);
+}
