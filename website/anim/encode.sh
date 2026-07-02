@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Re-encode a Manim render for smooth scroll-scrubbing and emit a poster.
 #   usage: encode.sh <scene_file.py> <SceneClass> <out-id>
-# Produces website/public/anim/<out-id>.mp4 (every frame a keyframe, -g 1, no
-# audio) + <out-id>.poster.webp. Run after the high-quality (`-qh` => 1080p30)
+# Produces website/public/anim/<out-id>.mp4 (scrub-friendly GOP: a keyframe every
+# 12 frames so seeks stay cheap without the ~5-10x bloat of all-intra, no audio) +
+# <out-id>.poster.webp. Run after the high-quality (`-qh` => 1080p30)
 # render. MEDIA_DIR overrides the manim media dir (default /tmp/emg_media).
 set -euo pipefail
 
@@ -19,7 +20,11 @@ src="$MEDIA/videos/$stem/1080p30/$cls.mp4"
 FFMPEG="$MENV/bin/ffmpeg"
 
 mkdir -p "$OUT_DIR"
-"$FFMPEG" -y -i "$src" -an -c:v libx264 -pix_fmt yuv420p -g 1 -crf 24 \
+# -g 12 -keyint_min 12 -sc_threshold 0: a fixed keyframe every 12 frames (~0.4s at
+# 30fps). Scrub seeks decode at most 11 frames from the prior keyframe (sub-frame
+# on modern decoders) while P-frames shrink these B&W clips ~2-3x vs all-intra.
+"$FFMPEG" -y -i "$src" -an -c:v libx264 -pix_fmt yuv420p \
+  -g 12 -keyint_min 12 -sc_threshold 0 -crf 24 \
   -preset slow -movflags +faststart "$OUT_DIR/$id.mp4" >/dev/null 2>&1
 
 # Poster = the clip's final frame as webp. Some ffmpeg builds (e.g. anaconda) ship

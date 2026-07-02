@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { STAGES } from '@/data/stages'
 import { useStore } from '@/store/useStore'
+import { assetUrl } from '@/lib/asset'
 import styles from './MediaLayer.module.css'
 import { useMediaScrubber } from './useMediaScrubber'
 import { type VideoStage } from './core'
@@ -35,7 +36,7 @@ export function MediaLayer() {
   const posters = useRef(new Map<string, HTMLImageElement>())
   const videos = useRef(new Map<string, HTMLVideoElement>())
   const baseOp = useRef(new Map<string, number>())
-  const shownOnce = useRef(new Map<string, boolean>())
+  const videoReveal = useRef(new Map<string, number>())
   const sceneRoot = useRef<HTMLElement | null>(null)
   const captionWrap = useRef<HTMLElement | null>(null)
   const canvasFade = useRef(1) // 1 = canvas visible (Act 1), 0 = hidden (Act 2)
@@ -48,7 +49,7 @@ export function MediaLayer() {
       posters,
       videos,
       baseOp,
-      shownOnce,
+      videoReveal,
       sceneRoot,
       captionWrap,
       canvasFade,
@@ -57,7 +58,7 @@ export function MediaLayer() {
 
   useEffect(() => {
     baseOp.current.clear()
-    shownOnce.current.clear()
+    videoReveal.current.clear()
   }, [reduced])
 
   if (VIDEO_STAGES.length === 0) return null
@@ -68,16 +69,24 @@ export function MediaLayer() {
         const fitClass = vs.media.fit === 'cover' ? styles.cover : styles.contain
         return (
           <div key={vs.stage.id} className={styles.stage}>
-            {reduced ? (
-              <img
-                ref={(el) => {
-                  if (el) posters.current.set(vs.stage.id, el)
-                  else posters.current.delete(vs.stage.id)
-                }}
-                className={`${styles.media} ${fitClass}`}
-                alt={vs.media.alt ?? vs.stage.caption}
-              />
-            ) : (
+            {/* Poster base: the final frame, shown instantly on a cold jump while
+                the video decodes. Meaningful alt in reduced motion; decorative
+                (video carries the description) otherwise. src is declarative so the
+                browser self-prioritizes — the visible poster loads eagerly (instant
+                land) while off-screen ones pre-warm every jump target at low cost
+                (~30KB each). */}
+            <img
+              ref={(el) => {
+                if (el) posters.current.set(vs.stage.id, el)
+                else posters.current.delete(vs.stage.id)
+              }}
+              src={assetUrl(vs.media.poster)}
+              className={`${styles.media} ${fitClass}`}
+              alt={vs.media.alt ?? vs.stage.caption}
+              aria-hidden={reduced ? undefined : true}
+              decoding="async"
+            />
+            {!reduced && (
               <video
                 ref={(el) => {
                   if (el) videos.current.set(vs.stage.id, el)

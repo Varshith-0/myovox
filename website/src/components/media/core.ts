@@ -13,6 +13,7 @@ export const MEDIA_CONFIG = {
   captionRiseVh: 22,
   sceneFadeLerp: 0.26,
   stagePresenceLerp: 0.2,
+  videoRevealLerp: 0.16,
 } as const
 
 export const HOLD = MEDIA_CONFIG.holdStart
@@ -29,7 +30,8 @@ export interface MediaScrubberRefs {
   posters: MutableRefObject<Map<string, HTMLImageElement>>
   videos: MutableRefObject<Map<string, HTMLVideoElement>>
   baseOp: MutableRefObject<Map<string, number>>
-  shownOnce: MutableRefObject<Map<string, boolean>>
+  /** Per-stage crossfade level (0 = poster shown, 1 = video shown). */
+  videoReveal: MutableRefObject<Map<string, number>>
   sceneRoot: MutableRefObject<HTMLElement | null>
   captionWrap: MutableRefObject<HTMLElement | null>
   canvasFade: MutableRefObject<number>

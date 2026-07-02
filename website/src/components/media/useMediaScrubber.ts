@@ -13,7 +13,6 @@ import {
 } from './core'
 import {
   detachVideoSrc,
-  ensureImageSrc,
   ensureVideoSrc,
   maybeSeekVideo,
   setVideoPreload,
@@ -59,7 +58,6 @@ function runReducedStageFrame(
   const bn = isActive ? 1 : 0
   refs.baseOp.current.set(stage.stage.id, bn)
 
-  ensureImageSrc(img, assetUrl(stage.media.poster))
   setOpacity(img, bn)
   return isActive ? local : -1
 }
@@ -70,7 +68,9 @@ function runVideoStageFrame(
   active: number,
   section: HTMLElement,
 ): number {
-  const video = refs.videos.current.get(stage.stage.id)
+  const id = stage.stage.id
+  const video = refs.videos.current.get(id)
+  const poster = refs.posters.current.get(id)
   if (!video) return -1
 
   const distance = Math.abs(stage.index - active)
@@ -78,13 +78,15 @@ function runVideoStageFrame(
 
   if (distance > WARM_DISTANCE) {
     updateStageVisibility(video, distance, VISIBLE_DISTANCE)
+    if (poster) updateStageVisibility(poster, distance, VISIBLE_DISTANCE)
     detachVideoSrc(video)
-    refs.baseOp.current.delete(stage.stage.id)
-    refs.shownOnce.current.delete(stage.stage.id)
+    refs.baseOp.current.delete(id)
+    refs.videoReveal.current.delete(id)
     return -1
   }
 
   const visible = updateStageVisibility(video, distance, VISIBLE_DISTANCE)
+  if (poster) updateStageVisibility(poster, distance, VISIBLE_DISTANCE)
   ensureVideoSrc(video, assetUrl(stage.media.src))
   if (!visible) return -1
 
@@ -92,15 +94,24 @@ function runVideoStageFrame(
   const local = localProgressFor(section)
 
   const bTarget = isActive ? 1 : 0
-  const bp = refs.baseOp.current.get(stage.stage.id) ?? 0
+  const bp = refs.baseOp.current.get(id) ?? 0
   const bn = bp + (bTarget - bp) * MEDIA_CONFIG.stagePresenceLerp
-  refs.baseOp.current.set(stage.stage.id, bn)
+  refs.baseOp.current.set(id, bn)
 
   maybeSeekVideo(video, local)
 
-  if (video.readyState >= 2) refs.shownOnce.current.set(stage.stage.id, true)
-  const vis = refs.shownOnce.current.get(stage.stage.id) ? 1 : 0
-  setOpacity(video, bn * smooth(local, HOLD, REVEAL) * vis)
+  // Crossfade poster → video. The poster (final frame) covers the decode gap so a
+  // cold jump shows the scene instantly instead of black; the video fades over it
+  // once it can paint. Warm clips seed at 1 (no flash); cold clips seed at 0. The
+  // reveal envelope keeps both hidden at the title-card beat (no ending spoiler).
+  const ready = video.readyState >= 2
+  const seed = refs.videoReveal.current.get(id) ?? (ready ? 1 : 0)
+  const vn = seed + ((ready ? 1 : 0) - seed) * MEDIA_CONFIG.videoRevealLerp
+  refs.videoReveal.current.set(id, vn)
+
+  const envelope = bn * smooth(local, HOLD, REVEAL)
+  setOpacity(video, envelope * vn)
+  if (poster) setOpacity(poster, envelope * (1 - vn))
   return isActive ? local : -1
 }
 

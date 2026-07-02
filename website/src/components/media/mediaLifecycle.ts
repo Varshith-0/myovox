@@ -16,10 +16,6 @@ export function updateStageVisibility(el: HTMLElement, distance: number, maxDist
   return true
 }
 
-export function ensureImageSrc(img: HTMLImageElement, url: string): void {
-  if (img.getAttribute('src') !== url) img.setAttribute('src', url)
-}
-
 export function ensureVideoSrc(video: HTMLVideoElement, url: string): void {
   if (video.getAttribute('src') !== url) {
     video.setAttribute('src', url)
