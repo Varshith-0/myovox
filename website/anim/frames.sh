@@ -14,11 +14,12 @@
 # consumed once at runtime to pick a tier by screen density, size preloading, and
 # map scroll -> frame index. Standard/phone screens load 1x; large/retina load 2x.
 #
-# Knobs (env): FPS (12), TIERS ("1x:540 2x:1080"), Q (cwebp quality 80). Higher FPS
-# = smoother slow-scrub but more frames/memory; tier heights trade crispness/bytes.
+# Knobs (env): FPS (default: EVERY source frame — no resample, maximally smooth),
+# TIERS ("1x:540 2x:1080"), Q (cwebp quality 80). Set FPS=N to downsample; leaving
+# it empty keeps all 30 frames/sec manim rendered. Tier heights trade crispness/bytes.
 set -euo pipefail
 
-FPS="${FPS:-12}"
+FPS="${FPS:-}"   # empty = keep every source frame (no fps filter)
 TIERS="${TIERS:-1x:540 2x:1080}"
 Q="${Q:-80}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -44,12 +45,13 @@ fi
 # One tier's frame extraction for one clip -> echoes the frame count.
 extract_tier() { # src dir height
   local src="$1" dir="$2" h="$3"
+  local vf; [ -n "$FPS" ] && vf="fps=$FPS,scale=-2:$h" || vf="scale=-2:$h"
   rm -rf "$dir"; mkdir -p "$dir"
   if [ "$WEBP" = ffmpeg ]; then
-    "$FFMPEG" -y -i "$src" -vf "fps=$FPS,scale=-2:$h" -q:v 3 "$dir/%04d.webp" >/dev/null 2>&1
+    "$FFMPEG" -y -i "$src" -vf "$vf" -q:v 3 "$dir/%04d.webp" >/dev/null 2>&1
   else
     local tmp; tmp="$(mktemp -d)"
-    "$FFMPEG" -y -i "$src" -vf "fps=$FPS,scale=-2:$h" "$tmp/%04d.png" >/dev/null 2>&1
+    "$FFMPEG" -y -i "$src" -vf "$vf" "$tmp/%04d.png" >/dev/null 2>&1
     ls "$tmp"/*.png | xargs -P 8 -I{} sh -c 'cwebp -quiet -q "$0" "$1" -o "$2/$(basename "${1%.png}").webp"' "$Q" {} "$dir"
     rm -rf "$tmp"
   fi
@@ -85,7 +87,7 @@ if os.path.exists(out):
         clips = {**json.load(open(out)).get("clips", {}), **clips}
     except Exception:
         pass
-json.dump({"fps": int(os.environ["FPS"]), "tiers": tiers, "clips": clips},
-          open(out, "w"), indent=0)
+fps = int(os.environ["FPS"]) if os.environ.get("FPS") else 30  # empty = native 30
+json.dump({"fps": fps, "tiers": tiers, "clips": clips}, open(out, "w"), indent=0)
 print(f"manifest: {len(clips)} clips, tiers={tiers} -> {out}")
 PY

@@ -36,7 +36,25 @@ export function ensureClipFrames(
     img.src = assetUrl(frameUrlPath(tier, id, i))
     images[i] = img
   }
-  cache.set(id, { images, count })
+  cache.set(id, { images, count, requested: new Set() })
+}
+
+/**
+ * Warm the next few frames' decodes off the main thread. drawImage(img) otherwise
+ * decodes the WebP synchronously on first paint — a multi-ms stall per new frame
+ * at 1080p that reads as scrub jank. Decoding ahead turns each draw into a pure
+ * GPU upload. Each index is requested once; a small back-window covers reversals.
+ */
+export function decodeAheadClip(clip: FrameClip, idx: number, ahead: number): void {
+  const start = Math.max(0, idx - 2)
+  const end = Math.min(clip.count - 1, idx + ahead)
+  for (let j = start; j <= end; j++) {
+    if (clip.requested.has(j)) continue
+    const img = clip.images[j]
+    if (!img || !img.complete || !img.naturalWidth) continue
+    clip.requested.add(j)
+    img.decode().catch(() => clip.requested.delete(j))
+  }
 }
 
 /** Drop a clip's frames so the browser can reclaim the decoded memory. */

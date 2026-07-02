@@ -13,6 +13,9 @@ export const MEDIA_CONFIG = {
   releaseDistance: 3,
   /** Crossfade speed from poster → live canvas once frames are drawable. */
   frameRevealLerp: 0.16,
+  /** Decode this many upcoming frames off the main thread so drawImage never
+   *  blocks on a synchronous decode (the source of scrub jank, worst at 2x). */
+  decodeAhead: 10,
   /** Cap the canvas backing-store scale so long clips stay memory-safe. */
   maxDpr: 2,
   holdStart: 0.04,
@@ -36,6 +39,8 @@ export type ClipStage = {
 export interface FrameClip {
   images: HTMLImageElement[]
   count: number
+  /** Indices already asked to decode (so we request each off-thread decode once). */
+  requested: Set<number>
 }
 
 /** A DPR tier folder name under frames/ (e.g. '1x' = standard, '2x' = retina). */
@@ -77,6 +82,8 @@ export interface MediaScrubberRefs {
   tier: MutableRefObject<FrameTier>
   /** True when the layout anchors clips to the top of their band (mobile CSS). */
   alignTop: MutableRefObject<boolean>
+  /** Last frame drawn (`id:idx`) so we skip redundant redraws while idle/fading. */
+  lastDraw: MutableRefObject<string>
   baseOp: MutableRefObject<Map<string, number>>
   /** Per-stage crossfade level (0 = poster shown, 1 = live canvas shown). */
   frameReveal: MutableRefObject<Map<string, number>>

@@ -11,6 +11,7 @@ import {
   type ClipStage,
 } from './core'
 import {
+  decodeAheadClip,
   drawFrame,
   ensureClipFrames,
   releaseClipFrames,
@@ -104,16 +105,22 @@ function runClipStageFrame(
   const local = localProgressFor(section)
   const envelope = bn * smooth(local, HOLD, REVEAL)
 
-  // Draw the exact scroll-mapped frame to the shared canvas — synchronous, so the
-  // picture is glued to the scroll. Falls back to the poster until frames decode.
+  // Draw the exact scroll-mapped frame to the shared canvas. Frames just ahead are
+  // decoded off the main thread first, so drawImage is a pure GPU upload and never
+  // stalls on a synchronous decode — that stall is the scrub jank, worst at 2x.
   const canvas = refs.canvas.current
   const clip = refs.frames.current.get(id)
   let drew = false
   if (canvas && clip && count > 0) {
     const idx = Math.min(count - 1, Math.max(0, Math.round(local * (count - 1))))
+    decodeAheadClip(clip, idx, MEDIA_CONFIG.decodeAhead)
     const img = clip.images[idx]
     if (img && img.complete && img.naturalWidth > 0) {
-      drawFrame(canvas, img, stage.media.fit, refs.alignTop.current)
+      const key = `${id}:${idx}`
+      if (refs.lastDraw.current !== key) {
+        drawFrame(canvas, img, stage.media.fit, refs.alignTop.current)
+        refs.lastDraw.current = key
+      }
       drew = true
     }
   }

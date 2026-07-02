@@ -50,6 +50,7 @@ export function MediaLayer() {
   const manifest = useRef<FrameManifest | null>(null)
   const tier = useRef<FrameTier>('1x')
   const alignTop = useRef(false)
+  const lastDraw = useRef('')
   const baseOp = useRef(new Map<string, number>())
   const frameReveal = useRef(new Map<string, number>())
   const sceneRoot = useRef<HTMLElement | null>(null)
@@ -67,6 +68,7 @@ export function MediaLayer() {
       manifest,
       tier,
       alignTop,
+      lastDraw,
       baseOp,
       frameReveal,
       sceneRoot,
@@ -107,6 +109,7 @@ export function MediaLayer() {
       if (w && h && (cv.width !== w || cv.height !== h)) {
         cv.width = w
         cv.height = h
+        lastDraw.current = '' // backing resize clears the canvas — force a redraw
       }
     }
     const ro = new ResizeObserver(resize)
