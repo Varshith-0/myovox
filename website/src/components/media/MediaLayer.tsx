@@ -4,77 +4,134 @@ import { useStore } from '@/store/useStore'
 import { assetUrl } from '@/lib/asset'
 import styles from './MediaLayer.module.css'
 import { useMediaScrubber } from './useMediaScrubber'
-import { type VideoStage } from './core'
+import {
+  MEDIA_CONFIG,
+  pickTier,
+  setOpacity,
+  type ClipStage,
+  type FrameClip,
+  type FrameManifest,
+  type FrameTier,
+} from './core'
 
 /**
- * The Act-2 video scrubber. A fixed, full-viewport layer above the 3D canvas and
+ * The Act-2 clip scrubber. A fixed, full-viewport layer above the 3D canvas and
  * below the content/captions.
  *
  * Each Act-2 stage is a 3-beat segment driven by the section's local scroll:
- *   - land (local ≈ 0): a centred title card — just the badge + headline. The
- *     clip is hidden and the caption sits low/centred (no spoiler of the end).
- *   - scroll (local 0→1): the caption rises to the top and the clip fades in and
- *     SCRUBS forward — the animation actually plays as you move.
- *   - rest: the <video> simply holds its current frame (no jump to the final
- *     frame). Reduced motion shows a static poster (the composed final frame).
+ *   - land (local ≈ 0): a centred title card — the clip is hidden and the caption
+ *     sits low/centred (no spoiler of the end).
+ *   - scroll (local 0→1): the caption rises and the clip fades in and SCRUBS
+ *     forward — the animation plays as you move.
+ *   - rest: holds its current frame. Reduced motion shows a static poster.
  *
- * The active stage's canvas is faded to 0 so the dispersed point-cloud head can't
- * ghost through. Visibility is keyed to the store's active stageIndex (reliable),
- * far stages are display:none (the compositor would otherwise juggle 19 videos +
- * the canvas), and src is loaded only near the active stage.
+ * Rendering is frame-perfect: every clip is a preloaded WebP frame sequence, and
+ * the active clip's current frame is drawn to one shared <canvas> each RAF — a
+ * synchronous drawImage with no video decoder on the hot path, so the picture is
+ * glued to the scroll however fast it moves. The per-stage poster is the base
+ * layer: shown instantly on a cold jump while that clip's frames preload, then the
+ * canvas crossfades over it. Far stages are display:none and their frames released.
  */
 
-const VIDEO_STAGES: VideoStage[] = STAGES.map((stage, index) => ({ stage, index, media: stage.media }))
+const CLIP_STAGES: ClipStage[] = STAGES.map((stage, index) => ({ stage, index, media: stage.media }))
 
-const ACT2_INDICES = new Set(VIDEO_STAGES.map((v) => v.index))
+const ACT2_INDICES = new Set(CLIP_STAGES.map((v) => v.index))
+
+/** Matches the mobile CSS that anchors a contained clip to the top of its band. */
+const TOP_ANCHOR_QUERY = '(max-width: 820px), (max-height: 600px), (max-aspect-ratio: 7/5)'
 
 export function MediaLayer() {
   const reduced = useStore((s) => s.reducedMotion)
-  // While narrating (armed + playing) → lift the clip to free a band at the
-  // bottom for the subtitles.
+  // While narrating → lift the clip to free a band for the subtitles.
   const captionsMode = useStore((s) => s.subtitlesOn)
   const posters = useRef(new Map<string, HTMLImageElement>())
-  const videos = useRef(new Map<string, HTMLVideoElement>())
+  const canvas = useRef<HTMLCanvasElement | null>(null)
+  const frames = useRef(new Map<string, FrameClip>())
+  const manifest = useRef<FrameManifest | null>(null)
+  const tier = useRef<FrameTier>('1x')
+  const alignTop = useRef(false)
   const baseOp = useRef(new Map<string, number>())
-  const videoReveal = useRef(new Map<string, number>())
+  const frameReveal = useRef(new Map<string, number>())
   const sceneRoot = useRef<HTMLElement | null>(null)
   const captionWrap = useRef<HTMLElement | null>(null)
   const canvasFade = useRef(1) // 1 = canvas visible (Act 1), 0 = hidden (Act 2)
 
   useMediaScrubber({
     reduced,
-    videoStages: VIDEO_STAGES,
+    clipStages: CLIP_STAGES,
     act2Indices: ACT2_INDICES,
     refs: {
       posters,
-      videos,
+      canvas,
+      frames,
+      manifest,
+      tier,
+      alignTop,
       baseOp,
-      videoReveal,
+      frameReveal,
       sceneRoot,
       captionWrap,
       canvasFade,
     },
   })
 
+  // Frame counts drive preloading and scroll→index mapping. Absent manifest just
+  // falls back to posters, so a missing/failed fetch degrades gracefully.
+  useEffect(() => {
+    let alive = true
+    fetch(assetUrl('anim/frames/manifest.json'))
+      .then((r) => (r.ok ? (r.json() as Promise<FrameManifest>) : null))
+      .then((m) => {
+        if (alive && m) {
+          manifest.current = m
+          tier.current = pickTier(m)
+        }
+      })
+      .catch(() => {})
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  // Size the canvas backing store to its CSS box × DPR (capped), and track the
+  // top-anchor breakpoint — both read here so the hot path never touches layout.
+  useEffect(() => {
+    const cv = canvas.current
+    if (!cv) return
+    const resize = () => {
+      alignTop.current = window.matchMedia(TOP_ANCHOR_QUERY).matches
+      const box = cv.getBoundingClientRect()
+      const dpr = Math.min(window.devicePixelRatio || 1, MEDIA_CONFIG.maxDpr)
+      const w = Math.round(box.width * dpr)
+      const h = Math.round(box.height * dpr)
+      if (w && h && (cv.width !== w || cv.height !== h)) {
+        cv.width = w
+        cv.height = h
+      }
+    }
+    const ro = new ResizeObserver(resize)
+    ro.observe(cv)
+    resize()
+    return () => ro.disconnect()
+  }, [captionsMode, reduced])
+
   useEffect(() => {
     baseOp.current.clear()
-    videoReveal.current.clear()
+    frameReveal.current.clear()
+    if (canvas.current) setOpacity(canvas.current, 0)
   }, [reduced])
 
-  if (VIDEO_STAGES.length === 0) return null
+  if (CLIP_STAGES.length === 0) return null
 
   return (
     <div className={`${styles.layer} ${captionsMode ? styles.withCaptions : ''}`}>
-      {VIDEO_STAGES.map((vs) => {
+      {CLIP_STAGES.map((vs) => {
         const fitClass = vs.media.fit === 'cover' ? styles.cover : styles.contain
         return (
           <div key={vs.stage.id} className={styles.stage}>
             {/* Poster base: the final frame, shown instantly on a cold jump while
-                the video decodes. Meaningful alt in reduced motion; decorative
-                (video carries the description) otherwise. src is declarative so the
-                browser self-prioritizes — the visible poster loads eagerly (instant
-                land) while off-screen ones pre-warm every jump target at low cost
-                (~30KB each). */}
+                this clip's frames preload; the canvas crossfades over it. Meaningful
+                alt in reduced motion; decorative (caption carries text) otherwise. */}
             <img
               ref={(el) => {
                 if (el) posters.current.set(vs.stage.id, el)
@@ -86,22 +143,20 @@ export function MediaLayer() {
               aria-hidden={reduced ? undefined : true}
               decoding="async"
             />
-            {!reduced && (
-              <video
-                ref={(el) => {
-                  if (el) videos.current.set(vs.stage.id, el)
-                  else videos.current.delete(vs.stage.id)
-                }}
-                className={`${styles.media} ${fitClass}`}
-                muted
-                playsInline
-                preload="auto"
-                aria-hidden="true"
-              />
-            )}
           </div>
         )
       })}
+      {!reduced && (
+        <div className={styles.stage}>
+          <canvas
+            ref={(el) => {
+              canvas.current = el
+            }}
+            className={styles.media}
+            aria-hidden="true"
+          />
+        </div>
+      )}
     </div>
   )
 }

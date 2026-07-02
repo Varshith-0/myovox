@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { useStore } from '@/store/useStore'
 import { smooth } from '@/lib/num'
-import { assetUrl } from '@/lib/asset'
 import {
   HOLD,
   REVEAL,
@@ -9,16 +8,16 @@ import {
   localProgressFor,
   setOpacity,
   type MediaScrubberRefs,
-  type VideoStage,
+  type ClipStage,
 } from './core'
 import {
-  detachVideoSrc,
-  ensureVideoSrc,
-  maybeSeekVideo,
-  setVideoPreload,
+  drawFrame,
+  ensureClipFrames,
+  releaseClipFrames,
   updateStageVisibility,
   VISIBLE_DISTANCE,
-  WARM_DISTANCE,
+  PRELOAD_DISTANCE,
+  RELEASE_DISTANCE,
 } from './mediaLifecycle'
 import {
   applyCaptionLift,
@@ -31,7 +30,7 @@ import {
 
 interface UseMediaScrubberArgs {
   reduced: boolean
-  videoStages: readonly VideoStage[]
+  clipStages: readonly ClipStage[]
   act2Indices: ReadonlySet<number>
   refs: MediaScrubberRefs
 }
@@ -41,9 +40,10 @@ interface FrameState {
   activeLocal: number
 }
 
+/** Reduced motion: static poster only, no scrubbing. */
 function runReducedStageFrame(
   refs: MediaScrubberRefs,
-  stage: VideoStage,
+  stage: ClipStage,
   active: number,
   section: HTMLElement,
 ): number {
@@ -62,72 +62,87 @@ function runReducedStageFrame(
   return isActive ? local : -1
 }
 
-function runVideoStageFrame(
+/** Preload near clips, release far ones; hysteresis avoids boundary thrash. */
+function updateFramePreload(refs: MediaScrubberRefs, id: string, count: number, distance: number): void {
+  if (count <= 0) return
+  if (distance <= PRELOAD_DISTANCE) {
+    ensureClipFrames(refs.frames.current, id, count, refs.tier.current)
+  } else if (distance > RELEASE_DISTANCE) {
+    releaseClipFrames(refs.frames.current, id)
+    // Reset crossfade/presence so a cold re-entry re-seeds fresh (no stale flash).
+    refs.frameReveal.current.delete(id)
+    refs.baseOp.current.delete(id)
+  }
+}
+
+function runClipStageFrame(
   refs: MediaScrubberRefs,
-  stage: VideoStage,
+  stage: ClipStage,
   active: number,
   section: HTMLElement,
 ): number {
   const id = stage.stage.id
-  const video = refs.videos.current.get(id)
-  const poster = refs.posters.current.get(id)
-  if (!video) return -1
-
   const distance = Math.abs(stage.index - active)
-  setVideoPreload(video, distance)
+  const count = refs.manifest.current?.clips[id] ?? 0
 
-  if (distance > WARM_DISTANCE) {
-    updateStageVisibility(video, distance, VISIBLE_DISTANCE)
-    if (poster) updateStageVisibility(poster, distance, VISIBLE_DISTANCE)
-    detachVideoSrc(video)
-    refs.baseOp.current.delete(id)
-    refs.videoReveal.current.delete(id)
+  updateFramePreload(refs, id, count, distance)
+
+  const poster = refs.posters.current.get(id)
+  const visible = poster ? updateStageVisibility(poster, distance, VISIBLE_DISTANCE) : false
+
+  // Presence lerp smooths the stage handoff at boundaries.
+  const isActive = stage.index === active
+  const bp = refs.baseOp.current.get(id) ?? 0
+  const bn = bp + ((isActive ? 1 : 0) - bp) * MEDIA_CONFIG.stagePresenceLerp
+  refs.baseOp.current.set(id, bn)
+
+  if (!isActive) {
+    if (poster && visible) setOpacity(poster, bn)
     return -1
   }
 
-  const visible = updateStageVisibility(video, distance, VISIBLE_DISTANCE)
-  if (poster) updateStageVisibility(poster, distance, VISIBLE_DISTANCE)
-  ensureVideoSrc(video, assetUrl(stage.media.src))
-  if (!visible) return -1
-
-  const isActive = stage.index === active
   const local = localProgressFor(section)
-
-  const bTarget = isActive ? 1 : 0
-  const bp = refs.baseOp.current.get(id) ?? 0
-  const bn = bp + (bTarget - bp) * MEDIA_CONFIG.stagePresenceLerp
-  refs.baseOp.current.set(id, bn)
-
-  maybeSeekVideo(video, local)
-
-  // Crossfade poster → video. The poster (final frame) covers the decode gap so a
-  // cold jump shows the scene instantly instead of black; the video fades over it
-  // once it can paint. Warm clips seed at 1 (no flash); cold clips seed at 0. The
-  // reveal envelope keeps both hidden at the title-card beat (no ending spoiler).
-  const ready = video.readyState >= 2
-  const seed = refs.videoReveal.current.get(id) ?? (ready ? 1 : 0)
-  const vn = seed + ((ready ? 1 : 0) - seed) * MEDIA_CONFIG.videoRevealLerp
-  refs.videoReveal.current.set(id, vn)
-
   const envelope = bn * smooth(local, HOLD, REVEAL)
-  setOpacity(video, envelope * vn)
-  if (poster) setOpacity(poster, envelope * (1 - vn))
-  return isActive ? local : -1
+
+  // Draw the exact scroll-mapped frame to the shared canvas — synchronous, so the
+  // picture is glued to the scroll. Falls back to the poster until frames decode.
+  const canvas = refs.canvas.current
+  const clip = refs.frames.current.get(id)
+  let drew = false
+  if (canvas && clip && count > 0) {
+    const idx = Math.min(count - 1, Math.max(0, Math.round(local * (count - 1))))
+    const img = clip.images[idx]
+    if (img && img.complete && img.naturalWidth > 0) {
+      drawFrame(canvas, img, stage.media.fit, refs.alignTop.current)
+      drew = true
+    }
+  }
+
+  // Crossfade: poster is the base (always at envelope); the canvas fades in over it
+  // once frames draw. Seeded so a warm clip shows no flash and a cold one shows the
+  // poster instantly. The reveal envelope keeps both hidden at the title-card beat.
+  const cp = refs.frameReveal.current.get(id) ?? (drew ? 1 : 0)
+  const cn = cp + ((drew ? 1 : 0) - cp) * MEDIA_CONFIG.frameRevealLerp
+  refs.frameReveal.current.set(id, cn)
+
+  if (poster && visible) setOpacity(poster, envelope)
+  if (canvas) setOpacity(canvas, envelope * cn)
+  return local
 }
 
 function runMediaPhase(
   reduced: boolean,
   refs: MediaScrubberRefs,
-  videoStages: readonly VideoStage[],
+  clipStages: readonly ClipStage[],
   active: number,
 ): FrameState {
   let activeLocal = -1
-  for (const stage of videoStages) {
+  for (const stage of clipStages) {
     const section = document.getElementById(stage.stage.id)
     if (!section) continue
     const local = reduced
       ? runReducedStageFrame(refs, stage, active, section)
-      : runVideoStageFrame(refs, stage, active, section)
+      : runClipStageFrame(refs, stage, active, section)
     if (local >= 0) activeLocal = local
   }
   return { active, activeLocal }
@@ -146,19 +161,19 @@ function runFxPhase(
   applyScrollCue(frame.activeLocal, reduced)
 }
 
-/** Hot-path RAF loop that scrubs active stage media and applies title-card FX. */
+/** Hot-path RAF loop that scrubs the active clip's frames and applies title-card FX. */
 export function useMediaScrubber({
   reduced,
-  videoStages,
+  clipStages,
   act2Indices,
   refs,
 }: UseMediaScrubberArgs): void {
   useEffect(() => {
-    if (videoStages.length === 0) return
+    if (clipStages.length === 0) return
     let raf = 0
     const tick = () => {
       const active = useStore.getState().stageIndex
-      const frame = runMediaPhase(reduced, refs, videoStages, active)
+      const frame = runMediaPhase(reduced, refs, clipStages, active)
       runFxPhase(reduced, act2Indices, refs, frame)
 
       raf = requestAnimationFrame(tick)
@@ -169,5 +184,5 @@ export function useMediaScrubber({
       cancelAnimationFrame(raf)
       resetDomFx(refs.sceneRoot, refs.captionWrap)
     }
-  }, [reduced, videoStages, act2Indices, refs])
+  }, [reduced, clipStages, act2Indices, refs])
 }
