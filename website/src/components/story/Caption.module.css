@@ -37,7 +37,7 @@
   position: absolute;
   inset: -0.9rem -2.2rem;
   z-index: -1;
-  background: radial-gradient(ellipse at center, rgba(5, 5, 5, 0.82), rgba(5, 5, 5, 0.5) 60%, transparent 100%);
+  background: radial-gradient(ellipse at center, rgba(3, 3, 3, 0.82), rgba(3, 3, 3, 0.5) 60%, transparent 100%);
   pointer-events: none;
 }
 .wrapTop .caption {
