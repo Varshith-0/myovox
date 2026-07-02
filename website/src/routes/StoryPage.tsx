@@ -3,6 +3,7 @@ import { StorySections } from '@/components/story/StorySections'
 import { Caption } from '@/components/story/Caption'
 import { ProgressRail } from '@/components/story/ProgressRail'
 import { MediaLayer } from '@/components/media/MediaLayer'
+import { MediaLoader } from '@/components/media/MediaLoader'
 import { NarrationLayer } from '@/components/story/NarrationLayer'
 import { Subtitles } from '@/components/story/Subtitles'
 import { PlayButton } from '@/components/story/PlayButton'
@@ -23,6 +24,7 @@ export function StoryPage() {
     <>
       <h1 className="sr-only">EMG to Text — reading speech from the muscles of the face</h1>
       <MediaLayer />
+      <MediaLoader />
       <div ref={scroller}>
         <StorySections />
       </div>

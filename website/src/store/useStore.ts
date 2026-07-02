@@ -24,6 +24,9 @@ export interface AppState {
   playing: boolean
   /** Playback speed multiplier (1×–5×) — scales both scroll and the voice. */
   playSpeed: number
+  /** The active clip's frames aren't ready to draw yet (fast-scrolled past the
+   *  preload window) — drives the "rendering…" overlay and gates Play. */
+  mediaLoading: boolean
 
   setStageIndex: (i: number) => void
   setReducedMotion: (reduced: boolean) => void
@@ -32,6 +35,7 @@ export interface AppState {
   setVolume: (v: number) => void
   setPlaying: (playing: boolean) => void
   setPlaySpeed: (speed: number) => void
+  setMediaLoading: (loading: boolean) => void
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -42,6 +46,7 @@ export const useStore = create<AppState>((set) => ({
   volume: 1,
   playing: false,
   playSpeed: 1,
+  mediaLoading: false,
 
   setStageIndex: (stageIndex) =>
     set((s) => (s.stageIndex === stageIndex ? s : { ...s, stageIndex })),
@@ -52,4 +57,6 @@ export const useStore = create<AppState>((set) => ({
   setVolume: (volume) => set((s) => (s.volume === volume ? s : { ...s, volume })),
   setPlaying: (playing) => set((s) => (s.playing === playing ? s : { ...s, playing })),
   setPlaySpeed: (playSpeed) => set((s) => (s.playSpeed === playSpeed ? s : { ...s, playSpeed })),
+  setMediaLoading: (mediaLoading) =>
+    set((s) => (s.mediaLoading === mediaLoading ? s : { ...s, mediaLoading })),
 }))

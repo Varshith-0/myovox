@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useStore } from '@/store/useStore'
 import { smooth } from '@/lib/num'
 import {
@@ -13,7 +13,7 @@ import {
 import {
   decodeAheadClip,
   drawFrame,
-  ensureClipFrames,
+  ensureClipWindow,
   releaseClipFrames,
   updateStageVisibility,
   VISIBLE_DISTANCE,
@@ -39,6 +39,7 @@ interface UseMediaScrubberArgs {
 interface FrameState {
   active: number
   activeLocal: number
+  activeNotReady: boolean
 }
 
 /** Reduced motion: static poster only, no scrubbing. */
@@ -63,40 +64,52 @@ function runReducedStageFrame(
   return isActive ? local : -1
 }
 
-/** Preload near clips, release far ones; hysteresis avoids boundary thrash. */
-function updateFramePreload(refs: MediaScrubberRefs, id: string, count: number, distance: number): void {
-  if (count <= 0) return
-  if (distance <= PRELOAD_DISTANCE) {
-    ensureClipFrames(refs.frames.current, id, count, refs.tier.current)
-  } else if (distance > RELEASE_DISTANCE) {
-    releaseClipFrames(refs.frames.current, id)
-    // Reset crossfade/presence so a cold re-entry re-seeds fresh (no stale flash).
-    refs.frameReveal.current.delete(id)
-    refs.baseOp.current.delete(id)
-  }
+interface ClipFrameResult {
+  local: number
+  /** Active clip past the title card but its current frame can't be drawn yet. */
+  notReady: boolean
 }
+
+const NOT_READY: ClipFrameResult = { local: -1, notReady: false }
 
 function runClipStageFrame(
   refs: MediaScrubberRefs,
   stage: ClipStage,
   active: number,
   section: HTMLElement,
-): number {
+): ClipFrameResult {
   const id = stage.stage.id
   const distance = Math.abs(stage.index - active)
   const count = refs.manifest.current?.clips[id] ?? 0
+  const isActive = stage.index === active
 
-  updateFramePreload(refs, id, count, distance)
+  // Drop clips beyond the ring entirely; re-seed on cold re-entry (no stale flash).
+  if (distance > RELEASE_DISTANCE) {
+    releaseClipFrames(refs.frames.current, id)
+    refs.frameReveal.current.delete(id)
+    refs.baseOp.current.delete(id)
+    return NOT_READY
+  }
 
   // Presence lerp smooths the stage handoff at boundaries.
-  const isActive = stage.index === active
   const bp = refs.baseOp.current.get(id) ?? 0
   const bn = bp + ((isActive ? 1 : 0) - bp) * MEDIA_CONFIG.stagePresenceLerp
   refs.baseOp.current.set(id, bn)
 
-  if (!isActive) return -1
+  if (!isActive) {
+    // Near, not active → preload the opening window so entering at the top is instant.
+    if (count > 0 && distance <= PRELOAD_DISTANCE) {
+      ensureClipWindow(refs.frames.current, id, count, refs.tier.current, 0)
+    }
+    return NOT_READY
+  }
 
   const local = localProgressFor(section)
+  const idx = count > 0 ? Math.min(count - 1, Math.max(0, Math.round(local * (count - 1)))) : 0
+  // Load a bounded window around the current frame, current frame first — so a
+  // fast-scroll stop paints immediately and held memory stays flat on mobile.
+  if (count > 0) ensureClipWindow(refs.frames.current, id, count, refs.tier.current, idx)
+
   const envelope = bn * smooth(local, HOLD, REVEAL)
 
   // Draw the exact scroll-mapped frame to the shared canvas. Frames just ahead are
@@ -106,7 +119,6 @@ function runClipStageFrame(
   const clip = refs.frames.current.get(id)
   let drew = false
   if (canvas && clip && count > 0) {
-    const idx = Math.min(count - 1, Math.max(0, Math.round(local * (count - 1))))
     decodeAheadClip(clip, idx, MEDIA_CONFIG.decodeAhead)
     const img = clip.images[idx]
     if (img && img.complete && img.naturalWidth > 0) {
@@ -129,7 +141,11 @@ function runClipStageFrame(
   refs.frameReveal.current.set(id, cn)
 
   if (canvas) setOpacity(canvas, envelope * cn)
-  return local
+
+  // Past the title card but the current frame still can't be drawn (fast-scrolled
+  // past the preload window) → signals the "rendering…" overlay.
+  const notReady = count > 0 && local > REVEAL && !drew
+  return { local, notReady }
 }
 
 function runMediaPhase(
@@ -139,15 +155,22 @@ function runMediaPhase(
   active: number,
 ): FrameState {
   let activeLocal = -1
+  let activeNotReady = false
   for (const stage of clipStages) {
     const section = document.getElementById(stage.stage.id)
     if (!section) continue
-    const local = reduced
-      ? runReducedStageFrame(refs, stage, active, section)
-      : runClipStageFrame(refs, stage, active, section)
-    if (local >= 0) activeLocal = local
+    if (reduced) {
+      const local = runReducedStageFrame(refs, stage, active, section)
+      if (local >= 0) activeLocal = local
+    } else {
+      const { local, notReady } = runClipStageFrame(refs, stage, active, section)
+      if (local >= 0) {
+        activeLocal = local
+        activeNotReady = notReady
+      }
+    }
   }
-  return { active, activeLocal }
+  return { active, activeLocal, activeNotReady }
 }
 
 function runFxPhase(
@@ -170,13 +193,26 @@ export function useMediaScrubber({
   act2Indices,
   refs,
 }: UseMediaScrubberArgs): void {
+  const notReadyFrames = useRef(0)
+  const lastLoading = useRef(false)
+
   useEffect(() => {
     if (clipStages.length === 0) return
     let raf = 0
+    // Write the "rendering…" flag to the store only when it flips (never per-frame).
+    const syncLoading = (loading: boolean) => {
+      if (loading === lastLoading.current) return
+      lastLoading.current = loading
+      useStore.getState().setMediaLoading(loading)
+    }
     const tick = () => {
       const active = useStore.getState().stageIndex
       const frame = runMediaPhase(reduced, refs, clipStages, active)
       runFxPhase(reduced, act2Indices, refs, frame)
+
+      // Debounced "rendering…" signal → store (on change only, never per-frame spam).
+      notReadyFrames.current = frame.activeNotReady ? notReadyFrames.current + 1 : 0
+      syncLoading(notReadyFrames.current > MEDIA_CONFIG.loadDebounceFrames)
 
       raf = requestAnimationFrame(tick)
     }
@@ -185,6 +221,8 @@ export function useMediaScrubber({
     return () => {
       cancelAnimationFrame(raf)
       resetDomFx(refs.sceneRoot, refs.captionWrap)
+      notReadyFrames.current = 0
+      syncLoading(false)
     }
   }, [reduced, clipStages, act2Indices, refs])
 }

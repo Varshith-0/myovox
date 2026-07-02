@@ -17,26 +17,52 @@ export function updateStageVisibility(el: HTMLElement, distance: number, maxDist
 }
 
 /**
- * Preload a clip's entire frame sequence into memory (idempotent). Holding every
- * frame is what makes scrubbing robust: once loaded, drawing any position is a
- * synchronous, network-free `drawImage` — no seek, no decode-wait, no buffer
- * starvation, however fast the scroll moves.
+ * Keep a bounded window of frames loaded around `idx`, current frame first.
+ *
+ * This is what makes scrubbing robust on any device: instead of fetching every
+ * frame of a clip (thousands of images → mobile floods the network and the browser
+ * evicts them under memory pressure → a fast-scroll stop shows nothing), we fetch
+ * only [idx-loadBack, idx+loadAhead] and free anything outside [idx-keepBack,
+ * idx+keepAhead]. The frame you stop on is fetched at high priority, so it paints
+ * immediately instead of waiting for frames 0..idx to load in order.
  */
-export function ensureClipFrames(
+export function ensureClipWindow(
   cache: Map<string, FrameClip>,
   id: string,
   count: number,
   tier: FrameTier,
+  idx: number,
 ): void {
-  if (cache.has(id)) return
-  const images: HTMLImageElement[] = new Array(count)
-  for (let i = 0; i < count; i++) {
+  let clip = cache.get(id)
+  if (!clip) {
+    clip = { images: new Array(count), count, requested: new Set() }
+    cache.set(id, clip)
+  }
+  const images = clip.images
+
+  const loStart = Math.max(0, idx - MEDIA_CONFIG.loadBack)
+  const loEnd = Math.min(count - 1, idx + MEDIA_CONFIG.loadAhead)
+  for (let j = loStart; j <= loEnd; j++) {
+    if (images[j]) continue
     const img = new Image()
     img.decoding = 'async'
-    img.src = assetUrl(frameUrlPath(tier, id, i))
-    images[i] = img
+    img.fetchPriority = j === idx ? 'high' : Math.abs(j - idx) <= 8 ? 'auto' : 'low'
+    img.src = assetUrl(frameUrlPath(tier, id, j))
+    images[j] = img
   }
-  cache.set(id, { images, count, requested: new Set() })
+
+  // Free frames well outside the window so held memory stays flat regardless of
+  // clip length — the fix for mobile eviction.
+  const keepLo = Math.max(0, idx - MEDIA_CONFIG.keepBack)
+  const keepHi = Math.min(count - 1, idx + MEDIA_CONFIG.keepAhead)
+  for (let j = 0; j < count; j++) {
+    const img = images[j]
+    if (img && (j < keepLo || j > keepHi)) {
+      img.src = ''
+      images[j] = undefined
+      clip.requested.delete(j)
+    }
+  }
 }
 
 /**
@@ -57,11 +83,11 @@ export function decodeAheadClip(clip: FrameClip, idx: number, ahead: number): vo
   }
 }
 
-/** Drop a clip's frames so the browser can reclaim the decoded memory. */
+/** Drop a clip's frames entirely so the browser can reclaim the memory. */
 export function releaseClipFrames(cache: Map<string, FrameClip>, id: string): void {
   const clip = cache.get(id)
   if (!clip) return
-  for (const img of clip.images) img.src = ''
+  for (const img of clip.images) if (img) img.src = ''
   cache.delete(id)
 }
 

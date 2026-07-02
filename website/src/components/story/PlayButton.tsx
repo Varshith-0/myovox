@@ -38,6 +38,8 @@ export function PlayButton() {
   const setPlaying = useStore((s) => s.setPlaying)
   const setPlaySpeed = useStore((s) => s.setPlaySpeed)
   const setNarrationOn = useStore((s) => s.setNarrationOn)
+  // Don't let Play start into a clip that hasn't rendered yet (blank auto-scroll).
+  const mediaLoading = useStore((s) => s.mediaLoading)
 
   const rafRef = useRef(0)
   const lastT = useRef(0)
@@ -168,7 +170,14 @@ export function PlayButton() {
         type="button"
         className={styles.btn}
         onClick={() => (playing ? stop() : start())}
-        aria-label={playing ? 'Pause auto-play' : 'Play the story hands-free'}
+        disabled={!playing && mediaLoading}
+        aria-label={
+          playing
+            ? 'Pause auto-play'
+            : mediaLoading
+              ? 'Play (waiting for the animation to finish rendering)'
+              : 'Play the story hands-free'
+        }
       >
         <span className={playing ? styles.pause : styles.play} aria-hidden="true" />
         <span className={styles.label}>{playing ? 'Pause' : 'Play'}</span>

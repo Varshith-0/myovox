@@ -53,7 +53,7 @@
   padding: 0.5rem 0.85rem;
 }
 
-.btn:hover,
+.btn:not(:disabled):hover,
 .speed:not(:disabled):hover {
   color: var(--ink);
   border-color: var(--line-bright);
@@ -66,8 +66,10 @@
   outline-offset: 3px;
 }
 
-/* The speed control is only meaningful during playback — dim + lock it otherwise. */
-.speed:disabled {
+/* Disabled: the speed control off-playback, and Play while a clip is still
+   rendering — dim + lock so the reader can't auto-scroll into a blank clip. */
+.speed:disabled,
+.btn:disabled {
   opacity: 0.34;
   cursor: default;
 }

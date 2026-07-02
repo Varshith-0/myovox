@@ -16,8 +16,20 @@ export const MEDIA_CONFIG = {
   /** Decode this many upcoming frames off the main thread so drawImage never
    *  blocks on a synchronous decode (the source of scrub jank, worst at 2x). */
   decodeAhead: 10,
-  /** Cap the canvas backing-store scale so long clips stay memory-safe. */
-  maxDpr: 2,
+  /** Windowed loading: only frames near the playhead are fetched/held (current
+   *  frame first). Bounds memory so mobile never evicts, and makes a fast-scroll
+   *  stop load the stopped-at frame immediately instead of waiting through 0..N. */
+  loadAhead: 48,
+  loadBack: 12,
+  keepAhead: 72,
+  keepBack: 24,
+  /** Show the "rendering…" overlay only after the active frame has been un-drawable
+   *  this many frames (~200ms) — so a real fast-scroll stall triggers it but brief
+   *  in-scroll gaps don't flash it. */
+  loadDebounceFrames: 12,
+  /** Canvas backing scale cap. 3 = render at full density on DPR-3 phones (no
+   *  2x→3x upscale blur); the source tier is chosen separately by pickTier. */
+  maxDpr: 3,
   holdStart: 0.04,
   revealEnd: 0.16,
   captionRiseVh: 22,
@@ -35,9 +47,11 @@ export type ClipStage = {
   media: Stage['media']
 }
 
-/** A clip's preloaded frame images, indexed 0..count-1. */
+/** A clip's frame images, indexed 0..count-1. Sparse: only the frames inside the
+ *  current load window are populated; the rest are undefined (freed or not yet
+ *  loaded), which is what keeps memory bounded on mobile. */
 export interface FrameClip {
-  images: HTMLImageElement[]
+  images: (HTMLImageElement | undefined)[]
   count: number
   /** Indices already asked to decode (so we request each off-thread decode once). */
   requested: Set<number>

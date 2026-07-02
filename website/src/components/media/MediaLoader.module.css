@@ -1,0 +1,44 @@
+/* Centered in the clip band (matches MediaLayer .stage), above the media layer
+   (z 4) and below the content/caption (z 10). Non-interactive. */
+.loader {
+  position: fixed;
+  top: 24vh;
+  bottom: 3vh;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-5, 1.15rem);
+  pointer-events: none;
+  animation: mediaLoaderIn 0.35s var(--ease-out, ease) both;
+}
+
+/* Mirror the mobile band anchor so the mark sits over the clip, not the caption. */
+@media (max-width: 820px), (max-height: 600px), (max-aspect-ratio: 7/5) {
+  .loader {
+    top: min(max(20vh, 210px), 40vh);
+    bottom: 4vh;
+  }
+}
+
+.text {
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  text-align: center;
+  padding: 0 1.5rem;
+}
+
+@keyframes mediaLoaderIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
