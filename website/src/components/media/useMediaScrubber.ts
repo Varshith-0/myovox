@@ -88,19 +88,13 @@ function runClipStageFrame(
 
   updateFramePreload(refs, id, count, distance)
 
-  const poster = refs.posters.current.get(id)
-  const visible = poster ? updateStageVisibility(poster, distance, VISIBLE_DISTANCE) : false
-
   // Presence lerp smooths the stage handoff at boundaries.
   const isActive = stage.index === active
   const bp = refs.baseOp.current.get(id) ?? 0
   const bn = bp + ((isActive ? 1 : 0) - bp) * MEDIA_CONFIG.stagePresenceLerp
   refs.baseOp.current.set(id, bn)
 
-  if (!isActive) {
-    if (poster && visible) setOpacity(poster, bn)
-    return -1
-  }
+  if (!isActive) return -1
 
   const local = localProgressFor(section)
   const envelope = bn * smooth(local, HOLD, REVEAL)
@@ -125,14 +119,15 @@ function runClipStageFrame(
     }
   }
 
-  // Crossfade: poster is the base (always at envelope); the canvas fades in over it
-  // once frames draw. Seeded so a warm clip shows no flash and a cold one shows the
-  // poster instantly. The reveal envelope keeps both hidden at the title-card beat.
+  // Fade the canvas in over the black layer, latched upward: once real frames draw
+  // we keep it faded in, so a momentarily un-decoded frame can't drop back to black
+  // mid-scrub. Seeded so a warm clip shows no flash. The reveal envelope keeps it
+  // hidden at the title-card beat; the clips start from black, so the load state is
+  // just the black layer — the animation's actual beginning, no end-frame spoiler.
   const cp = refs.frameReveal.current.get(id) ?? (drew ? 1 : 0)
-  const cn = cp + ((drew ? 1 : 0) - cp) * MEDIA_CONFIG.frameRevealLerp
+  const cn = drew ? cp + (1 - cp) * MEDIA_CONFIG.frameRevealLerp : cp
   refs.frameReveal.current.set(id, cn)
 
-  if (poster && visible) setOpacity(poster, envelope)
   if (canvas) setOpacity(canvas, envelope * cn)
   return local
 }
