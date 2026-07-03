@@ -1,14 +1,21 @@
 # REEL 5 — WORDS. "It guesses sounds, not spelling. A map of 34,546 English words
 # turns sounds into sentences — by finding the cheapest path through it."
 # OPENS ON: the phoneme row K AE T (== scene 4 close).
-# The sounds arc onto a constellation of word-nodes; candidate paths flicker; the
-# cheapest route ignites end to end and its words lift into a sentence.
-# CLOSES ON: the lit sentence + 3 ghost rivals  (== scene 6 open).
+# The sounds feed a LEGIBLE word lattice: 6 columns, each the right word plus a
+# look-alike. A single cheapest path lights up left-to-right through the real
+# words; those lit words then slide together INTO the finished sentence — so the
+# viewer actually sees the sentence get produced.
+# CLOSES ON: the sentence "the cat sat by the door".
 from manim import *
 from style import *
 from reel_common import WHITE, phoneme_row, motes, drift
 import numpy as np
 
+CORRECT = ["the", "cat", "sat", "by", "the", "door"]
+ALT = ["a", "cot", "sad", "buy", "an", "dock"]
+ALT_SIDE = [+1, -1, +1, -1, +1, -1]      # which side the look-alike sits
+COLS_X = np.linspace(-4.2, 4.2, 6)
+Y_MID, Y_OFF = 0.0, 1.0
 SENTENCE = "the cat sat by the door"
 
 
@@ -18,84 +25,92 @@ class Words(Scene):
         field = drift(motes(seed_n=3))
         self.add(field)
 
-        # ---- OPEN: the phoneme row (matched), drift it up ---------------
+        # ---- OPEN: the phoneme row (matched); lift it to feed the map ---
         self.next_section("open")
         row = phoneme_row(("K", "AE", "T"), at=[3.7, 0, 0], s=30)
         self.add(row)
-        self.play(row.animate.move_to([0, 2.6, 0]).scale(0.8), run_time=0.7,
-                  rate_func=smooth)
+        self.play(row.animate.scale(0.8).move_to([0, 3.05, 0]), run_time=0.7, rate_func=smooth)
+        sub = mono("guesses sounds, not spelling", 16, INK_FAINT).next_to(row, DOWN, buff=0.18)
+        self.play(FadeIn(sub), run_time=0.3)
 
-        # ---- BEAT 1: a constellation of words ---------------------------
+        # ---- BEAT 1: build the word lattice — real words, look-alikes ---
         self.next_section("map")
-        rng = np.random.RandomState(4)
-        nodes = VGroup()
-        node_pts = []
-        for _ in range(46):
-            p = [rng.uniform(-5.6, 5.6), rng.uniform(-2.4, 1.4), 0]
-            node_pts.append(p)
-            nodes.add(Dot(p, radius=0.03, color=INK).set_opacity(rng.uniform(0.25, 0.6)))
-        edges = VGroup()
-        node_pts = np.array(node_pts)
-        for i in range(len(node_pts)):
-            d = np.linalg.norm(node_pts - node_pts[i], axis=1)
-            for j in np.argsort(d)[1:3]:
-                edges.add(Line(node_pts[i], node_pts[j], stroke_color=INK_GHOST,
-                               stroke_width=0.8).set_opacity(0.3))
-        maplab = mono("34,546 words", 20, INK_FAINT).to_edge(DOWN, buff=0.5)
-        self.play(LaggedStart(*[FadeIn(e) for e in edges], lag_ratio=0.004),
-                  LaggedStart(*[GrowFromCenter(n) for n in nodes], lag_ratio=0.01),
-                  FadeIn(maplab), run_time=1.2)
+        start = Circle(0.16, stroke_color=INK, stroke_width=2.4,
+                       fill_color=BG, fill_opacity=1).move_to([-5.7, Y_MID, 0])
+        end = Circle(0.16, stroke_color=INK, stroke_width=2.4,
+                     fill_color=BG, fill_opacity=1).move_to([5.7, Y_MID, 0])
 
-        # ---- BEAT 2: candidate paths flicker ---------------------------
-        self.next_section("candidates")
-        # pick a route across the map (left→right ordered nodes) for the winner
-        order = np.argsort(node_pts[:, 0])
-        route_idx = [order[k] for k in np.linspace(0, len(order) - 1, 6).astype(int)]
-        route = [node_pts[i] for i in route_idx]
+        correct, alts = [], []
+        for i, x in enumerate(COLS_X):
+            c = mono(CORRECT[i], 22, INK).move_to([x, Y_MID, 0])
+            a = mono(ALT[i], 20, INK_GHOST).move_to([x, Y_MID + ALT_SIDE[i] * Y_OFF, 0])
+            correct.append(c)
+            alts.append(a)
+        correct_g = VGroup(*correct)
+        alts_g = VGroup(*alts)
 
-        for s in range(2):
-            ridx = rng.choice(len(node_pts), 5, replace=False)
-            rpts = sorted([node_pts[i] for i in ridx], key=lambda p: p[0])
-            faint = VMobject().set_points_as_corners(rpts).set_stroke(INK, 1.4, opacity=0.35)
-            self.play(Create(faint, run_time=0.4))
-            self.play(FadeOut(faint, run_time=0.25))
+        def link(p, q, gap=0.42):
+            a = np.array(p, float)
+            b = np.array(q, float)
+            u = (b - a) / (np.linalg.norm(b - a) + 1e-9)
+            return Line(a + u * gap, b - u * gap, stroke_color=INK_GHOST, stroke_width=1.2)
 
-        # ---- BEAT 3: the cheapest route ignites ------------------------
-        self.next_section("ignite")
-        winner = VMobject().set_points_as_corners(route).set_stroke(WHITE, 2.4)
-        scan = Dot(route[0], radius=0.06, color=WHITE)
-        self.add(scan)
-        self.play(Create(winner), MoveAlongPath(scan, winner),
-                  run_time=1.0, rate_func=rate_functions.ease_in_out_sine)
-        self.play(FadeOut(scan), run_time=0.2)
+        spine = [link(start.get_center(), [COLS_X[0], Y_MID, 0], 0.22)]
+        branches = []
+        for i in range(5):
+            spine.append(link([COLS_X[i], Y_MID, 0], [COLS_X[i + 1], Y_MID, 0]))
+            branches.append(link([COLS_X[i], Y_MID, 0], alts[i + 1].get_center()))
+            branches.append(link(alts[i].get_center(), [COLS_X[i + 1], Y_MID, 0]))
+        spine.append(link([COLS_X[5], Y_MID, 0], end.get_center(), 0.22))
+        # branches off the alts of the first / into the last, for a fuller web
+        branches.append(link(start.get_center(), alts[0].get_center(), 0.22))
+        branches.append(link(alts[5].get_center(), end.get_center(), 0.22))
+        spine_g = VGroup(*spine)
+        branch_g = VGroup(*branches)
 
-        # words lift off the route and assemble into a sentence up top
-        words = SENTENCE.split()
-        sent = VGroup(*[mono(w, 30, INK) for w in words]).arrange(RIGHT, buff=0.32)
-        sent.move_to([0, 1.6, 0])
-        risers = VGroup()
-        for k, w in enumerate(words):
-            anchor = route[min(k, len(route) - 1)]
-            wm = mono(w, 30, INK).move_to(anchor).scale(0.5).set_opacity(0.0)
-            risers.add(wm)
-        self.add(risers)
+        maplab = mono("34,546 words  ·  five times what it trained on", 18, INK_FAINT
+                      ).move_to([0, -2.55, 0])
+
+        self.play(GrowFromCenter(start), GrowFromCenter(end), run_time=0.3)
+        self.play(LaggedStart(*[FadeIn(m, shift=UP * 0.05) for m in [*correct, *alts]],
+                              lag_ratio=0.03),
+                  FadeIn(maplab), run_time=1.0)
+        self.play(LaggedStart(*[Create(e) for e in [*spine, *branches]], lag_ratio=0.02),
+                  run_time=0.9)
+        self.wait(0.2)
+
+        # ---- BEAT 2: the cheapest path lights up, left to right --------
+        self.next_section("path")
+        cap = mono("find the cheapest path", 18, INK_DIM).move_to([0, -2.55, 0])
+        self.play(ReplacementTransform(maplab, cap),
+                  alts_g.animate.set_opacity(0.28),
+                  branch_g.animate.set_stroke(opacity=0.1),
+                  run_time=0.4)
+
+        pulse = Dot(start.get_right(), radius=0.08, color=WHITE)
+        self.add(pulse)
+        self.play(start.animate.set_stroke(WHITE, 3.0), run_time=0.15)
+        for i in range(6):
+            self.play(
+                pulse.animate.move_to(correct[i].get_center()),
+                spine[i].animate.set_stroke(WHITE, 3.0, opacity=1.0),
+                correct[i].animate.set_color(WHITE).scale(1.12),
+                run_time=0.26, rate_func=smooth)
+        self.play(pulse.animate.move_to(end.get_left()),
+                  spine[6].animate.set_stroke(WHITE, 3.0, opacity=1.0),
+                  end.animate.set_stroke(WHITE, 3.0), run_time=0.24)
+        self.remove(pulse)
+
+        # ---- BEAT 3: the lit words slide together INTO the sentence ----
+        self.next_section("sentence")
+        sent = VGroup(*[mono(w, 32, WHITE) for w in CORRECT]).arrange(RIGHT, buff=0.34)
+        sent.move_to([0, 0.2, 0])
+        clutter = VGroup(alts_g, spine_g, branch_g, start, end, cap, row, sub)
         self.play(
-            FadeOut(nodes), FadeOut(edges), FadeOut(winner), FadeOut(maplab),
-            FadeOut(row),
-            LaggedStart(*[Transform(risers[k], sent[k]) for k in range(len(words))],
-                        lag_ratio=0.08),
-            run_time=1.1, rate_func=smooth)
-
-        # ---- CLOSE: winner up, 3 ghost rivals beneath -------------------
-        self.next_section("rivals")
-        rivals_txt = ["the cat sat by the door", "the cat sped by the door",
-                      "a cat sat by the door"]
-        rivals = VGroup()
-        for i, r in enumerate(rivals_txt):
-            rg = mono(r, 24, INK_GHOST).set_opacity(0.4).move_to([0, 0.4 - i * 0.7, 0])
-            rivals.add(rg)
-        self.play(risers.animate.move_to([0, 1.6, 0]),  # settle winner
-                  LaggedStart(*[FadeIn(r, shift=UP * 0.06) for r in rivals],
-                              lag_ratio=0.1),
-                  run_time=0.8)
+            *[Transform(correct[i], sent[i]) for i in range(6)],
+            FadeOut(clutter),
+            run_time=0.9, rate_func=smooth)
+        self.add(glow(VGroup(*correct)))
+        self.play(Flash([0, 0.2, 0], color=WHITE, num_lines=14, flash_radius=2.2,
+                        line_length=0.18, time_width=0.4), run_time=0.5)
         self.wait(0.4)

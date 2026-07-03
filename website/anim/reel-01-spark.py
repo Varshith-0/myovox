@@ -1,13 +1,12 @@
 # REEL 1 — SPARK. "Every word begins as movement; a moving muscle leaks a pulse."
-# One continuous face draws on; the lips mouth a SILENT word; each articulation
-# ripples faint pulses across jaw, cheek, throat; the pulses condense into the 31
-# sensor points that rest on the skin.
-# CLOSES ON: face_front + 31 settled sensor points  (== scene 2 open).
+# The head draws on; the lips mouth a SILENT word; each articulation FLASHES the
+# muscle sites white (monochrome — no fill discs); then the 31-sensor array (the
+# hand-placed grid from 06-signal.py) grows onto the skin.
+# CLOSES ON: head + face + 31 grid sensors  (== scene 2 open).
 from manim import *
 from style import *
-from reel_common import (WHITE, face_front, mouth_closed, mouth_open,
-                         sensor_positions, motes, drift)
-import numpy as np
+from reel_common import (WHITE, head_outline, face_features, mouth_closed,
+                         mouth_open, MUSCLE_SITES, sensor_array, motes, drift)
 
 
 class Spark(Scene):
@@ -16,60 +15,34 @@ class Spark(Scene):
         field = drift(motes(seed_n=3))
         self.add(field)
 
-        # ---- BEAT 1: the face draws on, one continuous line -------------
+        # ---- BEAT 1: the head draws on --------------------------------
         self.next_section("draw")
-        fc = face_front()
+        head = head_outline(INK, 2.2)
+        feats = face_features()
         mouth = mouth_closed()
-        spark0 = Dot(ORIGIN, radius=0.05, color=WHITE)
+        spark0 = Dot([0, 0.6, 0], radius=0.05, color=WHITE)
         self.play(FadeIn(spark0, scale=2.0), run_time=0.4)
-        self.play(Create(fc, run_time=1.5, rate_func=smooth),
-                  spark0.animate.move_to([0, -0.28, 0]).set_opacity(0.0))
+        self.play(Create(head, run_time=1.4, rate_func=smooth),
+                  spark0.animate.move_to([0, -0.25, 0]).set_opacity(0.0))
         self.remove(spark0)
-        self.play(Create(mouth), run_time=0.4)
-        self.wait(0.15)
+        self.play(Create(feats), Create(mouth), run_time=0.6)
+        self.wait(0.1)
 
-        # ---- BEAT 2: silent articulation + pulses ripple ---------------
+        # ---- BEAT 2: silent articulation, muscle sites flash white -----
         self.next_section("mouth")
-        # muscle sites the pulses radiate from (cheek, jaw, throat)
-        sites = [[-0.95, 0.05, 0], [0.95, 0.05, 0],
-                 [-0.75, -0.55, 0], [0.75, -0.55, 0], [0.0, -1.9, 0]]
-
-        def ripple(site, rmax=0.55, rt=0.7):
-            ring = Circle(radius=0.05, stroke_color=WHITE, stroke_width=2.4
-                          ).move_to(site).set_opacity(0.9)
-            self.add(ring)
-            return ring, AnimationGroup(
-                ring.animate.scale(rmax / 0.05).set_stroke(opacity=0.0),
-                run_time=rt, rate_func=rate_functions.ease_out_sine)
-
-        # two silent syllables, each opening the mouth and firing pulses
         for k in range(2):
-            mo = mouth_open(h=0.30 + 0.08 * k)
-            self.play(Transform(mouth, mo), run_time=0.28)
-            rings = []
-            anims = []
-            for s in sites:
-                r, a = ripple(s, rmax=0.5 + 0.12 * k)
-                rings.append(r)
-                anims.append(a)
-            self.play(*anims, run_time=0.7)
-            for r in rings:
-                self.remove(r)
-            self.play(Transform(mouth, mouth_closed()), run_time=0.24)
+            self.play(Transform(mouth, mouth_open(h=0.28 + 0.08 * k)), run_time=0.26)
+            self.play(
+                LaggedStart(*[Flash(s, color=WHITE, num_lines=10, flash_radius=0.28,
+                                    line_length=0.14) for s in MUSCLE_SITES],
+                            lag_ratio=0.06),
+                run_time=0.6)
+            self.play(Transform(mouth, mouth_closed()), run_time=0.22)
 
-        # ---- BEAT 3: pulses condense into 31 resting sensors -----------
-        self.next_section("settle")
-        pos = sensor_positions(31)
-        # seed each sensor from a random muscle site so they "condense" inward
-        rng = np.random.RandomState(7)
-        seeds = [sites[rng.randint(len(sites))] for _ in range(len(pos))]
-        sensors = VGroup(*[Dot(seeds[i], radius=0.045, color=WHITE).set_opacity(0.0)
-                           for i in range(len(pos))])
-        self.add(sensors)
-        self.play(
-            LaggedStart(*[
-                s.animate.move_to(pos[i]).set_opacity(0.55).set_color(INK)
-                for i, s in enumerate(sensors)],
-                lag_ratio=0.02),
-            run_time=1.4, rate_func=rate_functions.ease_in_out_sine)
+        # ---- BEAT 3: the 31-sensor array grows onto the skin -----------
+        self.next_section("sensors")
+        sensors = sensor_array(fill=0.5)
+        self.play(LaggedStart(*[GrowFromCenter(d) for d in sensors],
+                              lag_ratio=0.04),
+                  run_time=1.4)
         self.wait(0.5)

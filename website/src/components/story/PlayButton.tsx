@@ -53,11 +53,9 @@ export function PlayButton({ autoPlay = false }: { autoPlay?: boolean }) {
 
   const maxScroll = () => Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
 
-  const stop = useCallback(() => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    rafRef.current = 0
-    setPlaying(false)
-  }, [setPlaying])
+  // Stopping is just flipping the flag; the loop-lifecycle effect below owns the
+  // rAF, so it cancels when `playing` goes false and re-kicks when it goes true.
+  const stop = useCallback(() => setPlaying(false), [setPlaying])
 
   // Document-space top of a section and its scroll span.
   const sectionRect = (id: string) => {
@@ -129,15 +127,29 @@ export function PlayButton({ autoPlay = false }: { autoPlay?: boolean }) {
     // Only reset to the top when already parked at the very end; otherwise play
     // from exactly where you are (the voice picks up at the matching moment).
     if (maxScroll() - lenis.scroll < 8) lenis.scrollTo(0, { immediate: true, force: true })
+    // Voice is on by default when you press Play (the click is also the gesture
+    // that unlocks audio); mute it any time with the speaker. Setting `playing`
+    // starts the loop via the lifecycle effect below — never kick rAF here, or a
+    // StrictMode/remount teardown could cancel it with nothing to restart it.
+    setNarrationOn(true)
+    setPlaying(true)
+  }, [lenis, setPlaying, setNarrationOn])
+
+  // The rAF loop lifecycle, driven by `playing`. This is the single owner of the
+  // loop: it (re)starts whenever we're playing (including after a StrictMode
+  // double-mount or any remount that leaves `playing` true — the bug where the
+  // voice played but nothing scrolled) and cancels the moment we pause.
+  useEffect(() => {
+    if (!playing || !lenis) return
     lastT.current = 0
     lastScroll.current = lenis.scroll
     stallSince.current = 0
-    // Voice is on by default when you press Play (the click is also the gesture
-    // that unlocks audio); mute it any time with the speaker.
-    setNarrationOn(true)
-    setPlaying(true)
     rafRef.current = requestAnimationFrame((ts) => frameRef.current(ts))
-  }, [lenis, setPlaying, setNarrationOn])
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+      rafRef.current = 0
+    }
+  }, [playing, lenis])
 
   // Reel auto-start: entering via the chooser card is itself the user gesture that
   // unlocks audio, so the reel plays the moment it can. Fire exactly once, and only
@@ -177,7 +189,6 @@ export function PlayButton({ autoPlay = false }: { autoPlay?: boolean }) {
       window.removeEventListener('wheel', onUser)
       window.removeEventListener('touchstart', onUser)
       window.removeEventListener('keydown', onKey)
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
   }, [stop])
 

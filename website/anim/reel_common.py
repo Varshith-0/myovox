@@ -55,43 +55,60 @@ def waterfall(n=31, x0=-6.0, x1=6.0, ytop=2.35, ybot=-2.35, amp=0.11,
 
 
 # ---------------------------------------------------------------------------
-# 31 sensors resting on the face + neck (scene 1 end == scene 2 start)
+# The head + the 31-sensor array (mirrors scenes 05/06 of the deep dive, which
+# are the "known good" reference). Same head geometry as 06-signal.py so the
+# sensors land in exactly the right places.  (scene 1 end == scene 2 start)
 # ---------------------------------------------------------------------------
-def sensor_positions(n=31):
-    """Deterministic sensor dots scattered across the lower face, jaw and neck."""
-    rng = np.random.RandomState(31)
-    pts = []
-    # rough face+neck mask: an ellipse for the face, a trapezoid for the neck
-    while len(pts) < n:
-        x = rng.uniform(-1.25, 1.25)
-        y = rng.uniform(-2.2, 1.1)
-        in_face = (x / 1.25) ** 2 + ((y - 0.35) / 1.35) ** 2 <= 1.0 and y > -0.85
-        in_neck = (-0.7 < x < 0.7) and (-2.2 <= y <= -0.85)
-        if in_face or in_neck:
-            pts.append([x, y, 0])
-    return np.array(pts)
+HEAD_C = [0.0, 0.6, 0]
 
 
-def face_front(color=INK, dim=INK_DIM):
-    """A clean front face used as the reel's opening subject (scene 1 & 2)."""
-    head = Ellipse(width=2.5, height=3.4).set_stroke(color, 2.2).move_to([0, 0.35, 0])
-    eye_l = Arc(0.18, PI, PI, arc_center=[-0.42, 0.85, 0]).set_stroke(dim, 2)
-    eye_r = Arc(0.18, PI, PI, arc_center=[0.42, 0.85, 0]).set_stroke(dim, 2)
+def head_outline(stroke=INK, w=2.2):
+    head = Ellipse(width=3.2, height=4.2).set_stroke(stroke, w).move_to(HEAD_C)
+    neck = VGroup(Line([-0.6, -1.4, 0], [-0.75, -2.7, 0]),
+                  Line([0.6, -1.4, 0], [0.75, -2.7, 0])).set_stroke(stroke, w)
+    shoulders = ArcBetweenPoints([-2.4, -3.05, 0], [2.4, -3.05, 0],
+                                 angle=-0.5).set_stroke(stroke, w)
+    return VGroup(head, neck, shoulders)
+
+
+def face_features():
+    """Eyes + nose so the head reads as a face in the opening (scene 1 & 2)."""
+    eye_l = Arc(0.2, PI, PI, arc_center=[-0.55, 1.15, 0]).set_stroke(INK_DIM, 2)
+    eye_r = Arc(0.2, PI, PI, arc_center=[0.55, 1.15, 0]).set_stroke(INK_DIM, 2)
     nose = VMobject().set_points_as_corners(
-        [[0, 0.6, 0], [-0.1, 0.05, 0], [0.1, 0.05, 0]]).set_stroke(dim, 2)
-    neck = VGroup(Line([-0.5, -1.32, 0], [-0.62, -2.35, 0]),
-                  Line([0.5, -1.32, 0], [0.62, -2.35, 0])).set_stroke(color, 2)
-    shoulders = ArcBetweenPoints([-2.0, -2.75, 0], [2.0, -2.75, 0],
-                                 angle=-0.5).set_stroke(color, 2)
-    return VGroup(head, eye_l, eye_r, nose, neck, shoulders)
+        [[0, 0.95, 0], [-0.13, 0.25, 0], [0.1, 0.25, 0]]).set_stroke(INK_DIM, 2)
+    return VGroup(eye_l, eye_r, nose)
 
 
 def mouth_closed():
-    return Line([-0.32, -0.28, 0], [0.32, -0.28, 0]).set_stroke(INK, 2.4)
+    return Line([-0.34, -0.25, 0], [0.34, -0.25, 0]).set_stroke(INK, 2.4)
 
 
-def mouth_open(h=0.34, w=0.42):
-    return Ellipse(width=w, height=h).set_stroke(INK, 2.4).move_to([0, -0.30, 0])
+def mouth_open(h=0.34, w=0.5):
+    return Ellipse(width=w, height=h).set_stroke(INK, 2.4).set_fill(BG, 1.0).move_to([0, -0.3, 0])
+
+
+# Muscle sites that fire as the mouth silently articulates (scene 1). White
+# flashes only — monochrome, like the fibre flashes in 06-signal.py.
+MUSCLE_SITES = [[-0.95, 0.7, 0], [0.95, 0.7, 0], [-0.7, 0.05, 0],
+                [0.7, 0.05, 0], [0.0, -1.85, 0]]
+
+
+def grid31_positions():
+    """The hand-placed 31-sensor layout from 06-signal.py — 4·5·5·5·4·4·2·2."""
+    rows = [(0.4, np.linspace(-1.0, 1.0, 4)), (0.0, np.linspace(-1.3, 1.3, 5)),
+            (-0.4, np.linspace(-1.3, 1.3, 5)), (-0.8, np.linspace(-1.2, 1.2, 5)),
+            (-1.2, np.linspace(-0.95, 0.95, 4)), (-1.6, np.linspace(-0.8, 0.8, 4)),
+            (-2.0, np.linspace(-0.4, 0.4, 2)), (-2.4, np.linspace(-0.4, 0.4, 2))]
+    return [[x, y, 0] for y, xs in rows for x in xs]
+
+
+def sensor_dot(p, r=0.1, fill=0.5):
+    return Circle(r, stroke_color=INK, stroke_width=1.8).set_fill("#ffffff", fill).move_to(p)
+
+
+def sensor_array(fill=0.5):
+    return VGroup(*[sensor_dot(p, fill=fill) for p in grid31_positions()])
 
 
 # ---------------------------------------------------------------------------
@@ -128,6 +145,12 @@ def filmstrip(count=7, at=ORIGIN, tile_size=0.62, gap=0.12, seed0=20, op=1.0):
                        stroke_width=1.0, fill_opacity=0).move_to(t.get_center())
         strip.add(VGroup(t, frame))
     return strip
+
+
+# The one canonical filmstrip pose shared by scene 3's close and scene 4's open,
+# so the match cut is exact. Built from one place → identical tiles + geometry.
+def reel_filmstrip():
+    return filmstrip(count=7, at=[0, -0.7, 0], tile_size=0.8, gap=0.16, seed0=20)
 
 
 # ---------------------------------------------------------------------------
