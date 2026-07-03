@@ -4,7 +4,7 @@ export const SITE = {
   brand: 'MYOVOX',
   title: 'Myovox',
   repoUrl: 'https://github.com/Varshith-0/myovox',
-  tagline: 'Reading speech from the muscles of the face.',
+  tagline: 'Learn how speech can be read from the Muscles of the Face.',
   author: 'Varshith Madishetty',
   authorUrl: 'https://github.com/Varshith-0',
 } as const

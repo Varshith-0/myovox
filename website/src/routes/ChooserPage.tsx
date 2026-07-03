@@ -60,11 +60,11 @@ export function ChooserPage() {
           onClick={() => navigate(REEL_PATH)}
         >
           <TraceMotif />
-          <span className={styles.badge}>~90 seconds · a short watch</span>
+          <span className={styles.badge}>10 scenes · a short watch</span>
           <span className={styles.cardTitle}>In One Breath</span>
           <span className={styles.cardDesc}>
             The whole story, in one breath. A short, jargon-free watch — what happens, why it
-            works, and why it matters. It plays itself; just watch.
+            works, and why it matters. The complete picture, in under two minutes.
           </span>
           <span className={styles.cta}>Watch the reel →</span>
         </button>
@@ -78,8 +78,8 @@ export function ChooserPage() {
           <span className={styles.badge}>50 scenes · go deep</span>
           <span className={styles.cardTitle}>Under the Hood</span>
           <span className={styles.cardDesc}>
-            The full deep dive. Fifty short scenes, one idea each — from the first muscle spark to
-            the final sentence. For when you want to truly understand it.
+            The full deep dive. Fifty short scenes, from the first muscle spark to
+            the final sentence. One concept at a time. Understand what's happening under the hood.
           </span>
           <span className={styles.cta}>Take the deep dive →</span>
         </button>
