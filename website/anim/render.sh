@@ -6,8 +6,8 @@
 #   ./render.sh og      # render the social card -> ../public/og.png
 #
 # Each scene runs:  manim -qh <file> <class>  ->  encode.sh <file> <class> <id>,
-# producing ../public/anim/<id>.mp4 + <id>.poster.webp. Narration (<id>.mp3 +
-# <id>.captions.json) is generated separately by ../scripts/narrate.py.
+# producing ../public/anim/video/1080/<id>.mp4 + anim/posters/<id>.webp. Narration (anim/audio/<id>.mp3 +
+# anim/captions/<id>.json) is generated separately by ../scripts/narrate.py.
 #
 # Env (defaults match a base anaconda install holding manim + ffmpeg; the scenes
 # `from style import *`, so PYTHONPATH must include this dir — handled below):

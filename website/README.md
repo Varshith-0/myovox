@@ -31,15 +31,15 @@ Other scripts: `npm run build` · `npm run preview` · `npm run typecheck` · `n
 
 The Story is a sequence of pre-rendered [Manim](https://www.manim.community/) clips. Each scene is a
 Python file in [`anim/`](anim/) (`01-hero.py … 50-end.py`, in story order, plus the shared
-`style.py`); it renders to `public/anim/<id>.mp4` + `<id>.poster.webp`, where `<id>` is the kebab-case
+`style.py`); it renders to `public/anim/video/1080/<id>.mp4` + `anim/posters/<id>.webp`, where `<id>` is the kebab-case
 clip id referenced from `src/data/stages.ts`. Every clip is an **all-keyframe (intra-only) MP4**, so
 `currentTime` seeks are frame-exact and cost one hardware decode. `encode-videos.sh` produces a
-second resolution tier (`public/anim/540/<id>.mp4`) for phones/standard displays; large retina
+second resolution tier (`public/anim/video/540/<id>.mp4`) for phones/standard displays; large retina
 screens play the 1080p originals. At runtime the `MediaLayer` preloads the near clips' videos, and
 each animation frame seeks the active clip to its **scroll-mapped time** and draws the decoded frame
 to a single `<canvas>` — nothing decodes on the main thread, so the picture stays glued to the
 scroll however fast it moves, and held memory is just the decoder's own few-frame buffer. The
-`<id>.poster.webp` (each clip's final frame) is the static image for reduced motion. A service
+`anim/posters/<id>.webp` (each clip's final frame) is the static image for reduced motion. A service
 worker (`public/sw.js`) caches every anim asset whole (serving byte-ranges by slicing the cached
 body), and `src/lib/mediaPrefetch.ts` trickle-fetches the active tier after load — repeat visits
 and mid-story jumps play from disk with zero network.
@@ -48,10 +48,10 @@ The author-time pipeline lives entirely in `anim/`:
 
 ```bash
 cd anim
-./render.sh            # render all 50 scenes -> public/anim/<id>.{mp4,poster.webp}
+./render.sh            # render all 50 scenes -> anim/video/1080/<id>.mp4 + posters/<id>.webp
 ./render.sh hero       # render one scene by clip id
 ./render.sh og         # render the social card -> public/og.png
-./encode-videos.sh     # all-keyframe reels + the 540p tier -> public/anim/540/<id>.mp4
+./encode-videos.sh     # the 540p tier -> public/anim/video/540/<id>.mp4
 ```
 
 [`anim/render.manifest.json`](anim/render.manifest.json) is the authoritative
@@ -62,7 +62,7 @@ screens. Narration is generated separately:
 
 ```bash
 python scripts/narrate.py            # all stages, from src/data/narration.json (the spoken-script source)
-python scripts/narrate.py hero why   # specific stages -> public/anim/<id>.mp3 + <id>.captions.json
+python scripts/narrate.py hero why   # specific stages -> anim/audio/<id>.mp3 + captions/<id>.json
 ```
 
 `render.sh` defaults to a base anaconda install (`MENV=/opt/anaconda3`) that provides `manim` +
@@ -128,7 +128,7 @@ Quick performance checklist while iterating:
 
 The media stack under `src/components/media/` follows strict ownership rules:
 
-- `MediaLayer.tsx` is the React shell (refs + render only): per-stage poster `<img>` + one shared `<canvas>`, plus the manifest fetch and canvas-sizing ResizeObserver.
+- `MediaLayer.tsx` is the React shell (refs + render only): per-stage poster `<img>` + one shared `<canvas>`, plus the canvas-sizing ResizeObserver.
 - `useMediaScrubber.ts` owns the RAF hot path (no per-frame React state writes): preload/release, scroll→frame index, and the poster↔canvas crossfade.
 - `mediaLifecycle.ts` owns frame preload/release + the canvas `drawFrame` (fit/DPR).
 - `mediaDomFx.ts` owns caption/hero/canvas DOM-side visual effects.

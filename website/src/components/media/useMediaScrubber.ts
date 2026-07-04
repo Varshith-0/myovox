@@ -83,6 +83,10 @@ function runClipStageFrame(
   const id = stage.stage.id
   const distance = Math.abs(stage.index - active)
   const isActive = stage.index === active
+  const posterImg = refs.posters.current.get(id)
+  const posterShown = posterImg
+    ? updateStageVisibility(posterImg, distance, VISIBLE_DISTANCE)
+    : false
 
   // Drop clips beyond the ring entirely; re-seed on cold re-entry (no stale flash).
   if (distance > RELEASE_DISTANCE) {
@@ -98,6 +102,7 @@ function runClipStageFrame(
   refs.baseOp.current.set(id, bn)
 
   if (!isActive) {
+    if (posterShown && posterImg) setOpacity(posterImg, 0)
     // Near, not active → start fetching the clip so entering it is instant.
     if (distance <= PRELOAD_DISTANCE) {
       ensureClipVideo(refs.videos.current, id, tierSrc(stage.media.src, refs.tier.current))
@@ -136,6 +141,9 @@ function runClipStageFrame(
   refs.frameReveal.current.set(id, cn)
 
   if (canvas) setOpacity(canvas, envelope * cn)
+  // Blurred final-frame ambience while the video can't draw yet — visual content
+  // instead of a bare title on black; fades out as the live canvas reveals.
+  if (posterShown && posterImg) setOpacity(posterImg, envelope * (1 - cn))
 
   // Past the title card but the video has no drawable frame yet (still fetching
   // after a fast jump) → signals the "rendering…" overlay.

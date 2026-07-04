@@ -18,8 +18,8 @@ function reel(id: string, rail: string, caption: string, alt: string, sub?: stri
     caption,
     sub,
     media: {
-      src: `anim/${id}.mp4`,
-      poster: `anim/${id}.poster.webp`,
+      src: `anim/video/1080/${id}.mp4`,
+      poster: `anim/posters/${id}.webp`,
       fit: 'contain',
       alt,
     },

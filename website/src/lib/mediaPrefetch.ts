@@ -31,8 +31,8 @@ export function startMediaPrefetch(): void {
         ...clips.map((s) => tierSrc(s.media.src, tier)),
         ...clips.flatMap((s) => [
           s.media.poster,
-          `anim/${s.id}.mp3`,
-          `anim/${s.id}.captions.json`,
+          `anim/audio/${s.id}.mp3`,
+          `anim/captions/${s.id}.json`,
         ]),
       ]
       for (const url of urls) {

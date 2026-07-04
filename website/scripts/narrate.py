@@ -2,7 +2,7 @@
 """Render per-stage narration MP3s with edge-tts (free Microsoft neural voices).
 
 Reads the canonical spoken script from ``src/data/narration.json`` (id -> text)
-and writes ``public/anim/<id>.mp3`` — one clip per stage, dropped next to the
+and writes ``public/anim/audio/<id>.mp3`` — one clip per stage, dropped next to the
 Manim ``.mp4``s so GitHub Pages serves them as plain static assets. The browser
 never calls a TTS service; we pre-render here, exactly like the video clips.
 
@@ -89,15 +89,15 @@ def build_cues(text: str, timings: list[dict]) -> list[dict]:
 
 
 async def render(stage_id: str, text: str, voice: str, rate: str, pitch: str) -> None:
-    """Write <id>.mp3 and a <id>.captions.json track of sentence cues.
+    """Write audio/<id>.mp3 and a captions/<id>.json track of sentence cues.
 
     We stream rather than ``save()`` so we can capture the WordBoundary events
     the voice emits — each gives a word and its start offset (in 100-nanosecond
     units). Those are folded into punctuated sentence cues the site shows one at
     a time, with the spoken word lit in step.
     """
-    dest = OUT / f"{stage_id}.mp3"
-    caps_dest = OUT / f"{stage_id}.captions.json"
+    dest = OUT / "audio" / f"{stage_id}.mp3"
+    caps_dest = OUT / "captions" / f"{stage_id}.json"
     # boundary="WordBoundary" is required — the default is SentenceBoundary, which
     # gives no per-word timings to drive the subtitle highlight.
     comm = edge_tts.Communicate(text, voice=voice, rate=rate, pitch=pitch, boundary="WordBoundary")
@@ -128,7 +128,8 @@ async def main() -> None:
     if unknown:
         sys.exit(f"unknown stage id(s): {', '.join(unknown)}\nknown: {', '.join(script)}")
 
-    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / "audio").mkdir(parents=True, exist_ok=True)
+    (OUT / "captions").mkdir(parents=True, exist_ok=True)
     print(f"voice: {args.voice}   rate: {args.rate}   pitch: {args.pitch}")
     for stage_id in ids:
         await render(stage_id, script[stage_id], args.voice, args.rate, args.pitch)

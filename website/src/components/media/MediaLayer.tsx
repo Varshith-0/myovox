@@ -119,25 +119,26 @@ export function MediaLayer() {
 
   return (
     <div className={`${styles.layer} ${captionsMode ? styles.withCaptions : ''}`}>
-      {/* Reduced motion: a static poster per stage — the clip's FINAL frame (the
-          composed result), which is the informative still. No canvas, no scrub. */}
-      {reduced &&
-        clipStages.map((vs) => {
-          const fitClass = vs.media.fit === 'cover' ? styles.cover : styles.contain
-          return (
-            <div key={vs.stage.id} className={styles.stage}>
-              <img
-                ref={(el) => {
-                  if (el) posters.current.set(vs.stage.id, el)
-                  else posters.current.delete(vs.stage.id)
-                }}
-                src={assetUrl(vs.media.poster)}
-                className={`${styles.media} ${fitClass}`}
-                alt={vs.media.alt ?? vs.stage.caption}
-              />
-            </div>
-          )
-        })}
+      {/* A poster per stage — the clip's FINAL frame. Reduced motion shows it as
+          the static content; normal mode blurs it into a fallback layer that only
+          appears while the active clip's video has no drawable frame yet. */}
+      {clipStages.map((vs) => {
+        const fitClass = vs.media.fit === 'cover' ? styles.cover : styles.contain
+        const fallbackClass = reduced ? '' : ` ${styles.posterFallback}`
+        return (
+          <div key={vs.stage.id} className={styles.stage}>
+            <img
+              ref={(el) => {
+                if (el) posters.current.set(vs.stage.id, el)
+                else posters.current.delete(vs.stage.id)
+              }}
+              src={assetUrl(vs.media.poster)}
+              className={`${styles.media} ${fitClass}${fallbackClass}`}
+              alt={vs.media.alt ?? vs.stage.caption}
+            />
+          </div>
+        )
+      })}
       {/* Normal mode: one shared canvas draws the active clip's scroll-mapped frame.
           It fades in over the black layer as frames decode — the clips begin from
           black, so the loading state IS the start (no final-frame poster spoiler). */}

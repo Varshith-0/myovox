@@ -23,17 +23,28 @@ export function updateStageVisibility(el: HTMLElement, distance: number, maxDist
  * makes scrubbing robust on any device: no per-frame fetches to outrun, no
  * decoded-bitmap window for the OS to evict under memory pressure.
  */
+/** A failed load (network hiccup) is retried with a fresh element after this. */
+const RETRY_DELAY_MS = 3000
+
 export function ensureClipVideo(
   cache: Map<string, HTMLVideoElement>,
   id: string,
   src: string,
 ): HTMLVideoElement {
-  let video = cache.get(id)
-  if (video) return video
-  video = document.createElement('video')
+  const cached = cache.get(id)
+  if (cached) {
+    if (!cached.error || performance.now() < Number(cached.dataset.retryAt || 0)) {
+      return cached
+    }
+    releaseClipVideo(cache, id) // errored and past the backoff → rebuild fresh
+  }
+  const video = document.createElement('video')
   video.muted = true
   video.playsInline = true
   video.preload = 'auto'
+  video.addEventListener('error', () => {
+    video.dataset.retryAt = String(performance.now() + RETRY_DELAY_MS)
+  })
   video.src = assetUrl(src)
   video.load()
   cache.set(id, video)

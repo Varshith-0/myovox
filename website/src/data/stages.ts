@@ -11,7 +11,7 @@
 /**
  * What renders behind a stage's caption: a Manim clip scrubbed by the stage's
  * local scroll. `src` and `poster` are paths *relative to BASE_URL* (e.g.
- * `anim/ctc.mp4`); the MediaLayer resolves them via {@link assetUrl}. `poster` is
+ * `anim/video/1080/ctc.mp4`); the MediaLayer resolves them via {@link assetUrl}. `poster` is
  * shown for reduced-motion / while loading; `alt` is a one-sentence description of
  * the animation for assistive tech.
  */
@@ -57,8 +57,8 @@ function act2(id: string, rail: string, caption: string, alt: string, sub?: stri
     caption,
     sub,
     media: {
-      src: `anim/${id}.mp4`,
-      poster: `anim/${id}.poster.webp`,
+      src: `anim/video/1080/${id}.mp4`,
+      poster: `anim/posters/${id}.webp`,
       fit: 'contain',
       alt,
     },

@@ -43,21 +43,22 @@ export type ClipStage = {
 export type VideoTier = '540' | '1080'
 
 /**
- * Pick a video tier by screen density. Large/retina screens get the 1080p set;
- * phones and standard displays stay on the 540p set (memory- and bandwidth-safe).
- * Keyed on the device-pixel width the 16:9 clip actually spans in its band —
- * height-limited on wide screens, width-limited on phones — not raw DPR, so a
- * high-DPR phone (small clip) correctly stays 540p.
+ * Pick a video tier by the device-pixel width the 16:9 clip actually spans in
+ * its band — height-limited on wide screens, width-limited on phones. The 540p
+ * source is 960px wide, so any span past 960 device pixels would UPSCALE it:
+ * those screens get 1080p. At or under 960 the 540p file is pixel-for-pixel
+ * identical to the 1080p one on that screen — the smaller download loses
+ * nothing. Highest displayable quality everywhere, no wasted bytes.
  */
 export function pickTier(): VideoTier {
   const dpr = Math.min(window.devicePixelRatio || 1, MEDIA_CONFIG.maxDpr)
   const clipDevWidth = Math.min(window.innerWidth, window.innerHeight * 1.3) * dpr
-  return clipDevWidth > 1100 ? '1080' : '540'
+  return clipDevWidth > 960 ? '1080' : '540'
 }
 
-/** BASE-relative video path for a clip in a tier (540p encodes live in anim/540/). */
+/** BASE-relative video path for a clip in a tier (anim/video/<tier>/<id>.mp4). */
 export function tierSrc(src: string, tier: VideoTier): string {
-  return tier === '540' ? src.replace('anim/', 'anim/540/') : src
+  return tier === '540' ? src.replace('video/1080/', 'video/540/') : src
 }
 
 export interface MediaScrubberRefs {

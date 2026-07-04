@@ -1,24 +1,26 @@
 #!/usr/bin/env bash
-# Produce the scrubbable video tiers for the MediaLayer:
-#   - reels re-encoded to all-keyframe 1080p (they shipped with sparse keyframes;
-#     frame-exact currentTime scrubbing needs every frame independently seekable)
-#   - a 540p tier of every clip under anim/540/ for phones & standard displays
-# The story clips are the original all-keyframe 1080p renders and are left untouched.
+# Build the 540p scrub tier: every clip in public/anim/video/1080/ is encoded
+# all-keyframe (every frame independently seekable — frame-exact currentTime
+# scrubbing in one decode) into public/anim/video/540/. Screens whose clip band
+# spans ≤960 device pixels are served this tier; it is pixel-for-pixel identical
+# to 1080p there. Run after render.sh whenever clips change.
+#   ./encode-videos.sh            # all clips
+#   ./encode-videos.sh hero ctc   # only these ids
 set -euo pipefail
 cd "$(dirname "$0")/../public/anim"
 
 INTRA_FLAGS=(-c:v libx264 -preset slow -tune animation -g 1 -pix_fmt yuv420p -movflags +faststart -an)
 
-for f in reel-*.mp4; do
-  ffmpeg -hide_banner -loglevel error -y -i "$f" "${INTRA_FLAGS[@]}" -crf 18 "tmp-$f"
-  mv "tmp-$f" "$f"
-  echo "reel  $f"
-done
+mkdir -p video/540
+ids=("$@")
+if [ ${#ids[@]} -eq 0 ]; then
+  for f in video/1080/*.mp4; do ids+=("$(basename "$f" .mp4)"); done
+fi
 
-mkdir -p 540
-for f in *.mp4; do
-  ffmpeg -hide_banner -loglevel error -y -i "$f" -vf scale=-2:540 "${INTRA_FLAGS[@]}" -crf 20 "540/$f"
-  echo "540p  $f"
+for id in "${ids[@]}"; do
+  ffmpeg -hide_banner -loglevel error -y -i "video/1080/$id.mp4" \
+    -vf scale=-2:540 "${INTRA_FLAGS[@]}" -crf 20 "video/540/$id.mp4"
+  echo "540p  $id"
 done
 
 echo "done"

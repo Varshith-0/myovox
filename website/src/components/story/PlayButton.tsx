@@ -172,22 +172,25 @@ export function PlayButton({ autoPlay = false }: { autoPlay?: boolean }) {
     if (lenis) start()
   }, [playNonce, lenis, start])
 
-  // Any real user scroll input pauses auto-play. (Programmatic scrolls above do
-  // not fire wheel/touch/key events, so they never self-pause; nor does clicking
-  // the speed control, which only changes the rate.)
+  // Any real user SCROLL input pauses auto-play: wheel, touch DRAG, or nav keys.
+  // A bare tap is not scroll intent — touchmove (not touchstart) is what pauses,
+  // so tapping the pause/speaker/speed buttons on mobile doesn't race a global
+  // pause against the button's own click (the "pause restarts playback" bug).
+  // Touches that start on a control keep working even if the finger wobbles.
   useEffect(() => {
-    const onUser = () => {
+    const onUser = (e: Event) => {
+      if (e.target instanceof Element && e.target.closest('button')) return
       if (useStore.getState().playing) stop()
     }
     const onKey = (e: KeyboardEvent) => {
       if (useStore.getState().playing && PAUSE_KEYS.includes(e.key)) stop()
     }
     window.addEventListener('wheel', onUser, { passive: true })
-    window.addEventListener('touchstart', onUser, { passive: true })
+    window.addEventListener('touchmove', onUser, { passive: true })
     window.addEventListener('keydown', onKey)
     return () => {
       window.removeEventListener('wheel', onUser)
-      window.removeEventListener('touchstart', onUser)
+      window.removeEventListener('touchmove', onUser)
       window.removeEventListener('keydown', onKey)
     }
   }, [stop])

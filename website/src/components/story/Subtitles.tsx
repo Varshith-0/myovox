@@ -10,7 +10,7 @@ import styles from './Subtitles.module.css'
  * word lit in step. Shown only while narration is actually playing. It follows
  * the {@link NarrationLayer}'s active clip + playhead (via the {@link narration}
  * hot-state) and reads the sentence cues baked beside each clip
- * (`<id>.captions.json`, from `scripts/narrate.py`).
+ * (`anim/captions/<id>.json`, from `scripts/narrate.py`).
  */
 
 export function Subtitles() {
@@ -38,7 +38,7 @@ export function Subtitles() {
         return
       }
       try {
-        const res = await fetch(assetUrl(`anim/${clipId}.captions.json`))
+        const res = await fetch(assetUrl(`anim/captions/${clipId}.json`))
         const data = res.ok ? ((await res.json()).cues as Cue[]) : []
         cache.current.set(clipId, data)
         if (!cancelled && idRef.current === clipId) {
