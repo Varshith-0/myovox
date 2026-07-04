@@ -1,6 +1,6 @@
-/** Frame-sequence lifecycle + canvas drawing for the scroll-scrub hot path. */
+/** Scrub-video lifecycle + canvas drawing for the scroll-scrub hot path. */
 import { assetUrl } from '@/lib/asset'
-import { MEDIA_CONFIG, frameUrlPath, type FrameClip, type FrameTier } from './core'
+import { MEDIA_CONFIG } from './core'
 
 export const VISIBLE_DISTANCE = MEDIA_CONFIG.visibilityDistance
 export const PRELOAD_DISTANCE = MEDIA_CONFIG.preloadDistance
@@ -17,95 +17,76 @@ export function updateStageVisibility(el: HTMLElement, distance: number, maxDist
 }
 
 /**
- * Keep a bounded window of frames loaded around `idx`, current frame first.
- *
- * This is what makes scrubbing robust on any device: instead of fetching every
- * frame of a clip (thousands of images → mobile floods the network and the browser
- * evicts them under memory pressure → a fast-scroll stop shows nothing), we fetch
- * only [idx-loadBack, idx+loadAhead] and free anything outside [idx-keepBack,
- * idx+keepAhead]. The frame you stop on is fetched at high priority, so it paints
- * immediately instead of waiting for frames 0..idx to load in order.
+ * Get (or create) a clip's scrub video. `preload=auto` pulls the whole file —
+ * every clip is a single small all-keyframe MP4, so this is one request, and the
+ * hardware decoder holds only a couple of frames in its own buffer. That is what
+ * makes scrubbing robust on any device: no per-frame fetches to outrun, no
+ * decoded-bitmap window for the OS to evict under memory pressure.
  */
-export function ensureClipWindow(
-  cache: Map<string, FrameClip>,
+export function ensureClipVideo(
+  cache: Map<string, HTMLVideoElement>,
   id: string,
-  count: number,
-  tier: FrameTier,
-  idx: number,
-): void {
-  let clip = cache.get(id)
-  if (!clip) {
-    clip = { images: new Array(count), count, requested: new Set() }
-    cache.set(id, clip)
-  }
-  const images = clip.images
-
-  const loStart = Math.max(0, idx - MEDIA_CONFIG.loadBack)
-  const loEnd = Math.min(count - 1, idx + MEDIA_CONFIG.loadAhead)
-  for (let j = loStart; j <= loEnd; j++) {
-    if (images[j]) continue
-    const img = new Image()
-    img.decoding = 'async'
-    img.fetchPriority = j === idx ? 'high' : Math.abs(j - idx) <= 8 ? 'auto' : 'low'
-    img.src = assetUrl(frameUrlPath(tier, id, j))
-    images[j] = img
-  }
-
-  // Free frames well outside the window so held memory stays flat regardless of
-  // clip length — the fix for mobile eviction.
-  const keepLo = Math.max(0, idx - MEDIA_CONFIG.keepBack)
-  const keepHi = Math.min(count - 1, idx + MEDIA_CONFIG.keepAhead)
-  for (let j = 0; j < count; j++) {
-    const img = images[j]
-    if (img && (j < keepLo || j > keepHi)) {
-      img.src = ''
-      images[j] = undefined
-      clip.requested.delete(j)
-    }
-  }
+  src: string,
+): HTMLVideoElement {
+  let video = cache.get(id)
+  if (video) return video
+  video = document.createElement('video')
+  video.muted = true
+  video.playsInline = true
+  video.preload = 'auto'
+  video.src = assetUrl(src)
+  video.load()
+  cache.set(id, video)
+  return video
 }
 
-/**
- * Warm the next few frames' decodes off the main thread. drawImage(img) otherwise
- * decodes the WebP synchronously on first paint — a multi-ms stall per new frame
- * at 1080p that reads as scrub jank. Decoding ahead turns each draw into a pure
- * GPU upload. Each index is requested once; a small back-window covers reversals.
- */
-export function decodeAheadClip(clip: FrameClip, idx: number, ahead: number): void {
-  const start = Math.max(0, idx - 2)
-  const end = Math.min(clip.count - 1, idx + ahead)
-  for (let j = start; j <= end; j++) {
-    if (clip.requested.has(j)) continue
-    const img = clip.images[j]
-    if (!img || !img.complete || !img.naturalWidth) continue
-    clip.requested.add(j)
-    img.decode().catch(() => clip.requested.delete(j))
-  }
-}
-
-/** Drop a clip's frames entirely so the browser can reclaim the memory. */
-export function releaseClipFrames(cache: Map<string, FrameClip>, id: string): void {
-  const clip = cache.get(id)
-  if (!clip) return
-  for (const img of clip.images) if (img) img.src = ''
+/** Drop a clip's video entirely so the browser reclaims decoder + buffer memory. */
+export function releaseClipVideo(cache: Map<string, HTMLVideoElement>, id: string): void {
+  const video = cache.get(id)
+  if (!video) return
+  video.removeAttribute('src')
+  video.load()
   cache.delete(id)
 }
 
 /**
- * Draw one frame into the shared canvas with contain/cover fit. Uses the backing
- * size the ResizeObserver already set — no per-frame layout read. `alignTop`
- * mirrors the mobile CSS that anchors a contained clip to the top of its band.
+ * Seek the video to the scroll-mapped time, coalesced: while a seek is in flight
+ * we issue nothing, so however fast the RAF loop runs, seeks land at the decoder's
+ * own pace and always jump straight to the *latest* target — never a queue of
+ * stale frames. Every frame is a keyframe, so each seek decodes exactly one frame.
+ */
+export function scrubVideo(video: HTMLVideoElement, progress: number): void {
+  if (video.readyState < HTMLMediaElement.HAVE_METADATA || video.seeking) return
+  if (!Number.isFinite(video.duration)) return
+  const frame = 1 / MEDIA_CONFIG.fps
+  // Last full frame, not duration itself — seeking to the exact end can blank.
+  const target = Math.max(0, progress * (video.duration - frame))
+  if (Math.abs(video.currentTime - target) < frame / 2) return
+  video.currentTime = target
+}
+
+/** True when the video has a decoded frame ready to draw. */
+export function videoDrawable(video: HTMLVideoElement): boolean {
+  return video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && video.videoWidth > 0
+}
+
+/**
+ * Draw the video's current frame into the shared canvas with contain/cover fit.
+ * Uses the backing size the ResizeObserver already set — no per-frame layout read.
+ * `alignTop` mirrors the mobile CSS that anchors a contained clip to the top of
+ * its band. drawImage from a video element is a GPU-side copy of the frame the
+ * hardware decoder already produced — nothing decodes on the main thread.
  */
 export function drawFrame(
   canvas: HTMLCanvasElement,
-  img: HTMLImageElement,
+  video: HTMLVideoElement,
   fit: 'contain' | 'cover' | undefined,
   alignTop: boolean,
 ): void {
   const bw = canvas.width
   const bh = canvas.height
-  const iw = img.naturalWidth
-  const ih = img.naturalHeight
+  const iw = video.videoWidth
+  const ih = video.videoHeight
   if (!bw || !bh || !iw || !ih) return
 
   const ctx = canvas.getContext('2d')
@@ -118,5 +99,5 @@ export function drawFrame(
   const dy = fit !== 'cover' && alignTop ? 0 : (bh - dh) / 2
 
   ctx.clearRect(0, 0, bw, bh)
-  ctx.drawImage(img, dx, dy, dw, dh)
+  ctx.drawImage(video, dx, dy, dw, dh)
 }

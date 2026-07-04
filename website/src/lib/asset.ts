@@ -4,7 +4,8 @@
  * browser cache. In dev, bust per page-load (always see the latest render while
  * iterating); in prod, bust per build (cacheable, but a deploy invalidates it).
  */
-const VER = import.meta.env.DEV ? String(Date.now()) : __BUILD_ID__
+export const ASSET_VERSION = import.meta.env.DEV ? String(Date.now()) : __BUILD_ID__
+const VER = ASSET_VERSION
 const BASE = import.meta.env.BASE_URL
 
 /** Resolve a BASE_URL-relative asset path to a cache-busted URL. */

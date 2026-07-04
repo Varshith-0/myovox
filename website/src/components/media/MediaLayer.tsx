@@ -4,15 +4,8 @@ import { useStore } from '@/store/useStore'
 import { assetUrl } from '@/lib/asset'
 import styles from './MediaLayer.module.css'
 import { useMediaScrubber } from './useMediaScrubber'
-import {
-  MEDIA_CONFIG,
-  pickTier,
-  setOpacity,
-  type ClipStage,
-  type FrameClip,
-  type FrameManifest,
-  type FrameTier,
-} from './core'
+import { releaseClipVideo } from './mediaLifecycle'
+import { MEDIA_CONFIG, pickTier, setOpacity, type ClipStage, type VideoTier } from './core'
 
 /**
  * The Act-2 clip scrubber. A fixed, full-viewport layer above the 3D canvas and
@@ -25,13 +18,15 @@ import {
  *     forward — the animation plays as you move.
  *   - rest: holds its current frame. Reduced motion shows a static poster.
  *
- * Rendering is frame-perfect: every clip is a preloaded WebP frame sequence, and
- * the active clip's current frame is drawn to one shared <canvas> each RAF — a
- * synchronous drawImage with no video decoder on the hot path, so the picture is
- * glued to the scroll however fast it moves. The canvas fades in over the black
- * layer as frames decode; the clips begin from black, so the loading state is the
- * start (no end-frame poster spoiler). The final-frame poster is used only as the
- * reduced-motion static. Clips beyond the preload ring have their frames released.
+ * Rendering scrubs all-keyframe MP4s: each clip is one small video whose every
+ * frame is independently seekable, so `currentTime` seeks are frame-exact and the
+ * hardware decoder does all the work. Each RAF the active clip seeks to its
+ * scroll-mapped time and the decoded frame is drawn to one shared <canvas> — the
+ * picture stays glued to the scroll, and held memory is just the decoder's own
+ * couple-of-frames buffer. The canvas fades in over the black layer as the video
+ * becomes drawable; the clips begin from black, so the loading state is the start
+ * (no end-frame poster spoiler). The final-frame poster is used only as the
+ * reduced-motion static. Clips beyond the preload ring have their videos released.
  */
 
 /** Matches the mobile CSS that anchors a contained clip to the top of its band. */
@@ -52,9 +47,8 @@ export function MediaLayer() {
   const captionsMode = useStore((s) => s.subtitlesOn)
   const posters = useRef(new Map<string, HTMLImageElement>())
   const canvas = useRef<HTMLCanvasElement | null>(null)
-  const frames = useRef(new Map<string, FrameClip>())
-  const manifest = useRef<FrameManifest | null>(null)
-  const tier = useRef<FrameTier>('1x')
+  const videos = useRef(new Map<string, HTMLVideoElement>())
+  const tier = useRef<VideoTier>('540')
   const alignTop = useRef(false)
   const lastDraw = useRef('')
   const baseOp = useRef(new Map<string, number>())
@@ -70,8 +64,7 @@ export function MediaLayer() {
     refs: {
       posters,
       canvas,
-      frames,
-      manifest,
+      videos,
       tier,
       alignTop,
       lastDraw,
@@ -83,21 +76,13 @@ export function MediaLayer() {
     },
   })
 
-  // Frame counts drive preloading and scroll→index mapping. Absent manifest just
-  // falls back to posters, so a missing/failed fetch degrades gracefully.
+  // Pick the resolution tier once, and release every scrub video on unmount so
+  // a route change hands the decoders straight back to the browser.
   useEffect(() => {
-    let alive = true
-    fetch(assetUrl('anim/frames/manifest.json'))
-      .then((r) => (r.ok ? (r.json() as Promise<FrameManifest>) : null))
-      .then((m) => {
-        if (alive && m) {
-          manifest.current = m
-          tier.current = pickTier(m)
-        }
-      })
-      .catch(() => {})
+    tier.current = pickTier()
+    const cache = videos.current
     return () => {
-      alive = false
+      for (const id of [...cache.keys()]) releaseClipVideo(cache, id)
     }
   }, [])
 

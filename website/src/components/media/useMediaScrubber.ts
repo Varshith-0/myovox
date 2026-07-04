@@ -7,15 +7,17 @@ import {
   MEDIA_CONFIG,
   localProgressFor,
   setOpacity,
+  tierSrc,
   type MediaScrubberRefs,
   type ClipStage,
 } from './core'
 import {
-  decodeAheadClip,
   drawFrame,
-  ensureClipWindow,
-  releaseClipFrames,
+  ensureClipVideo,
+  releaseClipVideo,
+  scrubVideo,
   updateStageVisibility,
+  videoDrawable,
   VISIBLE_DISTANCE,
   PRELOAD_DISTANCE,
   RELEASE_DISTANCE,
@@ -80,12 +82,11 @@ function runClipStageFrame(
 ): ClipFrameResult {
   const id = stage.stage.id
   const distance = Math.abs(stage.index - active)
-  const count = refs.manifest.current?.clips[id] ?? 0
   const isActive = stage.index === active
 
   // Drop clips beyond the ring entirely; re-seed on cold re-entry (no stale flash).
   if (distance > RELEASE_DISTANCE) {
-    releaseClipFrames(refs.frames.current, id)
+    releaseClipVideo(refs.videos.current, id)
     refs.frameReveal.current.delete(id)
     refs.baseOp.current.delete(id)
     return NOT_READY
@@ -97,38 +98,32 @@ function runClipStageFrame(
   refs.baseOp.current.set(id, bn)
 
   if (!isActive) {
-    // Near, not active → preload the opening window so entering at the top is instant.
-    if (count > 0 && distance <= PRELOAD_DISTANCE) {
-      ensureClipWindow(refs.frames.current, id, count, refs.tier.current, 0)
+    // Near, not active → start fetching the clip so entering it is instant.
+    if (distance <= PRELOAD_DISTANCE) {
+      ensureClipVideo(refs.videos.current, id, tierSrc(stage.media.src, refs.tier.current))
     }
     return NOT_READY
   }
 
   const local = localProgressFor(section)
-  const idx = count > 0 ? Math.min(count - 1, Math.max(0, Math.round(local * (count - 1)))) : 0
-  // Load a bounded window around the current frame, current frame first — so a
-  // fast-scroll stop paints immediately and held memory stays flat on mobile.
-  if (count > 0) ensureClipWindow(refs.frames.current, id, count, refs.tier.current, idx)
+  // Seek the hardware decoder to the scroll-mapped frame; seeks coalesce, so
+  // however fast the scroll moves we always land on the latest target.
+  const video = ensureClipVideo(refs.videos.current, id, tierSrc(stage.media.src, refs.tier.current))
+  scrubVideo(video, local)
 
   const envelope = bn * smooth(local, HOLD, REVEAL)
 
-  // Draw the exact scroll-mapped frame to the shared canvas. Frames just ahead are
-  // decoded off the main thread first, so drawImage is a pure GPU upload and never
-  // stalls on a synchronous decode — that stall is the scrub jank, worst at 2x.
+  // Draw the decoder's current frame to the shared canvas — a GPU-side copy,
+  // nothing decodes on the main thread, so the draw can never stall the scroll.
   const canvas = refs.canvas.current
-  const clip = refs.frames.current.get(id)
   let drew = false
-  if (canvas && clip && count > 0) {
-    decodeAheadClip(clip, idx, MEDIA_CONFIG.decodeAhead)
-    const img = clip.images[idx]
-    if (img && img.complete && img.naturalWidth > 0) {
-      const key = `${id}:${idx}`
-      if (refs.lastDraw.current !== key) {
-        drawFrame(canvas, img, stage.media.fit, refs.alignTop.current)
-        refs.lastDraw.current = key
-      }
-      drew = true
+  if (canvas && videoDrawable(video)) {
+    const key = `${id}:${video.currentTime.toFixed(3)}`
+    if (refs.lastDraw.current !== key) {
+      drawFrame(canvas, video, stage.media.fit, refs.alignTop.current)
+      refs.lastDraw.current = key
     }
+    drew = true
   }
 
   // Fade the canvas in over the black layer, latched upward: once real frames draw
@@ -142,9 +137,9 @@ function runClipStageFrame(
 
   if (canvas) setOpacity(canvas, envelope * cn)
 
-  // Past the title card but the current frame still can't be drawn (fast-scrolled
-  // past the preload window) → signals the "rendering…" overlay.
-  const notReady = count > 0 && local > REVEAL && !drew
+  // Past the title card but the video has no drawable frame yet (still fetching
+  // after a fast jump) → signals the "rendering…" overlay.
+  const notReady = local > REVEAL && !drew
   return { local, notReady }
 }
 

@@ -18,7 +18,7 @@ export function MediaLoader() {
   return (
     <div className={styles.loader} role="status" aria-live="polite">
       <LogoMark size={44} duration={1.4} />
-      <span className={styles.text}>Animations are rendering, please wait</span>
+      <span className={styles.text}>Animation is loading, one moment</span>
     </div>
   )
 }

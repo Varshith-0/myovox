@@ -9,6 +9,7 @@ import '@fontsource/jetbrains-mono/700.css'
 
 import './styles/globals.css'
 import App from './App'
+import { startMediaPrefetch } from './lib/mediaPrefetch'
 
 const root = document.getElementById('root')
 if (!root) throw new Error('Root element #root not found')
@@ -18,3 +19,5 @@ createRoot(root).render(
     <App />
   </StrictMode>,
 )
+
+startMediaPrefetch()

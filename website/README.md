@@ -32,13 +32,17 @@ Other scripts: `npm run build` · `npm run preview` · `npm run typecheck` · `n
 The Story is a sequence of pre-rendered [Manim](https://www.manim.community/) clips. Each scene is a
 Python file in [`anim/`](anim/) (`01-hero.py … 50-end.py`, in story order, plus the shared
 `style.py`); it renders to `public/anim/<id>.mp4` + `<id>.poster.webp`, where `<id>` is the kebab-case
-clip id referenced from `src/data/stages.ts`. Each clip is then sliced into a **WebP frame sequence**
-(`frames.sh` → `public/anim/frames/<id>/NNNN.webp` + `frames/manifest.json`). At runtime the
-`MediaLayer` preloads the near clips' frames and draws the active stage's **scroll-mapped frame to a
-single `<canvas>`** each animation frame — a synchronous `drawImage`, no video decoder on the hot
-path, so the picture stays glued to the scroll however fast it moves. The `<id>.poster.webp` (each
-clip's final frame) is the instant base shown on a cold jump while that clip's frames preload, and
-the static image for reduced motion. The `.mp4` is only the author-time source for frame extraction.
+clip id referenced from `src/data/stages.ts`. Every clip is an **all-keyframe (intra-only) MP4**, so
+`currentTime` seeks are frame-exact and cost one hardware decode. `encode-videos.sh` produces a
+second resolution tier (`public/anim/540/<id>.mp4`) for phones/standard displays; large retina
+screens play the 1080p originals. At runtime the `MediaLayer` preloads the near clips' videos, and
+each animation frame seeks the active clip to its **scroll-mapped time** and draws the decoded frame
+to a single `<canvas>` — nothing decodes on the main thread, so the picture stays glued to the
+scroll however fast it moves, and held memory is just the decoder's own few-frame buffer. The
+`<id>.poster.webp` (each clip's final frame) is the static image for reduced motion. A service
+worker (`public/sw.js`) caches every anim asset whole (serving byte-ranges by slicing the cached
+body), and `src/lib/mediaPrefetch.ts` trickle-fetches the active tier after load — repeat visits
+and mid-story jumps play from disk with zero network.
 
 The author-time pipeline lives entirely in `anim/`:
 
@@ -47,15 +51,14 @@ cd anim
 ./render.sh            # render all 50 scenes -> public/anim/<id>.{mp4,poster.webp}
 ./render.sh hero       # render one scene by clip id
 ./render.sh og         # render the social card -> public/og.png
-./frames.sh            # slice every public/anim/*.mp4 -> frames/<id>/NNNN.webp + manifest.json
-./frames.sh hero ctc   # only these ids   (env: FPS=12 HEIGHT=540 Q=80)
+./encode-videos.sh     # all-keyframe reels + the 540p tier -> public/anim/540/<id>.mp4
 ```
 
 [`anim/render.manifest.json`](anim/render.manifest.json) is the authoritative
 `file → scene class → clip id` map (story order matches `src/data/stages.ts`); `render.sh` reads it,
-runs `manim -qh` then `encode.sh` (scrub-friendly GOP + emits the poster). `frames.sh` runs after,
-reading the encoded `.mp4`s (no manim env needed) to produce the frame sequences the site actually
-plays. Narration is generated separately:
+runs `manim -qh` then `encode.sh` (scrub-friendly GOP + emits the poster). `encode-videos.sh` runs
+after, reading the encoded `.mp4`s (no manim env needed) to produce the 540p tier served to smaller
+screens. Narration is generated separately:
 
 ```bash
 python scripts/narrate.py            # all stages, from src/data/narration.json (the spoken-script source)
@@ -111,13 +114,13 @@ npm run build && npm run preview
 Respects `prefers-reduced-motion` (no scrubbing — static posters, instant scroll); word-synced
 subtitles are on by default; semantic headings, a skip link, and a text alternative for each clip.
 The reading pages (react-markdown + the syntax highlighter) are code-split out of the initial Story
-bundle, and only clips near the active stage have their frames held in memory (far clips are released).
+bundle, and only clips near the active stage have their videos held in memory (far clips are released).
 
 Quick performance checklist while iterating:
 
 - Verify Story scrub feels stable end-to-end (no visible frame-jumps at stage boundaries).
 - Keep high-frequency updates off React state (`store/scroll.ts` + `store/narration.ts` stay hot-path).
-- In DevTools, confirm far stages are `display:none` and only near clips' frame sequences are loaded.
+- In DevTools, confirm far stages are `display:none` and only near clips' videos are loaded.
 - Check reduced-motion mode uses posters (no canvas scrubbing).
 - Validate autoplay handoff: voice-on (audio-clocked) and voice-off (constant velocity) both stop immediately on user input.
 
