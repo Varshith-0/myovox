@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
 import { SITE } from '@/data/site'
-import { LogoMark } from '@/components/ui/LogoMark'
 import styles from './ChooserPage.module.css'
 
 /**
@@ -47,16 +46,14 @@ export function ChooserPage() {
   return (
     <main className={styles.page}>
       <header className={styles.head}>
-        <LogoMark className={styles.mark} size={40} duration={14} />
-        <h1 className={styles.title}>{SITE.brand}</h1>
         <p className={styles.tagline}>{SITE.tagline}</p>
-        <p className={styles.prompt}>Two ways in. Pick your depth.</p>
+        <p className={styles.prompt}>Two ways in — pick your depth.</p>
       </header>
 
       <div className={styles.cards}>
         <button
           type="button"
-          className={`${styles.card} ${styles.reel}`}
+          className={styles.card}
           onClick={() => navigate(REEL_PATH)}
         >
           <TraceMotif />
@@ -84,6 +81,11 @@ export function ChooserPage() {
           <span className={styles.cta}>Take the deep dive →</span>
         </button>
       </div>
+
+      <p className={styles.note}>
+        Either one narrates itself, hands-free — or just scroll to move through it at your own
+        pace. Your scroll is the remote.
+      </p>
     </main>
   )
 }

@@ -20,24 +20,9 @@
   max-width: 44rem;
 }
 
-.title,
 .tagline,
 .prompt {
   max-width: 100%;
-}
-
-.mark {
-  margin-bottom: 0.4rem;
-}
-
-.title {
-  font-family: var(--font-mono);
-  font-size: var(--t-h2);
-  font-weight: 600;
-  letter-spacing: 0.3em;
-  text-indent: 0.3em;
-  color: var(--ink);
-  text-shadow: var(--glow-text);
 }
 
 .tagline {
@@ -67,11 +52,11 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: 0.6rem;
-  padding: clamp(1.5rem, 3vw, 2.25rem);
-  min-height: 15rem;
+  align-items: center;
+  text-align: center;
+  gap: 0.7rem;
+  padding: clamp(1.75rem, 3vw, 2.5rem);
+  min-height: 16rem;
   border: 1px solid var(--line-strong);
   border-radius: 1rem;
   background: rgba(11, 11, 12, 0.5);
@@ -93,18 +78,14 @@
   outline-offset: 4px;
 }
 
-/* The reel is the primary path — a hair brighter. */
-.reel {
-  border-color: var(--line-bright);
-}
-
 .motif {
   position: absolute;
-  inset: auto -10% -14% auto;
-  width: 62%;
-  height: 45%;
+  inset: auto 50% -16% 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 42%;
   color: var(--ink);
-  opacity: 0.06;
+  opacity: 0.05;
   pointer-events: none;
 }
 
@@ -128,17 +109,27 @@
   font-size: var(--t-sm);
   line-height: 1.6;
   color: var(--ink-dim);
-  max-width: 30ch;
+  max-width: 32ch;
+  margin: 0 auto;
 }
 
 .cta {
   margin-top: auto;
-  padding-top: 0.75rem;
+  padding-top: 0.9rem;
   font-family: var(--font-mono);
   font-size: var(--t-label);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink);
+}
+
+/* How-to note beneath the cards — both play themselves or scroll at your pace. */
+.note {
+  max-width: 46ch;
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+  line-height: 1.6;
+  color: var(--ink-faint);
 }
 
 @media (max-width: 640px) {
