@@ -1,28 +1,17 @@
 # REEL 7 — SCORE. "Where the baseline got half the words wrong, this gets four of
-# five right — 18.5% word error, from muscles alone."
+# five right — 18.5% word error, from muscles alone."  (the results payoff)
 # OPENS ON: the chosen sentence (== scene 6 close).
-# Its words disband into particles that reform as 51; the number falls
-# 51 -> 40 -> 26 -> 18.5 as a bar shrinks; five word-slots draw, four light.
-# CLOSES ON: 18.5 small + dim, sinking toward the bottom  (== scene 8 open).
+# The sentence gives way to ONE big word-error number that falls 51 → 18.5 with a
+# shrinking bar; it reframes as four-in-five (filled vs dim pills, not empty boxes);
+# then the SAME number settles smoothly to the small dim "18.5" scene 8 opens on —
+# one continuous element the whole way, so nothing jumps.
 from manim import *
 from style import *
 from reel_common import WHITE, counter, motes, drift
-import numpy as np
 
 STEPS = [51.17, 40.63, 26.14, 18.53]
 SENTENCE = "the cat sat by the door"
-
-
-def outline_points(mob, n):
-    subs = [m for m in mob.family_members_with_points() if len(m.points) >= 4]
-    pts = []
-    for m in subs:
-        k = max(8, len(m.points) // 3)
-        for t in np.linspace(0, 1, k, endpoint=False):
-            pts.append(m.point_from_proportion(t))
-    pts = np.array(pts)
-    idx = np.random.RandomState(7).choice(len(pts), n, replace=len(pts) < n)
-    return pts[idx]
+NUM_C = [0, 0.55, 0]
 
 
 class Score(Scene):
@@ -37,86 +26,69 @@ class Score(Scene):
         self.add(sent)
         self.wait(0.1)
 
-        # ---- BEAT 1: sentence -> particles -> the number 51 ------------
-        self.next_section("gather")
-        N = 150
-        big = num("51", 150, INK).move_to([0, 0.4, 0])
-        targets = outline_points(big, N)
-        src = outline_points(sent, N)
-        parts = VGroup(*[Dot(src[i], radius=0.02, color=INK).set_opacity(0.8)
-                         for i in range(N)])
-        self.add(parts)
-        self.play(FadeOut(sent), run_time=0.3)
-        self.play(LaggedStart(*[parts[i].animate.move_to(targets[i])
-                                for i in range(N)], lag_ratio=0.002),
-                  run_time=1.1, rate_func=rate_functions.ease_in_out_sine)
-
+        # ---- BEAT 1: the sentence gives way to a big word-error number --
+        self.next_section("reveal")
         wer_t = ValueTracker(STEPS[0])
-        readout = counter(wer_t, fmt=lambda v: f"{v:.1f}", s=150, c=INK, at=[0, 0.4, 0])
-        self.add(readout)
-        self.play(parts.animate.set_opacity(0.0), run_time=0.3)
-        self.remove(parts)
-        pct = mono("% of words wrong", 22, INK_FAINT).next_to(readout, DOWN, buff=0.5)
-        pct.add_updater(lambda m: m.next_to(readout, DOWN, buff=0.5))
-        self.add(pct)
+        big = counter(wer_t, fmt=lambda v: f"{v:.1f}", s=150, c=INK, at=NUM_C)
+        pct = mono("% of words wrong", 22, INK_FAINT).move_to([0, -1.0, 0])
+        tag = mono("published baseline", 18, INK_FAINT).move_to([0, 2.55, 0])
+        self.play(sent.animate.shift(DOWN * 0.5).set_opacity(0.0), run_time=0.4)
+        self.remove(sent)
+        self.add(big)
+        self.play(FadeIn(big, scale=0.6), FadeIn(pct, shift=UP * 0.1),
+                  FadeIn(tag, shift=DOWN * 0.1),
+                  Flash(NUM_C, color=WHITE, num_lines=16, flash_radius=2.4, line_length=0.2),
+                  run_time=0.6)
 
-        # ---- BEAT 2: the number falls; a bar shrinks -------------------
+        # ---- BEAT 2: the number falls; a bar shrinks in step -----------
         self.next_section("fall")
-        BAR_L, BAR_R, BAR_Y = -3.6, 3.6, -2.4
-        track = RoundedRectangle(width=BAR_R - BAR_L, height=0.16, corner_radius=0.04,
-                                 stroke_color=INK_GHOST, stroke_width=1.4,
-                                 fill_opacity=0).move_to([(BAR_L + BAR_R) / 2, BAR_Y, 0])
-        fill = RoundedRectangle(width=BAR_R - BAR_L, height=0.16, corner_radius=0.04,
-                                stroke_width=0, fill_color=INK, fill_opacity=0.8)
-        fill.move_to(track.get_center())
+        BAR_L, BAR_R, BAR_Y = -3.8, 3.8, -2.45
+        track = RoundedRectangle(width=BAR_R - BAR_L, height=0.18, corner_radius=0.05,
+                                 stroke_color=INK_GHOST, stroke_width=1.4, fill_opacity=0
+                                 ).move_to([(BAR_L + BAR_R) / 2, BAR_Y, 0])
 
         def bar_for(v):
-            frac = v / STEPS[0]
-            w = (BAR_R - BAR_L) * frac
-            r = RoundedRectangle(width=max(0.05, w), height=0.16, corner_radius=0.04,
-                                 stroke_width=0, fill_color=INK, fill_opacity=0.8)
-            r.move_to([BAR_L + w / 2, BAR_Y, 0])
-            return r
+            w = (BAR_R - BAR_L) * (v / STEPS[0])
+            return RoundedRectangle(width=max(0.06, w), height=0.18, corner_radius=0.05,
+                                    stroke_width=0, fill_color=INK, fill_opacity=0.85
+                                    ).move_to([BAR_L + w / 2, BAR_Y, 0])
+        fill = bar_for(STEPS[0])
         fill.add_updater(lambda m: m.become(bar_for(wer_t.get_value())))
-        self.play(Create(track), FadeIn(fill), run_time=0.4)
-
+        self.play(Create(track), FadeIn(fill), FadeOut(tag), run_time=0.4)
         for v in STEPS[1:]:
-            self.play(wer_t.animate.set_value(v), run_time=0.7,
+            self.play(wer_t.animate.set_value(v), run_time=0.8,
                       rate_func=rate_functions.ease_in_out_sine)
-            self.play(Flash(readout.get_center(), color=WHITE, num_lines=10,
-                            flash_radius=1.4, line_length=0.12), run_time=0.25)
+            self.play(Flash(NUM_C, color=WHITE, num_lines=10, flash_radius=1.7,
+                            line_length=0.12), run_time=0.2)
         fill.clear_updaters()
         wer_t.set_value(STEPS[-1])
+        big.clear_updaters()   # freeze the number at 18.5
 
-        # ---- BEAT 3: four of five words correct ------------------------
-        self.next_section("four-of-five")
-        readout.clear_updaters()
-        pct.clear_updaters()
-        self.play(readout.animate.scale(0.42).move_to([0, 1.5, 0]),
-                  pct.animate.scale(0.7).move_to([0, 0.95, 0]).set_opacity(0.6),
-                  FadeOut(track), FadeOut(fill), run_time=0.6, rate_func=smooth)
+        # land: the winning number pulses bright, tagged "this pipeline"
+        tag2 = mono("this pipeline · from muscles alone", 18, INK).move_to([0, 2.55, 0])
+        self.play(Indicate(big, scale_factor=1.1, color=WHITE),
+                  Flash(NUM_C, color=WHITE, num_lines=18, flash_radius=2.6, line_length=0.22),
+                  FadeIn(tag2, shift=DOWN * 0.1), run_time=0.6)
 
-        slots = VGroup(*[RoundedRectangle(width=1.5, height=0.7, corner_radius=0.08,
-                                          stroke_color=INK_GHOST, stroke_width=1.6,
-                                          fill_opacity=0) for _ in range(5)])
-        slots.arrange(RIGHT, buff=0.28).move_to([0, -0.6, 0])
-        self.play(LaggedStart(*[Create(s) for s in slots], lag_ratio=0.08), run_time=0.7)
-        for i in range(5):
-            if i < 4:
-                self.play(slots[i].animate.set_fill(INK, 0.9), run_time=0.2)
-            else:
-                self.play(slots[i].animate.set_stroke(INK_GHOST, 1.6).set_fill(BG, 0),
-                          run_time=0.2)
-        cap = mono("four words in five, correct", 22, INK_DIM).move_to([0, -1.7, 0])
-        self.play(FadeIn(cap, shift=UP * 0.1), run_time=0.4)
+        # ---- BEAT 3: reframe as four-in-five — filled vs dim pills ------
+        self.next_section("four")
+        headline = VGroup(big, pct)
+        self.play(headline.animate.scale(0.46).move_to([0, 1.55, 0]),
+                  FadeOut(track), FadeOut(fill), FadeOut(tag2), run_time=0.6)
 
-        # settle the number toward the bottom (match cut into scene 8)
+        pills = VGroup(*[RoundedRectangle(width=1.15, height=0.62, corner_radius=0.31,
+                                          stroke_color=INK, stroke_width=1.8,
+                                          fill_color=WHITE,
+                                          fill_opacity=(0.92 if i < 4 else 0.1))
+                         for i in range(5)]).arrange(RIGHT, buff=0.32).move_to([0, -0.35, 0])
+        cap = mono("four words in five, correct", 22, INK_DIM).move_to([0, -1.55, 0])
+        self.play(LaggedStart(*[GrowFromCenter(p) for p in pills], lag_ratio=0.08), run_time=0.7)
+        self.play(FadeIn(cap, shift=UP * 0.1), run_time=0.3)
+        self.wait(0.3)
+
+        # ---- BEAT 4: the SAME number settles to the scene-8 block -------
         self.next_section("settle")
-        block = mono("18.5", 30, INK_FAINT)
-        block.move_to([0, -0.6, 0])
-        self.play(FadeOut(VGroup(readout, pct, slots, cap), run_time=0.5),
-                  run_time=0.5)
-        self.add(block)
-        self.play(block.animate.move_to([0, -1.4, 0]).set_opacity(0.5),
-                  run_time=0.6, rate_func=smooth)
+        final = mono("18.5", 30, INK_FAINT).move_to([0, -1.4, 0]).set_opacity(0.5)
+        self.play(FadeOut(pills), FadeOut(cap), pct.animate.set_opacity(0.0), run_time=0.4)
+        self.play(Transform(big, final), run_time=0.7, rate_func=smooth)
         self.wait(0.4)

@@ -1,21 +1,64 @@
 # REEL 9 — SILENT. "What is it for? Silent speech. Mouth the words and they become
 # text — in a crowd, in a meeting, anywhere a voice can't go."
-# OPENS ON: the glowing stack expanding past the frame (== scene 8 close).
-# A sweep reveals a triptych: a noisy cafe where a silent mouth types text; a
-# private no-whisper dictation; a hands-free case. The panels compress to 3 lines.
-# CLOSES ON: three lines of typed text drifting to centre  (== scene 10 open).
+# OPENS ON: a wash of light from scene 8's glowing stack.
+# Lead with the HERO mechanic: a face silently mouths a phrase (sound struck out)
+# and the words type themselves out. Then the three use-cases stack as clean lines,
+# each with its context — no cluttered boxes.
+# CLOSES ON: three quoted lines at ORIGIN  (== scene 10 open, exact colours/sizes).
 from manim import *
 from style import *
-from reel_common import WHITE, motes, drift, mouth_closed, mouth_open
-import numpy as np
+from reel_common import WHITE, motes, drift
+
+FACE_C = [0.0, 1.05, 0]
 
 
-def panel(cx, title):
-    box = RoundedRectangle(width=3.4, height=2.6, corner_radius=0.12,
-                           stroke_color=INK_GHOST, stroke_width=1.4,
-                           fill_color=BG, fill_opacity=1.0).move_to([cx, 0.3, 0])
-    cap = mono(title, 17, INK_FAINT).next_to(box, DOWN, buff=0.2)
-    return box, cap
+def make_face():
+    head = Ellipse(width=2.0, height=2.6).set_stroke(INK, 2.0).move_to(FACE_C)
+    eye_l = Arc(0.13, PI, PI, arc_center=[FACE_C[0] - 0.34, FACE_C[1] + 0.5, 0]).set_stroke(INK_DIM, 2)
+    eye_r = Arc(0.13, PI, PI, arc_center=[FACE_C[0] + 0.34, FACE_C[1] + 0.5, 0]).set_stroke(INK_DIM, 2)
+    nose = VMobject().set_points_as_corners(
+        [[FACE_C[0], FACE_C[1] + 0.22, 0], [FACE_C[0] - 0.08, FACE_C[1] - 0.12, 0],
+         [FACE_C[0] + 0.06, FACE_C[1] - 0.12, 0]]).set_stroke(INK_DIM, 2)
+    return VGroup(head, eye_l, eye_r, nose)
+
+
+MOUTH_Y = FACE_C[1] - 0.48
+
+
+def mouth_closed_at():
+    return Line([FACE_C[0] - 0.28, MOUTH_Y, 0], [FACE_C[0] + 0.28, MOUTH_Y, 0]).set_stroke(INK, 2.4)
+
+
+def mouth_open_at(h):
+    return Ellipse(width=0.42, height=h).set_stroke(INK, 2.4).set_fill(BG, 1.0).move_to([FACE_C[0], MOUTH_Y, 0])
+
+
+def speaker_muted(at):
+    cone = Polygon([-0.14, -0.12, 0], [-0.14, 0.12, 0], [0.04, 0.28, 0], [0.04, -0.28, 0],
+                   color=INK_DIM, fill_opacity=0.9, stroke_width=0)
+    a1 = Arc(0.16, -PI / 3, 2 * PI / 3, arc_center=[0.1, 0, 0]).set_stroke(INK_DIM, 2)
+    grp = VGroup(cone, a1).move_to(at)
+    slash = Line(at + LEFT * 0.28 + DOWN * 0.28, at + RIGHT * 0.28 + UP * 0.28).set_stroke(WHITE, 2.6)
+    return grp, slash
+
+
+# small context glyphs, left of each use-case line
+def noise_glyph(at):
+    xs = [-0.14, -0.05, 0.04, 0.13]
+    hs = [0.07, 0.16, 0.1, 0.14]
+    return VGroup(*[Line([x, -h, 0], [x, h, 0]) for x, h in zip(xs, hs)]
+                  ).set_stroke(INK_FAINT, 2).move_to(at)
+
+
+def lock_glyph(at):
+    body = RoundedRectangle(width=0.24, height=0.18, corner_radius=0.03).set_stroke(INK_FAINT, 1.8)
+    shackle = Arc(0.085, 0, PI).set_stroke(INK_FAINT, 1.8).move_to(body.get_top() + UP * 0.06)
+    return VGroup(body, shackle).move_to(at)
+
+
+def hands_glyph(at):
+    grp, slash = speaker_muted([0, 0, 0])
+    return VGroup(grp, slash).scale(0.7).move_to(at)
 
 
 class Silent(Scene):
@@ -26,85 +69,68 @@ class Silent(Scene):
 
         # ---- OPEN: a wash of light from scene 8's glow -----------------
         self.next_section("open")
-        wash = Circle(radius=0.4, stroke_width=0, fill_color=INK, fill_opacity=0.10
-                      ).move_to([0, 0.4, 0])
+        wash = Circle(radius=0.4, stroke_width=0, fill_color=INK, fill_opacity=0.1).move_to([0, 0.4, 0])
         self.add(wash)
         self.play(wash.animate.scale(30).set_opacity(0.0), run_time=0.7,
                   rate_func=rate_functions.ease_out_sine)
         self.remove(wash)
+        title = mono("silent speech", 26, INK_FAINT).to_edge(UP, buff=0.5)
+        self.play(FadeIn(title, shift=DOWN * 0.1), run_time=0.4)
 
-        q = mono("what is it for?", 24, INK_FAINT).to_edge(UP, buff=0.5)
-        self.play(FadeIn(q, shift=DOWN * 0.1), run_time=0.4)
+        # ---- BEAT 1: the mechanic — mouth silently, words type out -----
+        self.next_section("mechanic")
+        face = make_face()
+        mouth = mouth_closed_at()
+        spk, slash = speaker_muted([FACE_C[0] + 1.65, FACE_C[1] + 0.25, 0])
+        self.play(Create(face), Create(mouth), run_time=0.8)
+        self.play(FadeIn(spk), Create(slash), run_time=0.4)
 
-        # ---- BEAT 1: three use-cases sweep in --------------------------
-        self.next_section("triptych")
-        cxs = [-3.8, 0.0, 3.8]
-        titles = ["a loud cafe", "in private", "hands-free"]
-        panels = []
-        caps = VGroup()
-        for cx, t in zip(cxs, titles):
-            b, c = panel(cx, t)
-            panels.append(b)
-            caps.add(c)
-
-        # panel 1: noise scribbles + a silent mouth -> text
-        noise = VGroup(*[trace_line(cxs[0], k) for k in range(4)])
-        mouth = mouth_closed().scale(0.9).move_to([cxs[0], 0.55, 0])
-        typed1 = mono("\"meet me at eight\"", 15, INK).move_to([cxs[0], -0.5, 0])
-        # panel 2: a struck-through speaker + text
-        spk = speaker_glyph([cxs[1] - 0.7, 0.6, 0])
-        spk_slash = Line([cxs[1] - 1.0, 0.35, 0], [cxs[1] - 0.4, 0.85, 0]).set_stroke(WHITE, 2.4)
-        typed2 = mono("\"send the file\"", 15, INK).move_to([cxs[1], -0.5, 0])
-        # panel 3: hands busy + text appears
-        hands = mono("[ hands busy ]", 15, INK_FAINT).move_to([cxs[2], 0.6, 0])
-        typed3 = mono("\"call me back\"", 15, INK).move_to([cxs[2], -0.5, 0])
-
-        self.play(LaggedStart(Create(panels[0]), Create(panels[1]), Create(panels[2]),
-                              lag_ratio=0.15),
-                  LaggedStart(*[FadeIn(c) for c in caps], lag_ratio=0.15),
-                  run_time=1.0)
-        self.play(FadeIn(VGroup(*noise)), FadeIn(mouth), run_time=0.4)
-        # silent articulation in panel 1
-        self.play(Transform(mouth, mouth_open(0.28).scale(0.9).move_to([cxs[0], 0.55, 0])),
-                  run_time=0.22)
-        self.play(Transform(mouth, mouth_closed().scale(0.9).move_to([cxs[0], 0.55, 0])),
-                  FadeIn(typed1, shift=UP * 0.06), run_time=0.3)
-        self.play(FadeIn(spk), Create(spk_slash), FadeIn(typed2, shift=UP * 0.06),
-                  run_time=0.5)
-        self.play(FadeIn(hands), FadeIn(typed3, shift=UP * 0.06), run_time=0.5)
+        typed = mono('"meet me at eight"', 26, INK).move_to([0, -1.35, 0])
+        # a few silent articulations, then the words type out
+        for h in (0.34, 0.18, 0.36, 0.2):
+            self.play(Transform(mouth, mouth_open_at(h)), run_time=0.12)
+        self.play(Transform(mouth, mouth_closed_at()),
+                  AddTextLetterByLetter(typed), run_time=1.0)
+        cap = mono("mouth the words — they become text", 18, INK_FAINT).move_to([0, -2.5, 0])
+        self.play(FadeIn(cap, shift=UP * 0.08), run_time=0.4)
         self.wait(0.2)
 
-        # ---- BEAT 2: compress to three lines of text -------------------
-        self.next_section("compress")
-        lines = VGroup(typed1.copy(), typed2.copy(), typed3.copy())
-        target = VGroup(
-            mono("\"meet me at eight\"", 22, INK),
-            mono("\"send the file\"", 22, INK_DIM),
-            mono("\"call me back\"", 22, INK_FAINT),
-        ).arrange(DOWN, buff=0.4).move_to([0, 0.1, 0])
-        everything = VGroup(*panels, caps, *noise, mouth, spk, spk_slash,
-                            hands, typed1, typed2, typed3, q)
-        self.play(FadeOut(everything), run_time=0.5)
-        self.add(lines)
-        self.play(Transform(lines[0], target[0]),
-                  Transform(lines[1], target[1]),
-                  Transform(lines[2], target[2]),
+        # ---- BEAT 2: the use-cases — where a voice can't go ------------
+        self.next_section("contexts")
+        USES = [('"meet me at eight"', "in a loud cafe", noise_glyph),
+                ('"send the file"', "in a private meeting", lock_glyph),
+                ('"call me back"', "hands full", hands_glyph)]
+        rows = VGroup()
+        for quote, ctx, _ in USES:
+            q = mono(quote, 24, INK)
+            t = mono("·  " + ctx, 16, INK_FAINT)
+            rows.add(VGroup(q, t).arrange(RIGHT, buff=0.35))
+        rows.arrange(DOWN, buff=0.55, aligned_edge=LEFT).move_to([0.4, 0, 0])
+        glyphs = VGroup(*[g(rows[i].get_left() + LEFT * 0.45).set_opacity(0)
+                          for i, (_, _, g) in enumerate(USES)])
+
+        # the hero phrase becomes the first use-case; face/speaker retire
+        self.play(FadeOut(VGroup(face, mouth, spk, slash, cap)),
+                  Transform(typed, rows[0][0]), run_time=0.55)
+        self.remove(typed)
+        self.add(rows[0][0])
+        self.play(FadeIn(rows[0][1], shift=RIGHT * 0.06),
+                  glyphs[0].animate.set_opacity(1.0), run_time=0.4)
+        for i in (1, 2):
+            self.play(FadeIn(rows[i], shift=UP * 0.06),
+                      glyphs[i].animate.set_opacity(1.0), run_time=0.4)
+        self.wait(0.3)
+
+        # ---- BEAT 3: converge to the three quoted lines (== scene 10) --
+        self.next_section("converge")
+        final = VGroup(
+            mono('"meet me at eight"', 22, INK),
+            mono('"send the file"', 22, INK_DIM),
+            mono('"call me back"', 22, INK_FAINT),
+        ).arrange(DOWN, buff=0.4).move_to(ORIGIN)
+        quotes = [rows[0][0], rows[1][0], rows[2][0]]
+        tags = VGroup(rows[0][1], rows[1][1], rows[2][1], glyphs, title)
+        self.play(FadeOut(tags),
+                  *[Transform(quotes[i], final[i]) for i in range(3)],
                   run_time=0.8, rate_func=smooth)
-        self.play(lines.animate.move_to(ORIGIN), run_time=0.5,
-                  rate_func=rate_functions.ease_in_out_sine)
         self.wait(0.4)
-
-
-def trace_line(cx, k=0):
-    xs = np.linspace(cx - 1.3, cx + 1.3, 40)
-    ph = np.random.RandomState(50 + k).uniform(0, 6)
-    ys = 1.05 - 0.28 * k + 0.10 * np.sin(np.linspace(0, 8, 40) + ph)
-    pts = [[xs[i], ys[i], 0] for i in range(40)]
-    return VMobject().set_points_smoothly(pts).set_stroke(INK_GHOST, 1.0, opacity=0.4)
-
-
-def speaker_glyph(at):
-    cone = Polygon([-0.16, -0.14, 0], [-0.16, 0.14, 0], [0.04, 0.3, 0], [0.04, -0.3, 0],
-                   color=INK, fill_opacity=0.9, stroke_width=0)
-    a1 = Arc(0.18, -PI / 3, 2 * PI / 3, arc_center=[0.1, 0, 0]).set_stroke(INK, 2)
-    return VGroup(cone, a1).move_to(at)

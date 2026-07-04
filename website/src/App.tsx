@@ -142,14 +142,18 @@ export default function App() {
             <Suspense fallback={null}>
               <Routes>
                 <Route path="/" element={<ChooserPage />} />
+                {/* Distinct keys force a full remount when navigating between the
+                    two story experiences (same component type), so a fresh mount
+                    re-runs auto-play instead of reusing the reel's played-out state. */}
                 <Route
                   path="/story/under-the-hood"
-                  element={<StoryExperience stages={STAGES} autoPlay />}
+                  element={<StoryExperience key="deep" stages={STAGES} autoPlay />}
                 />
                 <Route
                   path="/story/one-breath"
                   element={
                     <StoryExperience
+                      key="reel"
                       stages={REEL_STAGES}
                       autoPlay
                       endCardDeepDivePath={DEEP_DIVE_PATH}

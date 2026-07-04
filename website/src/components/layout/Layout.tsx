@@ -10,10 +10,12 @@ import styles from './Layout.module.css'
  * App shell: the fixed nav floats on top; routed page content scrolls beneath.
  * The story is now entirely Manim clips (the MediaLayer), so there is no WebGL
  * scene behind it — just the black backdrop. The footer is shown only on the
- * reading pages — the Story ends immersively on its final stage.
+ * reading pages (Technical/Code); the chooser and both story experiences end
+ * immersively on their own final frame, with no footer beneath.
  */
 export function Layout({ children }: { children: ReactNode }) {
-  const isStory = useLocation().pathname === '/'
+  const { pathname } = useLocation()
+  const showFooter = pathname === '/technical' || pathname === '/code'
   return (
     <>
       <a
@@ -33,7 +35,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <main id="main" tabIndex={-1} className={styles.main}>
         {children}
       </main>
-      {!isStory && <Footer />}
+      {showFooter && <Footer />}
       <Loader />
     </>
   )
