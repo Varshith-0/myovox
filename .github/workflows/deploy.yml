@@ -36,6 +36,28 @@ jobs:
           cache-dependency-path: website/package-lock.json
       - run: npm ci
       - run: npm run build
+
+      - name: Show build output summary
+        run: |
+          echo "cwd: $(pwd)"
+          echo "dist path exists?"; [ -d dist ] && echo "yes" || echo "NO"
+          echo "List files (top 200):"
+          ls -la dist | sed -n '1,200p' || true
+          echo "Disk usage of dist:"
+          du -sh dist || true
+          echo "Top 25 largest files in dist:"
+          find dist -type f -exec du -h {} + | sort -hr | head -n 25 || true
+
+      - name: Remove sourcemap files from artifact (if any)
+        run: |
+          if [ -d dist ]; then
+            echo "Removing sourcemaps (if present)..."
+            find dist -name "*.map" -print -delete || true
+            du -sh dist || true
+          else
+            echo "dist directory not found; skipping sourcemap removal"
+          fi
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -46,7 +68,28 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deployment
+      - id: deploy-attempt-1
         uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Retry deploy if first attempt failed
+        if: steps.deploy-attempt-1.outcome == 'failure'
+        id: deploy-attempt-2
+        uses: actions/deploy-pages@v4
+
+      - name: Fail if deploy failed twice
+        if: >-
+          (steps.deploy-attempt-1.outcome == 'failure' &&
+           (steps.deploy-attempt-2.outcome == 'failure' || steps.deploy-attempt-2.outcome == null))
+        run: |
+          echo "Both deploy attempts failed. See logs above for action outputs."
+          exit 1
+
+      - name: Print page url
+        if: steps.deploy-attempt-1.outcome == 'success' || steps.deploy-attempt-2.outcome == 'success'
+        run: |
+          echo "Attempt1 outcome: ${{ steps.deploy-attempt-1.outcome }}"
+          echo "Attempt2 outcome: ${{ steps.deploy-attempt-2.outcome }}"
+          echo "Page URL (attempt1): ${{ steps.deploy-attempt-1.outputs.page_url }}"
+          echo "Page URL (attempt2): ${{ steps.deploy-attempt-2.outputs.page_url }}"
