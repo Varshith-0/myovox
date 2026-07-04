@@ -79,7 +79,7 @@ export const STAGES: readonly Stage[] = [
     'why', 'Why',
     'Why this exists.',
     'Three research-paper cards fan in and collapse onto a UC Davis name plate (Gowda, Miller, with Comstock and McNaughton); a "what I changed" block stacks onto a "their foundation" block; a fifty-tick timeline labelled "the same science — made to watch" lights up.',
-    'Research papers are a wall of math almost nobody reads. This is that same science — made to watch: about fifty short scenes, built on one UC Davis lab’s work, then pushed further.',
+    'Research papers are a wall of math almost nobody reads. This is that same science — made to watch: about fifty short chapters, built on one UC Davis lab’s work, then pushed further.',
   ),
   act2(
     'landscape', 'Why this way',
@@ -90,8 +90,8 @@ export const STAGES: readonly Stage[] = [
   act2(
     'roadmap', 'The map',
     'What you’re about to learn.',
-    'A left-to-right map lights up stop by stop: the body, fingerprints, the reader, sounds, the word map, the chooser, and the final score — about fifty short scenes.',
-    'Here is the whole journey: the body and its signal, tidy fingerprints, the reader that learns, sounds instead of spelling, words on a map of English, and a chooser that picks the best sentence — ending at the score. About fifty short scenes, each one idea.',
+    'A left-to-right map lights up stop by stop: the body, fingerprints, the reader, sounds, the word map, the chooser, and the final score — about fifty short chapters.',
+    'Here is the whole journey: the body and its signal, tidy fingerprints, the reader that learns, sounds instead of spelling, words on a map of English, and a chooser that picks the best sentence — ending at the score. About fifty short chapters, each one idea.',
   ),
   act2(
     'muscles', 'Muscles',

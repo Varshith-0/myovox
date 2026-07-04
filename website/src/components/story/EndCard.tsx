@@ -62,7 +62,7 @@ export function EndCard({ deepDivePath }: { deepDivePath: string }) {
     <div className={`${styles.wrap} ${shown ? styles.shown : ''}`} aria-hidden={!shown}>
       <div className={styles.card}>
         <p className={styles.kicker}>That was the trailer.</p>
-        <p className={styles.line}>The full story goes fifty scenes deep.</p>
+        <p className={styles.line}>The full story goes fifty chapters deep.</p>
         <div className={styles.actions}>
           <button
             type="button"
