@@ -37,6 +37,7 @@ export function SpeakerControl() {
             value={volume}
             onChange={(e) => setVolume(Number(e.currentTarget.value))}
             aria-label="Narration volume"
+            aria-orientation="vertical"
             title={`Volume ${Math.round(volume * 100)}%`}
             style={{ '--v': volume } as CSSProperties}
           />

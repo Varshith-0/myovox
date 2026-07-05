@@ -47,10 +47,86 @@
   }
 }
 
-/* Speed toggle: a compact pill with a fast-forward glyph + the current multiplier. */
+/* Speed toggle: a compact pill with a fast-forward glyph + the current multiplier.
+   Clicking it opens the speed menu above (YouTube-style selectable options). */
 .speed {
   gap: 0.4rem;
   padding: 0.5rem 0.85rem;
+}
+
+.speedGroup {
+  position: relative;
+  display: inline-flex;
+}
+
+.speedMenu {
+  position: absolute;
+  bottom: calc(100% + 0.55rem);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 8.5rem;
+  padding: 0.3rem;
+  background: rgba(11, 11, 12, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--line-strong);
+  border-radius: 0.9rem;
+  pointer-events: auto;
+}
+
+.speedItem {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.9rem;
+  padding: 0.55rem 0.8rem;
+  background: none;
+  border: 0;
+  border-radius: 0.55rem;
+  color: var(--ink-dim);
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.speedItem:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.speedItem:focus-visible {
+  outline: 1px solid var(--line-bright);
+  outline-offset: -1px;
+}
+
+.speedItemActive {
+  color: var(--ink);
+}
+
+/* Selected marker — a filled dot before the value, YouTube's check equivalent. */
+.speedItemActive > span:first-child::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 0.5em;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: middle;
+}
+
+.speedNote {
+  font-size: 0.85em;
+  opacity: 0.55;
+  letter-spacing: 0.12em;
+}
+
+@media (pointer: coarse) {
+  .speedItem {
+    min-height: 42px;
+  }
 }
 
 .btn:not(:disabled):hover,

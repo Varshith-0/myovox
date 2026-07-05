@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLenis } from 'lenis/react'
 import { useStages } from '@/story/StagesContext'
 import { useStore } from '@/store/useStore'
@@ -24,7 +24,7 @@ import styles from './PlayButton.module.css'
  * Play state lives in the store so the engine and subtitles can react to it.
  */
 const SPEED = 95 // base px per second at 1× (voice-off mode); the speed control scales it
-const SPEEDS = [1, 1.5, 2, 3] as const
+const SPEEDS = [1, 1.25, 1.5, 2, 3] as const
 
 const PAUSE_KEYS = ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' ']
 // If the scroll hasn't budged this long while playing (a clip that never loaded,
@@ -187,7 +187,7 @@ export function PlayButton({ autoPlay = false }: { autoPlay?: boolean }) {
   // Touches that start on a control keep working even if the finger wobbles.
   useEffect(() => {
     const onUser = (e: Event) => {
-      if (e.target instanceof Element && e.target.closest('button')) return
+      if (e.target instanceof Element && e.target.closest('button, input')) return
       if (useStore.getState().playing) stop()
     }
     const onKey = (e: KeyboardEvent) => {
@@ -203,8 +203,19 @@ export function PlayButton({ autoPlay = false }: { autoPlay?: boolean }) {
     }
   }, [stop])
 
-  const cycleSpeed = () =>
-    setPlaySpeed(SPEEDS[(SPEEDS.indexOf(speed as (typeof SPEEDS)[number]) + 1) % SPEEDS.length])
+  // YouTube-style speed menu: the pill toggles a list of selectable speeds.
+  const [speedOpen, setSpeedOpen] = useState(false)
+  const speedRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!speedOpen) return
+    const onDown = (e: PointerEvent) => {
+      if (!(e.target instanceof Node) || !speedRef.current?.contains(e.target)) {
+        setSpeedOpen(false)
+      }
+    }
+    window.addEventListener('pointerdown', onDown)
+    return () => window.removeEventListener('pointerdown', onDown)
+  }, [speedOpen])
 
   return (
     <div className={styles.bar}>
@@ -229,16 +240,40 @@ export function PlayButton({ autoPlay = false }: { autoPlay?: boolean }) {
       </button>
 
       {playing && (
-        <button
-          type="button"
-          className={styles.speed}
-          onClick={cycleSpeed}
-          aria-label={`Playback speed ${speed}×. Click to change.`}
-          title={`Playback speed: ${speed}× — click to change`}
-        >
-          <span className={styles.ff} aria-hidden="true" />
-          <span className={styles.speedVal}>{speed}×</span>
-        </button>
+        <div className={styles.speedGroup} ref={speedRef}>
+          {speedOpen && (
+            <div className={styles.speedMenu} role="menu" aria-label="Playback speed">
+              {SPEEDS.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={s === speed}
+                  className={`${styles.speedItem} ${s === speed ? styles.speedItemActive : ''}`}
+                  onClick={() => {
+                    setPlaySpeed(s)
+                    setSpeedOpen(false)
+                  }}
+                >
+                  <span>{s}×</span>
+                  {s === 1 && <span className={styles.speedNote}>normal</span>}
+                </button>
+              ))}
+            </div>
+          )}
+          <button
+            type="button"
+            className={styles.speed}
+            onClick={() => setSpeedOpen((o) => !o)}
+            aria-haspopup="menu"
+            aria-expanded={speedOpen}
+            aria-label={`Playback speed ${speed}×. Click to choose a speed.`}
+            title={`Playback speed: ${speed}×`}
+          >
+            <span className={styles.ff} aria-hidden="true" />
+            <span className={styles.speedVal}>{speed}×</span>
+          </button>
+        </div>
       )}
     </div>
   )
