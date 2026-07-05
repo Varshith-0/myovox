@@ -1,13 +1,13 @@
-# REEL 4 — READER. "A small network learns to read the filmstrip. While training
+# ONE BREATH 4 — READER. "A small network learns to read the filmstrip. While training
 # it listens to the real voice — a teacher it copies, then never needs again."
-# OPENS ON: reel_filmstrip() (== scene 3 close).
+# OPENS ON: one_breath_filmstrip() (== scene 3 close).
 # Left-to-right flow: filmstrip → the reader (a box of dials) → the sounds K AE T.
 # The reader box sits left-of-centre so the sounds never collide with it. The
 # teacher voice pours in from above, then evaporates for good.
 # CLOSES ON: the phoneme row K AE T at [3.7, 0]  (== scene 5 open).
 from manim import *
 from style import *
-from reel_common import (WHITE, reel_filmstrip, dial_box, phoneme_row, trace,
+from one_breath_common import (WHITE, one_breath_filmstrip, dial_box, phoneme_row, trace,
                          motes, drift)
 import numpy as np
 
@@ -24,7 +24,7 @@ class Reader(Scene):
 
         # ---- OPEN: the filmstrip (matched), slide left; reader appears ---
         self.next_section("open")
-        strip = reel_filmstrip()
+        strip = one_breath_filmstrip()
         self.add(strip)
         self.wait(0.1)
 

@@ -56,7 +56,7 @@ export function pickTier(): VideoTier {
   return clipDevWidth > 960 ? '1080' : '540'
 }
 
-/** BASE-relative video path for a clip in a tier (anim/video/<tier>/<id>.mp4). */
+/** BASE-relative video path for a clip in a tier (anim/<chapter>/video/<tier>/<id>.mp4). */
 export function tierSrc(src: string, tier: VideoTier): string {
   return tier === '540' ? src.replace('video/1080/', 'video/540/') : src
 }

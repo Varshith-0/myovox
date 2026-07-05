@@ -6,9 +6,9 @@ import { useStore } from '@/store/useStore'
 import styles from './EndCard.module.css'
 
 /**
- * The reel's closing call-to-action, shown only on "In One Breath". It fades in
+ * One Breath's closing call-to-action, shown only on "In One Breath". It fades in
  * once the final scene (MYOVOX) has settled — over the lower third the end clip
- * leaves clear — offering the deep dive and a replay. Mounted only for the reel,
+ * leaves clear — offering the deep dive and a replay. Mounted only for One Breath,
  * so the deep dive never shows it.
  *
  * @param deepDivePath route to the fifty-scene deep dive.

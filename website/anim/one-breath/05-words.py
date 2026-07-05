@@ -1,4 +1,4 @@
-# REEL 5 — WORDS. "It guesses sounds, not spelling. A map of 34,546 English words
+# ONE BREATH 5 — WORDS. "It guesses sounds, not spelling. A map of 34,546 English words
 # turns sounds into sentences — by finding the cheapest path through it."
 # OPENS ON: the phoneme row K AE T (== scene 4 close).
 # The sounds feed a LEGIBLE word lattice: 6 columns, each the right word plus a
@@ -8,7 +8,7 @@
 # CLOSES ON: the sentence "the cat sat by the door".
 from manim import *
 from style import *
-from reel_common import WHITE, phoneme_row, motes, drift
+from one_breath_common import WHITE, phoneme_row, motes, drift
 import numpy as np
 
 CORRECT = ["the", "cat", "sat", "by", "the", "door"]

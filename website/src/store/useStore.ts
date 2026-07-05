@@ -28,9 +28,9 @@ export interface AppState {
    *  preload window) — drives the "rendering…" overlay and gates Play. */
   mediaLoading: boolean
   /** Bumped to ask the PlayButton to (re)start hands-free playback — the seam the
-   *  reel's end-card "Replay" uses without reaching into PlayButton internals. */
+   *  One Breath's end-card "Replay" uses without reaching into PlayButton internals. */
   playNonce: number
-  /** The reel's end-card is showing — subtitles hide so the CTA reads cleanly. */
+  /** One Breath's end-card is showing — subtitles hide so the CTA reads cleanly. */
   endCardShown: boolean
 
   setStageIndex: (i: number) => void

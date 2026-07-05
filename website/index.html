@@ -69,6 +69,41 @@
         "keywords": "surface EMG, sEMG, speech decoding, silent speech, neuroprosthesis, Conformer, WavLM, machine learning"
       }
     </script>
+
+    <!-- Analytics: GA4 (visitor counts + stats) and Microsoft Clarity (heatmaps, session
+         replays). Loaded only on the production host so local dev and previews never
+         pollute the data. Route changes here are SPA pushState navigations — GA4's
+         enhanced measurement ("page changes based on browser history events", on by
+         default) and Clarity both track those natively, so no per-route app code. -->
+    <script>
+      ;(function () {
+        if (location.hostname !== 'varshith-0.github.io') return
+
+        var GA_ID = 'G-BE2L9Q01J0'
+        var CLARITY_ID = 'xhq7urreb8'
+
+        var ga = document.createElement('script')
+        ga.async = true
+        ga.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID
+        document.head.appendChild(ga)
+        window.dataLayer = window.dataLayer || []
+        function gtag() {
+          dataLayer.push(arguments)
+        }
+        gtag('js', new Date())
+        gtag('config', GA_ID)
+
+        window.clarity =
+          window.clarity ||
+          function () {
+            ;(window.clarity.q = window.clarity.q || []).push(arguments)
+          }
+        var cl = document.createElement('script')
+        cl.async = true
+        cl.src = 'https://www.clarity.ms/tag/' + CLARITY_ID
+        document.head.appendChild(cl)
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

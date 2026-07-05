@@ -1,11 +1,11 @@
-# REEL 1 — SPARK. "Every word begins as movement; a moving muscle leaks a pulse."
+# ONE BREATH 1 — SPARK. "Every word begins as movement; a moving muscle leaks a pulse."
 # The head draws on; the lips mouth a SILENT word; each articulation FLASHES the
 # muscle sites white (monochrome — no fill discs); then the 31-sensor array (the
 # hand-placed grid from 06-signal.py) grows onto the skin.
 # CLOSES ON: head + face + 31 grid sensors  (== scene 2 open).
 from manim import *
 from style import *
-from reel_common import (WHITE, head_outline, face_features, mouth_closed,
+from one_breath_common import (WHITE, head_outline, face_features, mouth_closed,
                          mouth_open, MUSCLE_SITES, sensor_array, motes, drift)
 
 

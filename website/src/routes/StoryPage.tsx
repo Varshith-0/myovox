@@ -14,7 +14,7 @@ import { useScrollProgress } from '@/hooks/useScrollProgress'
 
 /**
  * The scroll experience, shared by both the fifty-scene deep dive and the ten-scene
- * reel. The scroller (one section per stage) feeds a single ScrollTrigger that
+ * One Breath. The scroller (one section per stage) feeds a single ScrollTrigger that
  * publishes `progress`; the fixed Caption and ProgressRail overlays react to the
  * active stage, and the MediaLayer reads progress imperatively to scrub the active
  * stage's clip. Scrolling is free (no mandatory snap) so each clip can be scrubbed
@@ -24,8 +24,8 @@ import { useScrollProgress } from '@/hooks/useScrollProgress'
  * the same list without prop-drilling.
  *
  * @param stages the stage list to render.
- * @param autoPlay start hands-free playback on entry (the reel).
- * @param endCardDeepDivePath when set, mounts the reel end-card linking here.
+ * @param autoPlay start hands-free playback on entry (One Breath).
+ * @param endCardDeepDivePath when set, mounts One Breath end-card linking here.
  */
 export function StoryExperience({
   stages,

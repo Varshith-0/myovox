@@ -34,7 +34,7 @@ function stageFloatFromDom(stages: readonly Stage[]): number {
  * reads `scroll.progress`, never the DOM, keeping the scene fully decoupled.
  *
  * @param ref the tall story container spanning all stage sections.
- * @param stages the active stage list (deep dive or reel).
+ * @param stages the active stage list (deep dive or One Breath).
  */
 export function useScrollProgress(ref: RefObject<HTMLElement | null>, stages: readonly Stage[]): void {
   const setStageIndex = useStore((s) => s.setStageIndex)

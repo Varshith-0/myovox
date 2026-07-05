@@ -9,9 +9,9 @@
  * asked to save data.
  */
 import { STAGES } from '@/data/stages'
-import { REEL_STAGES } from '@/data/reelStages'
+import { ONE_BREATH_STAGES } from '@/data/oneBreathStages'
 import { pickTier, tierSrc } from '@/components/media/core'
-import { assetUrl, ASSET_VERSION } from '@/lib/asset'
+import { animDir, assetUrl, ASSET_VERSION } from '@/lib/asset'
 
 export function startMediaPrefetch(): void {
   if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return
@@ -24,15 +24,15 @@ export function startMediaPrefetch(): void {
     .then(async (registration) => {
       registration.active?.postMessage({ keepVersion: ASSET_VERSION })
       const tier = pickTier()
-      // Reel first: it's the short path most first-time visitors take. Videos
+      // One Breath first: it's the short path most first-time visitors take. Videos
       // before narration/posters — they're what the scrubber blocks on.
-      const clips = [...REEL_STAGES, ...STAGES]
+      const clips = [...ONE_BREATH_STAGES, ...STAGES]
       const urls = [
         ...clips.map((s) => tierSrc(s.media.src, tier)),
         ...clips.flatMap((s) => [
           s.media.poster,
-          `anim/audio/${s.id}.mp3`,
-          `anim/captions/${s.id}.json`,
+          `${animDir(s.id)}/audio/${s.id}.mp3`,
+          `${animDir(s.id)}/captions/${s.id}.json`,
         ]),
       ]
       for (const url of urls) {

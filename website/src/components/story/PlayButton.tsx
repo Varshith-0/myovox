@@ -151,8 +151,8 @@ export function PlayButton({ autoPlay = false }: { autoPlay?: boolean }) {
     }
   }, [playing, lenis])
 
-  // Reel auto-start: entering via the chooser card is itself the user gesture that
-  // unlocks audio, so the reel plays the moment it can. Fire exactly once, and only
+  // One Breath auto-start: entering via the chooser card is itself the user gesture that
+  // unlocks audio, so One Breath plays the moment it can. Fire exactly once, and only
   // after the first clip's frames are ready (mediaLoading false) so it never
   // auto-scrolls into black. Any real scroll/tap before that pauses as usual.
   const didAutoStart = useRef(false)

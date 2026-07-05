@@ -10,3 +10,7 @@ const BASE = import.meta.env.BASE_URL
 
 /** Resolve a BASE_URL-relative asset path to a cache-busted URL. */
 export const assetUrl = (path: string): string => `${BASE}${path.replace(/^\//, '')}?v=${VER}`
+
+/** Chapter folder under anim/ for a clip id ("one-breath-*" ids vs the deep dive). */
+export const animDir = (id: string): string =>
+  `anim/${id.startsWith('one-breath-') ? 'one-breath' : 'under-the-hood'}`

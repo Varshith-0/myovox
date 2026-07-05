@@ -3,7 +3,7 @@ import { useStages } from '@/story/StagesContext'
 import { useStore } from '@/store/useStore'
 import { narration } from '@/store/narration'
 import { clamp01 } from '@/lib/num'
-import { assetUrl } from '@/lib/asset'
+import { animDir, assetUrl } from '@/lib/asset'
 
 /**
  * The narration engine. One hidden `<audio>` per stage; it plays the active
@@ -56,7 +56,7 @@ export function NarrationLayer() {
       // Fetch the active clip and its immediate neighbours only.
       for (const [id, audio] of audioMap) {
         if (Math.abs((index.get(id) ?? -1) - stageIndex) <= 1) {
-          const url = assetUrl(`anim/audio/${id}.mp3`)
+          const url = assetUrl(`${animDir(id)}/audio/${id}.mp3`)
           if (audio.getAttribute('src') !== url) audio.setAttribute('src', url)
         }
       }

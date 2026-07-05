@@ -14,11 +14,11 @@ import { scroll } from '@/store/scroll'
 import { useStore } from '@/store/useStore'
 import { clamp01 } from '@/lib/num'
 import { STAGES } from '@/data/stages'
-import { REEL_STAGES } from '@/data/reelStages'
+import { ONE_BREATH_STAGES } from '@/data/oneBreathStages'
 
 /** Route paths for the two ways into the story. */
 export const DEEP_DIVE_PATH = '/story/under-the-hood'
-export const REEL_PATH = '/story/one-breath'
+export const ONE_BREATH_PATH = '/story/one-breath'
 
 // The reading pages pull in react-markdown + the syntax highlighter; load them
 // only when visited so they stay out of the initial (Story) bundle.
@@ -144,7 +144,7 @@ export default function App() {
                 <Route path="/" element={<ChooserPage />} />
                 {/* Distinct keys force a full remount when navigating between the
                     two story experiences (same component type), so a fresh mount
-                    re-runs auto-play instead of reusing the reel's played-out state. */}
+                    re-runs auto-play instead of reusing One Breath's played-out state. */}
                 <Route
                   path="/story/under-the-hood"
                   element={<StoryExperience key="deep" stages={STAGES} autoPlay />}
@@ -153,8 +153,8 @@ export default function App() {
                   path="/story/one-breath"
                   element={
                     <StoryExperience
-                      key="reel"
-                      stages={REEL_STAGES}
+                      key="one-breath"
+                      stages={ONE_BREATH_STAGES}
                       autoPlay
                       endCardDeepDivePath={DEEP_DIVE_PATH}
                     />

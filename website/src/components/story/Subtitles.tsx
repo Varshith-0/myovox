@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useStore } from '@/store/useStore'
 import { narration } from '@/store/narration'
-import { assetUrl } from '@/lib/asset'
+import { animDir, assetUrl } from '@/lib/asset'
 import { lastBefore, needsLeadingSpace, joinWords, type Cue } from '@/lib/cues'
 import styles from './Subtitles.module.css'
 
@@ -10,12 +10,12 @@ import styles from './Subtitles.module.css'
  * word lit in step. Shown only while narration is actually playing. It follows
  * the {@link NarrationLayer}'s active clip + playhead (via the {@link narration}
  * hot-state) and reads the sentence cues baked beside each clip
- * (`anim/captions/<id>.json`, from `scripts/narrate.py`).
+ * (`anim/<chapter>/captions/<id>.json`, from `scripts/narrate.py`).
  */
 
 export function Subtitles() {
   const on = useStore((s) => s.subtitlesOn)
-  // The reel's end-card owns the lower third when it's up — don't overlap it.
+  // One Breath's end-card owns the lower third when it's up — don't overlap it.
   const endCardShown = useStore((s) => s.endCardShown)
   const [cues, setCues] = useState<Cue[]>([])
   const [cueIdx, setCueIdx] = useState(-1)
@@ -38,7 +38,7 @@ export function Subtitles() {
         return
       }
       try {
-        const res = await fetch(assetUrl(`anim/captions/${clipId}.json`))
+        const res = await fetch(assetUrl(`${animDir(clipId)}/captions/${clipId}.json`))
         const data = res.ok ? ((await res.json()).cues as Cue[]) : []
         cache.current.set(clipId, data)
         if (!cancelled && idRef.current === clipId) {

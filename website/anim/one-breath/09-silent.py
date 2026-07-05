@@ -1,4 +1,4 @@
-# REEL 9 — SILENT. "What is it for? Silent speech. Mouth the words and they become
+# ONE BREATH 9 — SILENT. "What is it for? Silent speech. Mouth the words and they become
 # text — in a crowd, in a meeting, anywhere a voice can't go."
 # OPENS ON: a wash of light from scene 8's glowing stack.
 # Lead with the HERO mechanic: a face silently mouths a phrase (sound struck out)
@@ -7,7 +7,7 @@
 # CLOSES ON: three quoted lines at ORIGIN  (== scene 10 open, exact colours/sizes).
 from manim import *
 from style import *
-from reel_common import WHITE, motes, drift
+from one_breath_common import WHITE, motes, drift
 
 FACE_C = [0.0, 1.05, 0]
 

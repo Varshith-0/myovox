@@ -1,4 +1,4 @@
-# REEL 10 — END. "That's the whole idea — in one breath. If you want to see how
+# ONE BREATH 10 — END. "That's the whole idea — in one breath. If you want to see how
 # every piece really works — fifty short scenes are waiting under the hood."
 # OPENS ON: three lines of text converging (== scene 9 close).
 # The lines braid into one EMG trace that shatters into particles; the particles
@@ -6,7 +6,7 @@
 # settles high in frame — leaving room below for the DOM end-card buttons.
 from manim import *
 from style import *
-from reel_common import WHITE, motes, drift
+from one_breath_common import WHITE, motes, drift
 import numpy as np
 from random import uniform, seed as rseed
 
@@ -29,7 +29,7 @@ def emg_y(x):
     return fine * (0.45 + 1.3 * burst)
 
 
-class ReelEnd(Scene):
+class OneBreathEnd(Scene):
     def construct(self):
         seed()
         rseed(7)

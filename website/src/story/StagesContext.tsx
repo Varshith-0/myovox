@@ -1,6 +1,6 @@
 /**
  * Which stage list the story components render — the fifty-scene deep dive
- * ({@link module:data/stages}) or the ten-scene reel ({@link module:data/reelStages}).
+ * ({@link module:data/stages}) or the ten-scene One Breath ({@link module:data/oneBreathStages}).
  *
  * The context + hook live here; the {@link StagesProvider} component lives in its
  * own file so React Fast Refresh stays happy. The value is static for a route's

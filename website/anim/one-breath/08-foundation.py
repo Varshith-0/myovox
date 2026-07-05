@@ -1,4 +1,4 @@
-# REEL 8 — FOUNDATION. "None of this starts from zero. A lab at UC Davis built the
+# ONE BREATH 8 — FOUNDATION. "None of this starts from zero. A lab at UC Davis built the
 # sensors, the data, and the whole approach. I built upward from their foundation,
 # using proven ideas from across the field — composition, not invention."
 # OPENS ON: the small dim block sinking (== scene 7 close).
@@ -7,7 +7,7 @@
 # CLOSES ON: the full glowing stack  (== scene 9 open).
 from manim import *
 from style import *
-from reel_common import WHITE, motes, drift
+from one_breath_common import WHITE, motes, drift
 import numpy as np
 
 TAGS = ["Conformer", "WavLM", "HuBERT", "CTC", "k2 / icefall", "Qwen2.5", "QLoRA"]

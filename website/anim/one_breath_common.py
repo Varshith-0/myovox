@@ -1,6 +1,6 @@
-"""Shared geometry + motifs for the "In One Breath" reel scenes.
+"""Shared geometry + motifs for the "In One Breath" scenes.
 
-The reel is ten short clips that must read as ONE continuous film: every scene
+One Breath is ten short clips that must read as ONE continuous film: every scene
 OPENS on the exact composition the previous scene CLOSED on (a "match cut"). The
 only way to guarantee that is to build those shared compositions from one place —
 this module — so identical seeds and coordinates produce pixel-identical starts
@@ -115,7 +115,7 @@ def sensor_array(fill=0.5):
 # Covariance "fingerprint" tile — a small symmetric grid (scene 3 & 4)
 # ---------------------------------------------------------------------------
 def fingerprint_tile(k=9, size=0.9, at=ORIGIN, seed_n=7, op=1.0):
-    """A k×k symmetric heat tile: the reel's stand-in for the 31×31 covariance."""
+    """A k×k symmetric heat tile: One Breath's stand-in for the 31×31 covariance."""
     rng = np.random.RandomState(seed_n)
     base = rng.uniform(0, 1, (k, k))
     m = (base + base.T) / 2
@@ -149,7 +149,7 @@ def filmstrip(count=7, at=ORIGIN, tile_size=0.62, gap=0.12, seed0=20, op=1.0):
 
 # The one canonical filmstrip pose shared by scene 3's close and scene 4's open,
 # so the match cut is exact. Built from one place → identical tiles + geometry.
-def reel_filmstrip():
+def one_breath_filmstrip():
     return filmstrip(count=7, at=[0, -0.7, 0], tile_size=0.8, gap=0.16, seed0=20)
 
 

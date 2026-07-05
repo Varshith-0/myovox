@@ -1,4 +1,4 @@
-# REEL 2 — SENSORS. "31 sensors catch those pulses, 5000 readings a second. No mic."
+# ONE BREATH 2 — SENSORS. "31 sensors catch those pulses, 5000 readings a second. No mic."
 # OPENS ON: head + face + 31 grid sensors  (== scene 1 close).
 # The sensors brighten; then EACH sensor unfurls into ONE line of the waterfall —
 # the face-signal literally BECOMES the 31-channel recording — so the "5000
@@ -6,7 +6,7 @@
 # CLOSES ON: the 31-line waterfall  (== scene 3 open).
 from manim import *
 from style import *
-from reel_common import (WHITE, head_outline, face_features, mouth_closed,
+from one_breath_common import (WHITE, head_outline, face_features, mouth_closed,
                          grid31_positions, sensor_array, waterfall, motes, drift)
 
 

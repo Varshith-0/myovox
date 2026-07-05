@@ -1,13 +1,13 @@
-# REEL 3 — FINGERPRINTS. "Too much to read. 50 times a second we ask: which
+# ONE BREATH 3 — FINGERPRINTS. "Too much to read. 50 times a second we ask: which
 # muscles move together? Each answer is a fingerprint of the face."
 # OPENS ON: the 31-line waterfall  (== scene 2 close).
 # The signal compresses into a clean band; a window sweeps it EXACTLY from left
 # edge to right edge, full height; each pass drops one fingerprint tile that STAYS,
 # building a filmstrip; a scan then runs the finished sequence.
-# CLOSES ON: reel_filmstrip()  (== scene 4 open).
+# CLOSES ON: one_breath_filmstrip()  (== scene 4 open).
 from manim import *
 from style import *
-from reel_common import WHITE, waterfall, reel_filmstrip, motes, drift
+from one_breath_common import WHITE, waterfall, one_breath_filmstrip, motes, drift
 import numpy as np
 
 # Where the compressed signal band lives, and its exact extent.
@@ -43,7 +43,7 @@ class Fingerprints(Scene):
                         ).move_to([SIG_L + HALF_W, SIG_CY, 0])
         self.play(FadeIn(win), run_time=0.3)
 
-        target = reel_filmstrip()               # exact final strip (== scene 4 open)
+        target = one_breath_filmstrip()               # exact final strip (== scene 4 open)
         xs = np.linspace(SIG_L + HALF_W, SIG_R - HALF_W, 7)  # window centre per capture
         placed = VGroup()
         for k in range(7):
@@ -66,7 +66,7 @@ class Fingerprints(Scene):
         self.play(FadeOut(win), FadeOut(wf, shift=UP * 0.25), FadeOut(note),
                   FadeIn(rate, shift=UP * 0.1), run_time=0.7)
         # a bright scan runs left-to-right across the tiles — they are a sequence in
-        # time, not a static row. Ends clean on the exact reel_filmstrip pose.
+        # time, not a static row. Ends clean on the exact one_breath_filmstrip pose.
         for k in range(7):
             self.play(Indicate(placed[k], scale_factor=1.12, color=WHITE), run_time=0.12)
         self.wait(0.4)

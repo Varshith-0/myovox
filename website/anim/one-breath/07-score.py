@@ -1,4 +1,4 @@
-# REEL 7 — SCORE. "Where the baseline got half the words wrong, this gets four of
+# ONE BREATH 7 — SCORE. "Where the baseline got half the words wrong, this gets four of
 # five right — 18.5% word error, from muscles alone."  (the results payoff)
 # OPENS ON: the chosen sentence (== scene 6 close).
 # The sentence gives way to ONE big word-error number that falls 51 → 18.5 with a
@@ -7,7 +7,7 @@
 # one continuous element the whole way, so nothing jumps.
 from manim import *
 from style import *
-from reel_common import WHITE, counter, motes, drift
+from one_breath_common import WHITE, counter, motes, drift
 
 STEPS = [51.17, 40.63, 26.14, 18.53]
 SENTENCE = "the cat sat by the door"

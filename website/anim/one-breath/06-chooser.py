@@ -1,4 +1,4 @@
-# REEL 6 — CHOOSER. "Dozens of candidates survive. A language model reads them all,
+# ONE BREATH 6 — CHOOSER. "Dozens of candidates survive. A language model reads them all,
 # alongside the detected sounds — and picks the one that makes the most sense."
 # OPENS ON: the sentence from scene 5, which is revealed to be just ONE candidate.
 # NOTE: scene 5 already showed a sentence being *built*; this scene is only about
@@ -7,7 +7,7 @@
 # CLOSES ON: the single chosen sentence at ORIGIN, size 30  (== scene 7 open).
 from manim import *
 from style import *
-from reel_common import WHITE, motes, drift
+from one_breath_common import WHITE, motes, drift
 
 WINNER_TXT = "the cat sat by the door"
 # The candidates, winner in the MIDDLE so it stays centred through the scene.

@@ -1,19 +1,20 @@
 #!/usr/bin/env bash
 # Re-encode a Manim render for smooth scroll-scrubbing and emit a poster.
 #   usage: encode.sh <scene_file.py> <SceneClass> <out-id>
-# Produces website/public/anim/video/1080/<out-id>.mp4 (scrub-friendly GOP: a keyframe every
-# 12 frames so seeks stay cheap without the ~5-10x bloat of all-intra, no audio) +
-# anim/posters/<out-id>.webp. Run after the high-quality (`-qh` => 1080p30)
+# Produces website/public/anim/<chapter>/video/1080/<out-id>.mp4 (scrub-friendly GOP: a
+# keyframe every 12 frames so seeks stay cheap without the ~5-10x bloat of all-intra, no
+# audio) + <chapter>/posters/<out-id>.webp. Run after the high-quality (`-qh` => 1080p30)
 # render. MEDIA_DIR overrides the manim media dir (default /tmp/emg_media).
 set -euo pipefail
 
 MENV="${MENV:-${CONDA_PREFIX:-$HOME/.conda/envs/emgmanim}}"
 MEDIA="${MEDIA_DIR:-/tmp/emg_media}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VIDEO_DIR="$HERE/../public/anim/video/1080"
-POSTER_DIR="$HERE/../public/anim/posters"
 
 file="$1"; cls="$2"; id="$3"
+case "$id" in one-breath-*) chapter=one-breath;; *) chapter=under-the-hood;; esac
+VIDEO_DIR="$HERE/../public/anim/$chapter/video/1080"
+POSTER_DIR="$HERE/../public/anim/$chapter/posters"
 stem="$(basename "$file" .py)"
 src="$MEDIA/videos/$stem/1080p30/$cls.mp4"
 [ -f "$src" ] || { echo "ERROR: render not found: $src (did you run -qh?)"; exit 1; }

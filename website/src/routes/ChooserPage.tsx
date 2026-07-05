@@ -5,24 +5,24 @@ import styles from './ChooserPage.module.css'
 
 /**
  * The landing chooser (route `/`). Two ways into the same science: the ten-scene
- * reel ("In One Breath") or the fifty-scene deep dive ("Under the Hood"). Picking
- * the reel is itself the user gesture browsers require to auto-play its audio, so
- * that card routes straight into a playing reel.
+ * One Breath ("In One Breath") or the fifty-scene deep dive ("Under the Hood"). Picking
+ * One Breath is itself the user gesture browsers require to auto-play its audio, so
+ * that card routes straight into One Breath already playing.
  *
  * Clicking a card runs a short shared-element handoff — the chosen card lifts and
  * the frame dissolves to black — before navigating, so the black start of the
  * story reads as a continuation rather than a hard cut. Reduced-motion skips it.
  */
 
-const REEL_PATH = '/story/one-breath'
+const ONE_BREATH_PATH = '/story/one-breath'
 const DEEP_PATH = '/story/under-the-hood'
 const LEAVE_MS = 460
 
 export function ChooserPage() {
   const navigate = useNavigate()
-  const [leaving, setLeaving] = useState<null | 'reel' | 'deep'>(null)
+  const [leaving, setLeaving] = useState<null | 'one-breath' | 'deep'>(null)
 
-  const go = (which: 'reel' | 'deep', path: string) => {
+  const go = (which: 'one-breath' | 'deep', path: string) => {
     if (leaving) return
     // Reduced motion: skip the handoff, navigate straight away.
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -45,8 +45,8 @@ export function ChooserPage() {
 
         <button
           type="button"
-          className={`${styles.card} ${leaving === 'reel' ? styles.chosen : ''}`}
-          onClick={() => go('reel', REEL_PATH)}
+          className={`${styles.card} ${leaving === 'one-breath' ? styles.chosen : ''}`}
+          onClick={() => go('one-breath', ONE_BREATH_PATH)}
         >
           <span className={styles.badge}>10 chapters · a short watch</span>
           <span className={styles.cardTitle}>In One Breath</span>
@@ -54,7 +54,7 @@ export function ChooserPage() {
             The whole story, in one breath. A short, jargon-free watch — what happens, why it
             works, and why it matters. The complete picture, in under two minutes.
           </span>
-          <span className={styles.cta}>Watch the reel →</span>
+          <span className={styles.cta}>Watch in one breath →</span>
         </button>
 
         <button
