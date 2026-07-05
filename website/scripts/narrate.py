@@ -33,7 +33,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "src" / "data" / "narration.json"
 OUT = ROOT / "public" / "anim"
 
-DEFAULT_VOICE = "en-US-AvaMultilingualNeural"
+DEFAULT_VOICE = "en-US-AndrewMultilingualNeural"
 DEFAULT_RATE = "+10%"  # a little brisker than default — the site can speed it further
 DEFAULT_PITCH = "+0Hz"
 
