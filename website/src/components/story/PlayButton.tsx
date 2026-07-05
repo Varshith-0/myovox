@@ -72,6 +72,14 @@ export function PlayButton({ autoPlay = false }: { autoPlay?: boolean }) {
       const dt = lastT.current ? Math.min(0.05, (t - lastT.current) / 1000) : 0
       lastT.current = t
       if (!stallSince.current) stallSince.current = t
+      // Buffering: the clip's frames aren't drawable, so hold the whole player —
+      // narration pauses itself on the same flag, and resetting the stall timer
+      // keeps the skip-ahead from firing while the animation loads.
+      if (st.mediaLoading) {
+        stallSince.current = t
+        rafRef.current = requestAnimationFrame((ts) => frameRef.current(ts))
+        return
+      }
       const max = maxScroll()
       const onLast = st.stageIndex >= stageCount - 1
       const activeId = stages[st.stageIndex]?.id

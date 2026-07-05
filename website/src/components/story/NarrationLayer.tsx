@@ -47,7 +47,8 @@ export function NarrationLayer() {
     const audioMap = audios.current
     let raf = 0
     const tick = () => {
-      const { stageIndex, narrationOn, playing, volume, playSpeed } = useStore.getState()
+      const { stageIndex, narrationOn, playing, volume, playSpeed, mediaLoading } =
+        useStore.getState()
       const activeId = stages[stageIndex]?.id ?? null
       // Voice is part of Play: only sound while both are on.
       const shouldPlay = narrationOn && playing
@@ -90,6 +91,14 @@ export function NarrationLayer() {
         if (cur) {
           cur.volume = clamp01(volume)
           cur.playbackRate = playSpeed
+          // Video-player behavior: when the animation's frames aren't ready
+          // (mediaLoading), the sound pauses with the picture and resumes when
+          // it's back — the voice never talks over a black canvas.
+          if (mediaLoading) {
+            if (!cur.paused) cur.pause()
+          } else if (cur.paused && !cur.ended) {
+            cur.play().catch(() => {})
+          }
         }
         narration.activeId = voiced.current
         narration.time = cur ? cur.currentTime : 0
