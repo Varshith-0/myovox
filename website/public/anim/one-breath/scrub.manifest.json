@@ -1,0 +1,152 @@
+{
+  "one-breath-chooser": {
+    "frames": 84,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "one-breath-end": {
+    "frames": 90,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "one-breath-fingerprints": {
+    "frames": 80,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "one-breath-foundation": {
+    "frames": 72,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "one-breath-reader": {
+    "frames": 92,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "one-breath-score": {
+    "frames": 102,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "one-breath-sensors": {
+    "frames": 64,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "one-breath-silent": {
+    "frames": 93,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "one-breath-spark": {
+    "frames": 80,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "one-breath-words": {
+    "frames": 92,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  }
+}

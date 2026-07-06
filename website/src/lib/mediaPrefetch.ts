@@ -1,16 +1,15 @@
 /**
  * Register the media service worker, prune stale-build cache entries, then
- * trickle-fetch every clip of the chosen resolution tier — one at a time, so
- * the scrubber's own on-demand loads always win the connection. Each fetch
- * passes through the SW, which stores the whole file; from then on any
- * mid-story jump or repeat visit serves from disk with zero network.
+ * trickle-fetch the light story assets — one at a time, so the scrubber's own
+ * on-demand loads always win the connection. Each fetch passes through the SW,
+ * which stores the whole file; from then on any mid-story jump or repeat visit
+ * serves from disk with zero network.
  *
  * Skipped in dev, when the browser lacks service workers, and when the user
  * asked to save data.
  */
 import { STAGES } from '@/data/stages'
 import { ONE_BREATH_STAGES } from '@/data/oneBreathStages'
-import { pickTier, tierSrc } from '@/components/media/core'
 import { animDir, assetUrl, ASSET_VERSION } from '@/lib/asset'
 
 export function startMediaPrefetch(): void {
@@ -23,18 +22,16 @@ export function startMediaPrefetch(): void {
     .then(() => navigator.serviceWorker.ready)
     .then(async (registration) => {
       registration.active?.postMessage({ keepVersion: ASSET_VERSION })
-      const tier = pickTier()
-      // One Breath first: it's the short path most first-time visitors take. Videos
-      // before narration/posters — they're what the scrubber blocks on.
+      // One Breath first: it's the short path most first-time visitors take.
+      // Scrub strips before narration/posters — they're what makes any stage
+      // instantly drawable; the crisp frames load on demand while scrubbing.
       const clips = [...ONE_BREATH_STAGES, ...STAGES]
-      const urls = [
-        ...clips.map((s) => tierSrc(s.media.src, tier)),
-        ...clips.flatMap((s) => [
-          s.media.poster,
-          `${animDir(s.id)}/audio/${s.id}.mp3`,
-          `${animDir(s.id)}/captions/${s.id}.json`,
-        ]),
-      ]
+      const urls = clips.flatMap((s) => [
+        `${animDir(s.id)}/scrub/${s.id}/strip.webp`,
+        s.media.poster,
+        `${animDir(s.id)}/audio/${s.id}.mp3`,
+        `${animDir(s.id)}/captions/${s.id}.json`,
+      ])
       for (const url of urls) {
         try {
           await fetch(assetUrl(url))

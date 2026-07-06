@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useStages } from '@/story/StagesContext'
 import { useStore } from '@/store/useStore'
-import { assetUrl } from '@/lib/asset'
+import { assetUrl, ASSET_VERSION } from '@/lib/asset'
 import styles from './MediaLayer.module.css'
 import { useMediaScrubber } from './useMediaScrubber'
-import { releaseClipVideo } from './mediaLifecycle'
-import { MEDIA_CONFIG, pickTier, setOpacity, type ClipStage, type VideoTier } from './core'
+import { ScrubEngine, loadChapterManifest } from './scrubEngine'
+import { MEDIA_CONFIG, setOpacity, type ClipStage } from './core'
 
 /**
  * The Act-2 clip scrubber. A fixed, full-viewport layer above the 3D canvas and
@@ -18,15 +18,15 @@ import { MEDIA_CONFIG, pickTier, setOpacity, type ClipStage, type VideoTier } fr
  *     forward — the animation plays as you move.
  *   - rest: holds its current frame. Reduced motion shows a static poster.
  *
- * Rendering scrubs all-keyframe MP4s: each clip is one small video whose every
- * frame is independently seekable, so `currentTime` seeks are frame-exact and the
- * hardware decoder does all the work. Each RAF the active clip seeks to its
- * scroll-mapped time and the decoded frame is drawn to one shared <canvas> — the
- * picture stays glued to the scroll, and held memory is just the decoder's own
- * couple-of-frames buffer. The canvas fades in over the black layer as the video
- * becomes drawable; the clips begin from black, so the loading state is the start
- * (no end-frame poster spoiler). The final-frame poster is used only as the
- * reduced-motion static. Clips beyond the preload ring have their videos released.
+ * Rendering scrubs pre-decoded image frames (Apple-style image-sequence
+ * scrubbing) — no <video> seeking, which is unreliable on phones. Each RAF the
+ * ScrubEngine draws the active clip's scroll-mapped frame to one shared <canvas>;
+ * a tiny always-loaded strip guarantees a frame is drawable almost immediately,
+ * and crisp per-frame webps sharpen it as they decode. The canvas fades in over
+ * the black layer as frames draw; the clips begin from black, so the loading
+ * state is the start (no end-frame poster spoiler). The final-frame poster is
+ * used only as the reduced-motion static. Clips beyond the preload ring have
+ * their decoded frames released by the engine.
  */
 
 /** Matches the mobile CSS that anchors a contained clip to the top of its band. */
@@ -47,10 +47,8 @@ export function MediaLayer() {
   const captionsMode = useStore((s) => s.subtitlesOn)
   const posters = useRef(new Map<string, HTMLImageElement>())
   const canvas = useRef<HTMLCanvasElement | null>(null)
-  const videos = useRef(new Map<string, HTMLVideoElement>())
-  const tier = useRef<VideoTier>('540')
+  const engine = useRef<ScrubEngine | null>(null)
   const alignTop = useRef(false)
-  const lastDraw = useRef('')
   const baseOp = useRef(new Map<string, number>())
   const frameReveal = useRef(new Map<string, number>())
   const sceneRoot = useRef<HTMLElement | null>(null)
@@ -64,10 +62,8 @@ export function MediaLayer() {
     refs: {
       posters,
       canvas,
-      videos,
-      tier,
+      engine,
       alignTop,
-      lastDraw,
       baseOp,
       frameReveal,
       sceneRoot,
@@ -76,15 +72,43 @@ export function MediaLayer() {
     },
   })
 
-  // Pick the resolution tier once, and release every scrub video on unmount so
-  // a route change hands the decoders straight back to the browser.
+  // Build the scrub engine once per story: fetch the chapter manifest, pick the
+  // tier from the canvas's device-pixel width, and pull every clip's tiny strip
+  // so the whole story is instantly scrubbable. Destroyed on unmount so a route
+  // change frees all decoded frames.
+  const chapter = clipStages[0]?.media.src.split('/')[1] ?? ''
   useEffect(() => {
-    tier.current = pickTier()
-    const cache = videos.current
+    if (reduced || !chapter) return
+    let alive = true
+    ;(async () => {
+      const assetBase = `${import.meta.env.BASE_URL}anim`
+      let manifest
+      try {
+        manifest = await loadChapterManifest(assetBase, chapter, ASSET_VERSION)
+      } catch {
+        return // no manifest → posters/loader fallback still works
+      }
+      if (!alive) return
+      const eng = new ScrubEngine()
+      eng.configure({
+        assetBase,
+        chapter,
+        manifest,
+        version: ASSET_VERSION,
+        preloadDistance: MEDIA_CONFIG.preloadDistance,
+        releaseDistance: MEDIA_CONFIG.releaseDistance,
+      })
+      const cssWidth = canvas.current?.getBoundingClientRect().width || window.innerWidth
+      eng.setViewport(cssWidth, Math.min(window.devicePixelRatio || 1, MEDIA_CONFIG.maxDpr))
+      eng.prefetchAllStrips(clipStages.map((v) => v.stage.id))
+      engine.current = eng
+    })()
     return () => {
-      for (const id of [...cache.keys()]) releaseClipVideo(cache, id)
+      alive = false
+      engine.current?.destroy()
+      engine.current = null
     }
-  }, [])
+  }, [reduced, chapter, clipStages])
 
   // Size the canvas backing store to its CSS box × DPR (capped), and track the
   // top-anchor breakpoint — both read here so the hot path never touches layout.
@@ -95,12 +119,12 @@ export function MediaLayer() {
       alignTop.current = window.matchMedia(TOP_ANCHOR_QUERY).matches
       const box = cv.getBoundingClientRect()
       const dpr = Math.min(window.devicePixelRatio || 1, MEDIA_CONFIG.maxDpr)
+      engine.current?.setViewport(box.width, dpr)
       const w = Math.round(box.width * dpr)
       const h = Math.round(box.height * dpr)
       if (w && h && (cv.width !== w || cv.height !== h)) {
         cv.width = w
         cv.height = h
-        lastDraw.current = '' // backing resize clears the canvas — force a redraw
       }
     }
     const ro = new ResizeObserver(resize)

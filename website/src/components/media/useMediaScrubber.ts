@@ -7,21 +7,10 @@ import {
   MEDIA_CONFIG,
   localProgressFor,
   setOpacity,
-  tierSrc,
   type MediaScrubberRefs,
   type ClipStage,
 } from './core'
-import {
-  drawFrame,
-  ensureClipVideo,
-  releaseClipVideo,
-  scrubVideo,
-  updateStageVisibility,
-  videoDrawable,
-  VISIBLE_DISTANCE,
-  PRELOAD_DISTANCE,
-  RELEASE_DISTANCE,
-} from './mediaLifecycle'
+import { updateStageVisibility } from './mediaLifecycle'
 import {
   applyCaptionLift,
   applyHeroScale,
@@ -55,7 +44,7 @@ function runReducedStageFrame(
   if (!img) return -1
 
   const distance = Math.abs(stage.index - active)
-  if (!updateStageVisibility(img, distance, VISIBLE_DISTANCE)) return -1
+  if (!updateStageVisibility(img, distance, MEDIA_CONFIG.visibilityDistance)) return -1
 
   const isActive = stage.index === active
   const local = localProgressFor(section)
@@ -85,12 +74,12 @@ function runClipStageFrame(
   const isActive = stage.index === active
   const posterImg = refs.posters.current.get(id)
   const posterShown = posterImg
-    ? updateStageVisibility(posterImg, distance, VISIBLE_DISTANCE)
+    ? updateStageVisibility(posterImg, distance, MEDIA_CONFIG.visibilityDistance)
     : false
 
-  // Drop clips beyond the ring entirely; re-seed on cold re-entry (no stale flash).
-  if (distance > RELEASE_DISTANCE) {
-    releaseClipVideo(refs.videos.current, id)
+  // Beyond the ring the engine has already freed the clip's frames (setWindow);
+  // drop the crossfade state too so cold re-entry re-seeds (no stale flash).
+  if (distance > MEDIA_CONFIG.releaseDistance) {
     refs.frameReveal.current.delete(id)
     refs.baseOp.current.delete(id)
     return NOT_READY
@@ -103,32 +92,25 @@ function runClipStageFrame(
 
   if (!isActive) {
     if (posterShown && posterImg) setOpacity(posterImg, 0)
-    // Near, not active → start fetching the clip so entering it is instant.
-    if (distance <= PRELOAD_DISTANCE) {
-      ensureClipVideo(refs.videos.current, id, tierSrc(stage.media.src, refs.tier.current))
-    }
+    // Neighbour prefetch is the engine's job (setWindow on stage change).
     return NOT_READY
   }
 
   const local = localProgressFor(section)
-  // Seek the hardware decoder to the scroll-mapped frame; seeks coalesce, so
-  // however fast the scroll moves we always land on the latest target.
-  const video = ensureClipVideo(refs.videos.current, id, tierSrc(stage.media.src, refs.tier.current))
-  scrubVideo(video, local)
-
   const envelope = bn * smooth(local, HOLD, REVEAL)
 
-  // Draw the decoder's current frame to the shared canvas — a GPU-side copy,
-  // nothing decodes on the main thread, so the draw can never stall the scroll.
+  // Draw the scroll-mapped pre-decoded frame to the shared canvas. The tiny
+  // always-loaded strip guarantees something is drawable almost immediately,
+  // so `drawn` is false only for the sub-second before the strip decodes.
   const canvas = refs.canvas.current
+  const engine = refs.engine.current
+  const ctx = canvas?.getContext('2d')
   let drew = false
-  if (canvas && videoDrawable(video)) {
-    const key = `${id}:${video.currentTime.toFixed(3)}`
-    if (refs.lastDraw.current !== key) {
-      drawFrame(canvas, video, stage.media.fit, refs.alignTop.current)
-      refs.lastDraw.current = key
-    }
-    drew = true
+  if (canvas && ctx && engine) {
+    drew = engine.drawFrame(
+      ctx, id, local, canvas.width, canvas.height,
+      stage.media.fit ?? 'contain', refs.alignTop.current,
+    ).drawn
   }
 
   // Fade the canvas in over the black layer, latched upward: once real frames draw
@@ -141,12 +123,12 @@ function runClipStageFrame(
   refs.frameReveal.current.set(id, cn)
 
   if (canvas) setOpacity(canvas, envelope * cn)
-  // Blurred final-frame ambience while the video can't draw yet — visual content
+  // Blurred final-frame ambience while nothing can draw yet — visual content
   // instead of a bare title on black; fades out as the live canvas reveals.
   if (posterShown && posterImg) setOpacity(posterImg, envelope * (1 - cn))
 
-  // Past the title card but the video has no drawable frame yet (still fetching
-  // after a fast jump) → signals the "rendering…" overlay.
+  // Past the title card but not even the strip is drawable yet (first hit after
+  // a fast jump) → signals the "rendering…" overlay.
   const notReady = local > REVEAL && !drew
   return { local, notReady }
 }
@@ -196,12 +178,20 @@ export function useMediaScrubber({
   act2Indices,
   refs,
 }: UseMediaScrubberArgs): void {
-  const notReadyFrames = useRef(0)
   const lastLoading = useRef(false)
 
   useEffect(() => {
     if (clipStages.length === 0) return
     let raf = 0
+    const orderedIds = clipStages.map((s) => s.stage.id)
+    // Cold-path window: preload/release rings move only on stage change (or when
+    // the engine finishes its async setup), never per-frame.
+    let windowEngine: unknown = null
+    let windowActive = -1
+    // Loader is strictly time-bounded: shows after a real stall, hard-dismisses
+    // ≤ loaderMaxMs later no matter what (the strip makes longer stalls impossible
+    // short of total network failure — and then the poster/black is the fallback).
+    let stallStart = 0
     // Write the "rendering…" flag to the store only when it flips (never per-frame).
     const syncLoading = (loading: boolean) => {
       if (loading === lastLoading.current) return
@@ -210,12 +200,25 @@ export function useMediaScrubber({
     }
     const tick = () => {
       const active = useStore.getState().stageIndex
+      const engine = refs.engine.current
+      if (engine && (engine !== windowEngine || active !== windowActive)) {
+        engine.setWindow(active, orderedIds)
+        windowEngine = engine
+        windowActive = active
+      }
       const frame = runMediaPhase(reduced, refs, clipStages, active)
       runFxPhase(reduced, act2Indices, refs, frame)
 
-      // Debounced "rendering…" signal → store (on change only, never per-frame spam).
-      notReadyFrames.current = frame.activeNotReady ? notReadyFrames.current + 1 : 0
-      syncLoading(notReadyFrames.current > MEDIA_CONFIG.loadDebounceFrames)
+      if (frame.activeNotReady) {
+        if (!stallStart) stallStart = performance.now()
+      } else {
+        stallStart = 0
+      }
+      const stalledMs = stallStart ? performance.now() - stallStart : 0
+      syncLoading(
+        stalledMs > MEDIA_CONFIG.loaderShowAfterMs &&
+          stalledMs < MEDIA_CONFIG.loaderShowAfterMs + MEDIA_CONFIG.loaderMaxMs,
+      )
 
       raf = requestAnimationFrame(tick)
     }
@@ -224,7 +227,6 @@ export function useMediaScrubber({
     return () => {
       cancelAnimationFrame(raf)
       resetDomFx(refs.sceneRoot, refs.captionWrap)
-      notReadyFrames.current = 0
       syncLoading(false)
     }
   }, [reduced, clipStages, act2Indices, refs])

@@ -1,0 +1,752 @@
+{
+  "alignment-problem": {
+    "frames": 190,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "approach": {
+    "frames": 139,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "arc": {
+    "frames": 165,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "binding-constraint": {
+    "frames": 154,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "blurry-average-cheat": {
+    "frames": 144,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "conformer": {
+    "frames": 149,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "copy-the-teacher": {
+    "frames": 161,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "credits": {
+    "frames": 151,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "ctc-many-timings": {
+    "frames": 166,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "ctc": {
+    "frames": 190,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "distillation": {
+    "frames": 150,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "encoder-bidir": {
+    "frames": 147,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "end": {
+    "frames": 106,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "ensemble-nbest": {
+    "frames": 176,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "every-pair-grid": {
+    "frames": 165,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "features-cov": {
+    "frames": 146,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "features-embed": {
+    "frames": 152,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "features-window": {
+    "frames": 149,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "foundation": {
+    "frames": 143,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "frozen-lock-how": {
+    "frames": 163,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "frozen-recognizer": {
+    "frames": 151,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "heads": {
+    "frames": 183,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "hero": {
+    "frames": 113,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "how-training-works": {
+    "frames": 150,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "journey": {
+    "frames": 168,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "knobs": {
+    "frames": 144,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "landscape": {
+    "frames": 122,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "memorize-trap": {
+    "frames": 149,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "muscles": {
+    "frames": 156,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "rerank": {
+    "frames": 147,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "roadmap": {
+    "frames": 100,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "second-opinion": {
+    "frames": 180,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "signal": {
+    "frames": 226,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "silent": {
+    "frames": 166,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "sounds-to-words-search": {
+    "frames": 165,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "targets-phon": {
+    "frames": 168,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "targets-units": {
+    "frames": 148,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "thanks": {
+    "frames": 144,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "twin-warmstart": {
+    "frames": 167,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "two-answer-keys": {
+    "frames": 167,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "two-sensors-dancing": {
+    "frames": 148,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "voice-as-teacher": {
+    "frames": 165,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "wfst": {
+    "frames": 148,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "what-is-a-net": {
+    "frames": 168,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "what-is-attention": {
+    "frames": 195,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "what-is-convolution": {
+    "frames": 153,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "what-is-lm": {
+    "frames": 144,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "what-is-wer": {
+    "frames": 188,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "where-units-from": {
+    "frames": 204,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  },
+  "why": {
+    "frames": 118,
+    "fps": 12,
+    "tiers": {
+      "hi": 960,
+      "lo": 540
+    },
+    "strip": {
+      "n": 12,
+      "cols": 12,
+      "rows": 1,
+      "cw": 240,
+      "ch": 135
+    }
+  }
+}
