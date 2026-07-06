@@ -23,6 +23,11 @@
   justify-content: flex-end;
   align-items: center;
   padding: 0.2rem 0;
+  /* Fixed, non-resizing hit box (tick + a comfortable pad to its left). The tick
+     grows INSIDE it, so hovering never chases a moving edge or falls into a gap —
+     that was the flicker. Wider than the widest tick (34px) on purpose. */
+  width: 3rem;
+  box-sizing: border-box;
 }
 
 .tick {
@@ -39,7 +44,10 @@
 /* Label sits to the LEFT of the tick (into the viewport), revealed on hover/active. */
 .name {
   position: absolute;
-  right: calc(100% + 0.7rem);
+  /* Anchored just left of the tick (not the box), and click-through so the label
+     never captures hover — it reads as a tooltip, revealed by hovering the row. */
+  right: 2.6rem;
+  pointer-events: none;
   top: 50%;
   white-space: nowrap;
   font-family: var(--font-mono);

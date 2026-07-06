@@ -67,7 +67,7 @@ export const ONE_BREATH_STAGES: readonly Stage[] = [
   ),
   oneBreath(
     'one-breath-score', 'The score',
-    'Four words in five.',
+    'Four words in five — 81% accurate.',
     'The chosen sentence bursts into particles that reform as the number 51, which falls 51 to 40 to 26 to 18.5 as a bar shrinks; five word-slots draw and four light up.',
     'From a baseline of half the words wrong down to four in five correct — 18.5% word error, from muscles alone.',
   ),

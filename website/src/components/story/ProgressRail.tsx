@@ -31,7 +31,9 @@ export function ProgressRail() {
     // Stop hands-free Play first — otherwise its per-frame scroll loop overrides
     // the jump and the click "doesn't go directly" to the chosen stage.
     setPlaying(false)
-    if (lenis) lenis.scrollTo(el)
+    // Land a few px INTO the section so its top is safely negative — otherwise a
+    // subpixel-positive top makes the previous stage read as active (stops short).
+    if (lenis) lenis.scrollTo(el, { offset: 8 })
     else el.scrollIntoView({ behavior: 'smooth' })
   }
 
