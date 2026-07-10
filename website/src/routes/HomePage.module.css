@@ -1,141 +1,96 @@
 /*
- * Homepage: a tall scroll runway (`.journey`) under a fixed canvas. All chrome
- * is fixed and frame-driven from HomePage.tsx; this file only sets the stage.
+ * Homepage: a single still viewport. One lockup — mark, wordmark, the living
+ * signal underline, tagline, facts, button — each rising into place once.
  */
 
-.journey {
-  position: relative;
-  height: 1100vh;
-  background: var(--bg-sink);
-}
-
-/* Reduced motion / no WebGL: just the final screen. */
-.still {
-  position: relative;
+.hero {
   min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--nav-h) + var(--space-8)) var(--space-6) var(--space-16);
   background: var(--bg-sink);
-}
-
-.canvas {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: var(--z-canvas);
-}
-
-/* A breath of darkness at the edges — keeps the eye centered, hides sprite pop. */
-.vignette {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: radial-gradient(
-    ellipse 90% 78% at 50% 50%,
-    transparent 58%,
-    rgba(0, 0, 0, 0.55) 100%
-  );
-}
-
-/* ---- Statements ---------------------------------------------------- */
-
-.statements {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-content);
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-}
-
-.statement {
-  grid-area: 1 / 1;
-  max-width: min(88vw, 22ch);
-  padding: 0 var(--space-6);
-  font-size: clamp(1.6rem, 1rem + 3.4vw, 3.6rem);
   text-align: center;
-  text-wrap: balance;
-  color: var(--ink);
-  opacity: 0;
-  visibility: hidden;
-  will-change: opacity, transform;
 }
 
-.hint {
-  position: fixed;
-  bottom: calc(var(--space-8) + var(--safe-b));
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: var(--z-content);
+/* Staggered entrance; the global reduced-motion rule collapses it instantly. */
+.rise {
   opacity: 0;
-  pointer-events: none;
-  animation: hintPulse 3.2s var(--ease-in-out) infinite;
+  transform: translateY(14px);
+  animation: rise 0.9s var(--ease-out) forwards;
 }
 
-@keyframes hintPulse {
-  0%,
-  100% {
-    letter-spacing: 0.28em;
-  }
-  50% {
-    letter-spacing: 0.42em;
+@keyframes rise {
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* ---- Final screen --------------------------------------------------- */
-
-.endCard {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-content);
-  text-align: center;
-  opacity: 0;
-  pointer-events: none;
+/* Monumental lockup: the mark sits left of a wordmark that owns the frame. */
+.lockup {
+  animation-delay: 0.25s;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 0;
 }
 
-.endCardStill {
-  opacity: 1;
-  pointer-events: auto;
+/* The SVG's box includes clearance for the orbiting dot, so the visible ring
+ * is ~56% of it. Sized so the ring hits ~90% of the wordmark's cap height
+ * (circles must run slightly proud of cap height to look optically equal),
+ * with a negative margin eating part of the built-in clearance — leaving just
+ * enough room that the satellite grazes, never crosses, the M. */
+.mark {
+  display: block;
+  margin-right: -0.5vw;
 }
 
-/* Pinned to the exact viewport center — where the particle logotype converges,
- * so the crossfade from particles to crisp type is seamless. */
-.logo {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: clamp(3.2rem, 13.5vw, 11.5rem);
+.mark svg {
+  display: block;
+  width: min(18.2vw, 26.5vh);
+  height: auto;
+}
+
+.wordmark {
+  font-size: min(15.8vw, 23vh);
   letter-spacing: 0.02em;
   line-height: 1;
   white-space: nowrap;
   color: var(--ink);
 }
 
-.meta {
-  position: absolute;
-  top: calc(50% + clamp(3rem, 10vw, 8.5rem));
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-6);
-  width: 100%;
-  padding: 0 var(--space-6);
+/* The underline that is the product: a live muscle-signal trace,
+ * running the full width of the lockup above it. */
+.traceWrap {
+  animation-delay: 0.55s;
+  align-self: center;
+  width: min(89vw, 130vh);
+  margin-top: min(0.5vw, 0.8vh);
 }
 
-.subline {
+.trace {
+  width: 100%;
+  height: clamp(64px, 7.5vw, 130px);
+}
+
+.tagline {
+  animation-delay: 0.8s;
+  margin-top: var(--space-2);
   color: var(--ink-dim);
 }
 
 .stats {
+  animation-delay: 0.95s;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: var(--space-3);
+  margin-top: var(--space-6);
   font-size: var(--t-sm);
+  font-family: var(--font-mono);
   color: var(--ink-faint);
   letter-spacing: 0.06em;
 }
@@ -148,7 +103,8 @@
 }
 
 .cta {
-  margin-top: var(--space-8);
+  animation-delay: 1.15s;
+  margin-top: var(--space-12);
   padding: 0.9em 2.2em;
   font-family: var(--font-mono);
   font-size: var(--t-sm);
