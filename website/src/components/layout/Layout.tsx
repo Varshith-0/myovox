@@ -16,6 +16,9 @@ import styles from './Layout.module.css'
 export function Layout({ children }: { children: ReactNode }) {
   const { pathname } = useLocation()
   const showFooter = pathname === '/technical' || pathname === '/code'
+  // The homepage is a chromeless cinematic shot — it starts in total darkness
+  // and ends on its own call to action, so the nav never appears there.
+  const showNav = pathname !== '/'
   return (
     <>
       <a
@@ -31,7 +34,7 @@ export function Layout({ children }: { children: ReactNode }) {
         Skip to content
       </a>
       <OfflineBanner />
-      <Nav />
+      {showNav && <Nav />}
       <main id="main" tabIndex={-1} className={styles.main}>
         {children}
       </main>

@@ -8,6 +8,7 @@ import { Layout } from '@/components/layout/Layout'
 import { ErrorBoundary } from '@/components/layout/ErrorBoundary'
 import { StoryExperience } from '@/routes/StoryPage'
 import { ChooserPage } from '@/routes/ChooserPage'
+import { HomePage } from '@/routes/HomePage'
 import { useLenisGsapSync } from '@/hooks/useLenis'
 import { useResponsive, getInitialReducedMotion } from '@/hooks/useResponsive'
 import { scroll } from '@/store/scroll'
@@ -83,7 +84,8 @@ function DevScrollHooks() {
 /** Per-route document title (client-side routing doesn't change it on its own) — so
  *  shared links and browser tabs read meaningfully instead of all saying the same thing. */
 const ROUTE_TITLES: Record<string, string> = {
-  '/': 'Myovox — reading speech from the muscles of the face',
+  '/': 'MYOVOX — speech begins before sound',
+  '/story': 'Myovox — reading speech from the muscles of the face',
   '/story/one-breath': 'In One Breath — Myovox',
   '/story/under-the-hood': 'Under the Hood — Myovox',
   '/technical': 'Technical report — Myovox',
@@ -141,7 +143,8 @@ export default function App() {
           <ErrorBoundary>
             <Suspense fallback={null}>
               <Routes>
-                <Route path="/" element={<ChooserPage />} />
+                <Route path="/" element={<HomePage />} />
+                <Route path="/story" element={<ChooserPage />} />
                 {/* Distinct keys force a full remount when navigating between the
                     two story experiences (same component type), so a fresh mount
                     re-runs auto-play instead of reusing One Breath's played-out state. */}
