@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useStore } from '@/store/useStore'
 import { smooth } from '@/lib/num'
+import { netMeter } from './quality'
 import {
   HOLD,
   REVEAL,
@@ -193,10 +194,30 @@ export function useMediaScrubber({
     // short of total network failure — and then the poster/black is the fallback).
     let stallStart = 0
     // Write the "rendering…" flag to the store only when it flips (never per-frame).
+    // When it flips ON, also diagnose why (weak pipe vs outran the preloader) and
+    // let the quality controller demote if the network is the culprit.
+    // Recent stall onsets: the loader re-appearing repeatedly within seconds is
+    // the surest sign of a starved pipe — even before the meter has samples
+    // (cold loads on slow networks stall before any fetch completes).
+    let stallTimes: number[] = []
     const syncLoading = (loading: boolean) => {
-      if (loading === lastLoading.current) return
+      const flipped = loading !== lastLoading.current
+      if (!flipped && !loading) return
       lastLoading.current = loading
-      useStore.getState().setMediaLoading(loading)
+      const state = useStore.getState()
+      if (loading) {
+        const now = performance.now()
+        if (flipped) {
+          stallTimes = [...stallTimes.filter((t) => now - t < 6000), now]
+          refs.quality.current?.onStall()
+        }
+        // Re-evaluated while visible: slow samples (or a second stall in quick
+        // succession) upgrade the message to the honest "weak connection".
+        const network = netMeter.networkBound(state.activeQuality) || stallTimes.length >= 2
+        state.setMediaLoading(true, network ? 'network' : 'preparing') // store dedupes
+      } else {
+        state.setMediaLoading(false)
+      }
     }
     const tick = () => {
       const active = useStore.getState().stageIndex

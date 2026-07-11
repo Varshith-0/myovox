@@ -1,18 +1,38 @@
 // scrubEngine.ts — image-sequence scrubber. Replaces the <video> seek + drawImage(video)
 // path. Draws pre-decoded frames onto the existing shared canvas. A tiny always-loaded
 // strip (L0) guarantees a frame is always drawable, so the "rendering…" loader cannot stick.
+//
+// Frames exist in a YouTube-style quality ladder (240p…1080p, one directory per
+// tier). The engine fetches from whichever tier `setTier` selects; on a switch the
+// old tier's decoded frames are kept as a stale fallback so the picture never
+// drops to the strip while the new tier streams in.
 
-export type Tier = 'hi' | 'lo';
+/** The quality ladder, best first. Labels are the height names the UI shows (…p). */
+export const TIERS = ['1080', '720', '540', '360', '240'] as const
+export type Tier = (typeof TIERS)[number]
+
+/** Tier widths (px) — mirrors encode-scrub.sh; the manifest carries the real values. */
+export const TIER_WIDTHS: Record<Tier, number> = {
+  '1080': 1920,
+  '720': 1280,
+  '540': 960,
+  '360': 640,
+  '240': 426,
+}
+
 export type Fit = 'contain' | 'cover';
 
 export interface StripMeta { n: number; cols: number; rows: number; cw: number; ch: number; }
 export interface ClipMeta {
   frames: number;
   fps: number;
-  tiers: { hi: number; lo: number };
+  tiers: Record<string, number>;
   strip: StripMeta;
 }
 export type ChapterManifest = Record<string, ClipMeta>;
+
+/** One successful frame fetch: how many bytes, how long it took. */
+export type FetchSample = (bytes: number, ms: number) => void;
 
 export interface ScrubConfig {
   assetBase: string;        // e.g. `${import.meta.env.BASE_URL}anim`
@@ -24,16 +44,18 @@ export interface ScrubConfig {
   releaseDistance?: number; // clips from active to free memory       (default 3)
   frameWindow?: number;     // decoded L1 frames kept around active index (memory bound; default 16)
   leadAhead?: number;       // frames prefetched in scroll direction (default 6)
-  hiThresholdDevicePx?: number; // display width (device px) above which hi tier is used (default 640)
+  /** Reports each successful frame fetch — feeds the network quality meter. */
+  onSample?: FetchSample;
 }
 
 interface ClipState {
   id: string;
   meta: ClipMeta;
-  tier: Tier;
   strip?: ImageBitmap;
   stripInflight?: boolean;
   frames: Map<number, ImageBitmap>;
+  /** Previous-tier frames kept as fallback across a tier switch. */
+  stale: Map<number, ImageBitmap>;
   inflight: Set<number>;
   lastIndex: number;
   active: boolean;
@@ -55,9 +77,11 @@ export async function loadChapterManifest(
 }
 
 export class ScrubEngine {
-  private cfg!: Required<Omit<ScrubConfig, 'version'>> & Pick<ScrubConfig, 'version'>;
+  private cfg!: Required<Omit<ScrubConfig, 'version' | 'onSample'>> &
+    Pick<ScrubConfig, 'version' | 'onSample'>;
   private clips = new Map<string, ClipState>();
-  private tier: Tier = 'hi';
+  private tier: Tier = '540';
+  private cap: Tier = '1080';
 
   configure(cfg: ScrubConfig) {
     this.cfg = {
@@ -65,14 +89,44 @@ export class ScrubEngine {
       releaseDistance: 3,
       frameWindow: 16,
       leadAhead: 6,
-      hiThresholdDevicePx: 640,
       ...cfg,
     };
   }
 
+  /** Highest tier worth fetching for this display (no point exceeding device px). */
   setViewport(cssWidth: number, dpr: number) {
     const devicePx = cssWidth * dpr;
-    this.tier = devicePx > this.cfg.hiThresholdDevicePx ? 'hi' : 'lo';
+    let cap: Tier = TIERS[0];
+    for (const t of TIERS) {
+      if (TIER_WIDTHS[t] >= devicePx) cap = t; // TIERS is best-first; keep tightening
+    }
+    this.cap = cap;
+  }
+
+  viewportCap(): Tier {
+    return this.cap;
+  }
+
+  currentTier(): Tier {
+    return this.tier;
+  }
+
+  /**
+   * Switch quality. Decoded frames of the old tier become the stale fallback
+   * (still drawable, replaced index-by-index as the new tier decodes), so a
+   * switch never flashes down to the strip.
+   */
+  setTier(t: Tier) {
+    if (t === this.tier) return;
+    this.tier = t;
+    for (const cs of this.clips.values()) {
+      for (const [i, bmp] of cs.frames) {
+        cs.stale.get(i)?.close();
+        cs.stale.set(i, bmp);
+      }
+      cs.frames.clear();
+      cs.inflight.clear();
+    }
   }
 
   setWindow(activeIndex: number, orderedIds: string[]) {
@@ -115,7 +169,7 @@ export class ScrubEngine {
       this.loadFrame(cs, clamp(i - dir, 0, n - 1));
     }
 
-    const l1 = cs.frames.get(i);
+    const l1 = cs.frames.get(i) ?? cs.stale.get(i);
     if (l1) {
       ctx.clearRect(0, 0, dstW, dstH);
       this.blit(ctx, l1, 0, 0, l1.width, l1.height, dstW, dstH, fit, alignTop);
@@ -150,6 +204,7 @@ export class ScrubEngine {
     cs.abort.abort();
     cs.strip?.close();
     for (const b of cs.frames.values()) b.close();
+    for (const b of cs.stale.values()) b.close();
     this.clips.delete(id);
   }
 
@@ -163,8 +218,8 @@ export class ScrubEngine {
     const meta = this.cfg.manifest[id];
     if (!meta) return null;
     const cs: ClipState = {
-      id, meta, tier: this.tier,
-      frames: new Map(), inflight: new Set(),
+      id, meta,
+      frames: new Map(), stale: new Map(), inflight: new Set(),
       lastIndex: 0, active: false, abort: new AbortController(),
     };
     this.clips.set(id, cs);
@@ -196,26 +251,36 @@ export class ScrubEngine {
   private async loadFrame(cs: ClipState, i: number) {
     if (cs.frames.has(i) || cs.inflight.has(i)) return;
     cs.inflight.add(i);
+    const tier = this.tier; // captured: a switch mid-flight lands in stale-safe territory
     try {
       const name = String(i + 1).padStart(4, '0'); // ffmpeg %04d is 1-based
-      const url = `${this.cfg.assetBase}/${this.cfg.chapter}/scrub/${cs.id}/${cs.tier}/${name}.webp`;
+      const url = `${this.cfg.assetBase}/${this.cfg.chapter}/scrub/${cs.id}/${tier}/${name}.webp`;
+      const t0 = performance.now();
       const res = await fetch(versioned(url, this.cfg.version), { signal: cs.abort.signal });
       if (!res.ok) throw new Error(String(res.status));
-      const bmp = await createImageBitmap(await res.blob());
-      if (cs.abort.signal.aborted) { bmp.close(); return; }
+      const blob = await res.blob();
+      this.cfg.onSample?.(blob.size, Math.max(1, performance.now() - t0));
+      const bmp = await createImageBitmap(blob);
+      if (cs.abort.signal.aborted || tier !== this.tier) { bmp.close(); return; }
       cs.frames.set(i, bmp);
+      cs.stale.get(i)?.close();
+      cs.stale.delete(i);
       this.evict(cs);
-    } catch { /* leave to L0 */ }
+    } catch { /* leave to stale/strip */ }
     finally { cs.inflight.delete(i); }
   }
 
   private evict(cs: ClipState) {
     const w = this.cfg.frameWindow;
-    if (cs.frames.size <= w) return;
     const lo = cs.lastIndex - Math.floor(w / 2);
     const hi = cs.lastIndex + Math.ceil(w / 2);
-    for (const [idx, bmp] of cs.frames) {
-      if (idx < lo || idx > hi) { bmp.close(); cs.frames.delete(idx); }
+    if (cs.frames.size > w) {
+      for (const [idx, bmp] of cs.frames) {
+        if (idx < lo || idx > hi) { bmp.close(); cs.frames.delete(idx); }
+      }
+    }
+    for (const [idx, bmp] of cs.stale) {
+      if (idx < lo || idx > hi) { bmp.close(); cs.stale.delete(idx); }
     }
   }
 

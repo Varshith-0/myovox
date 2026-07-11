@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 # encode-scrub.sh — the offline half of the "scrub with images, not video-seek" fix.
 #
-# For every existing 1080 clip it produces, alongside your current MP4/poster:
-#   scrub/<id>/hi/0001.webp …   crisp scrub frames, retina tier   (L1)
-#   scrub/<id>/lo/0001.webp …   crisp scrub frames, phone tier    (L1)
-#   scrub/<id>/strip.webp        ONE tiny 12-frame sheet           (L0, the anti-spinner)
-# and writes public/anim/<chapter>/scrub.manifest.json (id -> {frames, fps, tiers, strip}).
+# For every existing 1080 clip it produces, alongside your current MP4/poster,
+# one directory of crisp scrub frames per quality tier (the YouTube-style ladder):
+#   scrub/<id>/1080/0001.webp …  1920px wide
+#   scrub/<id>/720/0001.webp …   1280px
+#   scrub/<id>/540/0001.webp …    960px
+#   scrub/<id>/360/0001.webp …    640px
+#   scrub/<id>/240/0001.webp …    426px
+#   scrub/<id>/strip.webp         ONE tiny 12-frame sheet (L0, the anti-spinner)
+# and writes public/anim/<chapter>/scrub.manifest.json
+#   (id -> {frames, fps, tiers: {"1080":1920,…}, strip}).
 #
 # It reads the clips straight off disk, so it needs no knowledge of your render.manifest
 # schema, and it drops everything under public/ so `vite build` ships it verbatim.
@@ -19,8 +24,9 @@ set -euo pipefail
 
 # ---- config (tune, then re-run) -------------------------------------------
 SCRUB_FPS=12          # sampled frames/sec; 10–15 is visually identical to 30 WHILE dragging
-HI_W=960              # retina scrub tier width (px). True-HD on huge displays is the optional WebCodecs tier.
-LO_W=540              # phone scrub tier width (px)
+# Quality ladder: "label:width". Labels are the height names the site shows (…p);
+# widths assume 16:9. The masters are 1080p, so 1080 is the top (no upscaled 2160).
+TIERS="1080:1920 720:1280 540:960 360:640 240:426"
 STRIP_N=12            # frames in the tiny always-loaded baseline strip
 STRIP_W=240           # per-cell width of that strip (px)
 WEBP_Q=72             # libwebp quality (0–100)
@@ -53,13 +59,18 @@ probe() { ffprobe -v quiet -show_entries "$1" -of csv=p=0 "$2"; }   # single-str
 mb()    { python3 -c "print(f'{$1/1048576:.2f}')"; }
 
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-: > "$tmp/manifest.tsv"   # chapter \t id \t frames \t fps \t hi_w \t lo_w \t strip_n \t cw \t ch
+: > "$tmp/manifest.tsv"   # chapter \t id \t frames \t fps \t tiers("l:w,l:w,…") \t strip_n \t cw \t ch
 
-tot_hi=0; tot_lo=0; tot_frames=0; nclips=0
+# macOS ships bash 3.2 (no associative arrays): accumulate dry-run bytes in a tsv
+: > "$tmp/dry.tsv"     # label \t projected_bytes
+tot_frames=0; nclips=0
 
 shopt -s nullglob
 clips=("$ROOT"/*/video/1080/*.mp4)
 [ ${#clips[@]} -gt 0 ] || { echo "no 1080 mp4s under $ROOT (run from repo root)" >&2; exit 1; }
+
+# the top tier's frame dir doubles as the "is this clip done?" marker
+top_label="${TIERS%%:*}"
 
 for f in "${clips[@]}"; do
   chapter="$(basename "$(dirname "$(dirname "$(dirname "$f")")")")"
@@ -74,34 +85,53 @@ for f in "${clips[@]}"; do
   if [ "$DRY" = 1 ]; then
     # encode ONE mid-clip frame per tier, measure real bytes, project to n frames
     mid="$(python3 -c "print(max(0.0, float('$dur')/2))")"
-    ffmpeg -v quiet -ss "$mid" -i "$f" -vf "scale=$HI_W:-2" -frames:v 1 -y "$tmp/h.png"; webp "$tmp/h.png"
-    ffmpeg -v quiet -ss "$mid" -i "$f" -vf "scale=$LO_W:-2" -frames:v 1 -y "$tmp/l.png"; webp "$tmp/l.png"
-    ph=$(( $(fsize "$tmp/h.webp") * n ))
-    pl=$(( $(fsize "$tmp/l.webp") * n ))
-    tot_hi=$((tot_hi+ph)); tot_lo=$((tot_lo+pl)); tot_frames=$((tot_frames+n)); nclips=$((nclips+1))
-    printf "%-30s %6.1fs  n=%3d  hi~%7sMB  lo~%7sMB\n" "$chapter/$id" "$dur" "$n" "$(mb $ph)" "$(mb $pl)"
+    line="$(printf '%-30s %6.1fs  n=%3d ' "$chapter/$id" "$dur" "$n")"
+    for t in $TIERS; do
+      lbl="${t%%:*}"; tw="${t##*:}"
+      ffmpeg -v quiet -ss "$mid" -i "$f" -vf "scale=$tw:-2" -frames:v 1 -y "$tmp/s.png"; webp "$tmp/s.png"
+      p=$(( $(fsize "$tmp/s.webp") * n ))
+      printf "%s\t%d\n" "$lbl" "$p" >> "$tmp/dry.tsv"
+      line+="$(printf ' %s~%sMB' "$lbl" "$(mb $p)")"
+    done
+    tot_frames=$((tot_frames+n)); nclips=$((nclips+1))
+    echo "$line"
     continue
   fi
 
-  if [ "$FORCE" = 0 ] && [ -f "$out/strip.webp" ] && [ -d "$out/hi" ] \
-     && [ "$(ls -1 "$out/hi" 2>/dev/null | wc -l | tr -d ' ')" -ge "$n" ]; then
+  if [ "$FORCE" = 0 ] && [ -f "$out/strip.webp" ] && [ -d "$out/$top_label" ] \
+     && [ "$(ls -1 "$out/$top_label" 2>/dev/null | wc -l | tr -d ' ')" -ge "$n" ]; then
     echo "skip (done): $chapter/$id"
   else
-    rm -rf "$out"; mkdir -p "$out/hi" "$out/lo"
+    rm -rf "$out"; mkdir -p "$out"
     strip_fps="$(python3 -c "print(($STRIP_N+2)/float('$dur'))")"   # oversample so tile always fills
-    ffmpeg -v error -i "$f" -vf "fps=$SCRUB_FPS,scale=$HI_W:-2" -y "$out/hi/%04d.png"
-    ffmpeg -v error -i "$f" -vf "fps=$SCRUB_FPS,scale=$LO_W:-2" -y "$out/lo/%04d.png"
+    for t in $TIERS; do
+      lbl="${t%%:*}"; tw="${t##*:}"
+      mkdir -p "$out/$lbl"
+      ffmpeg -v error -i "$f" -vf "fps=$SCRUB_FPS,scale=$tw:-2" -y "$out/$lbl/%04d.png"
+      webp_dir "$out/$lbl"
+    done
     ffmpeg -v error -i "$f" -vf "fps=$strip_fps,scale=$STRIP_W:-2,tile=${STRIP_N}x1" -frames:v 1 -y "$out/strip.png"
-    webp_dir "$out/hi"; webp_dir "$out/lo"; webp "$out/strip.png"
+    webp "$out/strip.png"
     echo "done: $chapter/$id  (n=$n)"
   fi
-  printf "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n" \
-    "$chapter" "$id" "$n" "$SCRUB_FPS" "$HI_W" "$LO_W" "$STRIP_N" "$STRIP_W" "$ch" >> "$tmp/manifest.tsv"
+  tiers_field="$(echo "$TIERS" | tr ' ' ',')"
+  printf "%s\t%s\t%d\t%d\t%s\t%d\t%d\t%d\n" \
+    "$chapter" "$id" "$n" "$SCRUB_FPS" "$tiers_field" "$STRIP_N" "$STRIP_W" "$ch" >> "$tmp/manifest.tsv"
 done
 
 if [ "$DRY" = 1 ]; then
-  printf "\n== projected scrub budget ==\n%d clips, %d frames total\n  hi (%dpx): ~%s MB\n  lo (%dpx): ~%s MB\ncurrent MP4s for comparison: 275 MB (1080) / 183 MB (540)\n" \
-    "$nclips" "$tot_frames" "$HI_W" "$(mb $tot_hi)" "$LO_W" "$(mb $tot_lo)"
+  printf "\n== projected scrub budget ==\n%d clips, %d frames total\n" "$nclips" "$tot_frames"
+  python3 - "$tmp/dry.tsv" "$TIERS" <<'PY'
+import sys, collections
+tot = collections.defaultdict(int)
+for line in open(sys.argv[1]):
+    lbl, b = line.split("\t")
+    tot[lbl] += int(b)
+for pair in sys.argv[2].split():
+    lbl, w = pair.split(":")
+    print(f"  {lbl}p ({w}px): ~{tot[lbl]/1048576:.1f} MB")
+print(f"  all tiers: ~{sum(tot.values())/1048576:.1f} MB")
+PY
   exit 0
 fi
 
@@ -111,10 +141,14 @@ import sys, os, json, collections
 tsv, root = sys.argv[1], sys.argv[2]
 ch = collections.defaultdict(dict)
 for line in open(tsv):
-    chapter, cid, n, fps, hi, lo, sn, cw, cch = line.rstrip("\n").split("\t")
+    chapter, cid, n, fps, tiers_field, sn, cw, cch = line.rstrip("\n").split("\t")
+    tiers = {}
+    for pair in tiers_field.split(","):
+        lbl, w = pair.split(":")
+        tiers[lbl] = int(w)
     ch[chapter][cid] = {
         "frames": int(n), "fps": int(fps),
-        "tiers": {"hi": int(hi), "lo": int(lo)},
+        "tiers": tiers,
         "strip": {"n": int(sn), "cols": int(sn), "rows": 1, "cw": int(cw), "ch": int(cch)},
     }
 for chapter, clips in ch.items():

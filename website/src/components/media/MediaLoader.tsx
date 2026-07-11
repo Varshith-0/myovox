@@ -12,13 +12,22 @@ import styles from './MediaLoader.module.css'
  */
 export function MediaLoader() {
   const loading = useStore((s) => s.mediaLoading)
+  const reason = useStore((s) => s.mediaLoadReason)
+  const quality = useStore((s) => s.activeQuality)
   const reduced = useStore((s) => s.reducedMotion)
   if (reduced || !loading) return null
+
+  // Honest reasons: either the pipe is the bottleneck (especially with a pinned
+  // high tier) or the reader simply outran the preloader.
+  const text =
+    reason === 'network'
+      ? `Weak connection — loading the ${quality}p animation…`
+      : 'Preparing animation — one moment'
 
   return (
     <div className={styles.loader} role="status" aria-live="polite">
       <LogoMark size={44} duration={1.4} />
-      <span className={styles.text}>Animation is loading, one moment</span>
+      <span className={styles.text}>{text}</span>
     </div>
   )
 }

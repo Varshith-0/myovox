@@ -3,6 +3,7 @@ import type { MutableRefObject } from 'react'
 import { type Stage } from '@/data/stages'
 import { clamp01 } from '@/lib/num'
 import type { ScrubEngine } from './scrubEngine'
+import type { QualityController } from './quality'
 
 /** Centralized tuning knobs for the frame scrubber. */
 export const MEDIA_CONFIG = {
@@ -53,6 +54,8 @@ export interface MediaScrubberRefs {
   sceneRoot: MutableRefObject<HTMLElement | null>
   captionWrap: MutableRefObject<HTMLElement | null>
   canvasFade: MutableRefObject<number>
+  /** Adaptive-quality brain (null until the engine exists); told about stalls. */
+  quality: MutableRefObject<QualityController | null>
 }
 
 /** Local scroll progress through a section, 0 at top hit and 1 when scrolled out. */

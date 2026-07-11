@@ -5,6 +5,7 @@ import { assetUrl, ASSET_VERSION } from '@/lib/asset'
 import styles from './MediaLayer.module.css'
 import { useMediaScrubber } from './useMediaScrubber'
 import { ScrubEngine, loadChapterManifest } from './scrubEngine'
+import { QualityController } from './quality'
 import { MEDIA_CONFIG, setOpacity, type ClipStage } from './core'
 
 /**
@@ -48,6 +49,7 @@ export function MediaLayer() {
   const posters = useRef(new Map<string, HTMLImageElement>())
   const canvas = useRef<HTMLCanvasElement | null>(null)
   const engine = useRef<ScrubEngine | null>(null)
+  const qualityCtl = useRef<QualityController | null>(null)
   const alignTop = useRef(false)
   const baseOp = useRef(new Map<string, number>())
   const frameReveal = useRef(new Map<string, number>())
@@ -69,6 +71,7 @@ export function MediaLayer() {
       sceneRoot,
       captionWrap,
       canvasFade,
+      quality: qualityCtl,
     },
   })
 
@@ -97,14 +100,19 @@ export function MediaLayer() {
         version: ASSET_VERSION,
         preloadDistance: MEDIA_CONFIG.preloadDistance,
         releaseDistance: MEDIA_CONFIG.releaseDistance,
+        // Every frame fetch feeds the quality meter (self-measuring network).
+        onSample: (bytes, ms) => qualityCtl.current?.sample(bytes, ms),
       })
       const cssWidth = canvas.current?.getBoundingClientRect().width || window.innerWidth
       eng.setViewport(cssWidth, Math.min(window.devicePixelRatio || 1, MEDIA_CONFIG.maxDpr))
+      qualityCtl.current = new QualityController(eng)
       eng.prefetchAllStrips(clipStages.map((v) => v.stage.id))
       engine.current = eng
     })()
     return () => {
       alive = false
+      qualityCtl.current?.dispose()
+      qualityCtl.current = null
       engine.current?.destroy()
       engine.current = null
     }

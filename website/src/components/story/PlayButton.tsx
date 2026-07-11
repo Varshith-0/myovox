@@ -6,6 +6,7 @@ import { narration } from '@/store/narration'
 import { clamp01 } from '@/lib/num'
 import { SpeakerControl } from './SpeakerControl'
 import { CaptionsToggle } from './CaptionsToggle'
+import { QualityControl } from './QualityControl'
 import styles from './PlayButton.module.css'
 
 /**
@@ -42,6 +43,7 @@ export function PlayButton({ autoPlay = false }: { autoPlay?: boolean }) {
   const setNarrationOn = useStore((s) => s.setNarrationOn)
   // Don't let Play start into a clip that hasn't rendered yet (blank auto-scroll).
   const mediaLoading = useStore((s) => s.mediaLoading)
+  const reducedMotion = useStore((s) => s.reducedMotion)
 
   const rafRef = useRef(0)
   const lastT = useRef(0)
@@ -220,6 +222,8 @@ export function PlayButton({ autoPlay = false }: { autoPlay?: boolean }) {
   return (
     <div className={styles.bar}>
       <CaptionsToggle />
+      {/* Reduced motion shows static posters — quality has nothing to change. */}
+      {!reducedMotion && <QualityControl />}
       {playing && <SpeakerControl />}
 
       <button
