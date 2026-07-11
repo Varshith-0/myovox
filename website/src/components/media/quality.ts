@@ -97,24 +97,27 @@ export class QualityController {
   constructor(engine: ScrubEngine) {
     this.engine = engine
     const cap = engine.viewportCap()
-    const start = useStore.getState().qualityPinned ?? initialTier(cap)
-    this.apply(start)
+    const auto = initialTier(cap)
+    useStore.getState().setAutoQuality(auto)
+    this.apply(useStore.getState().qualityPinned ?? auto)
 
     // React to pin/unpin from the menu immediately.
     this.unsubscribe = useStore.subscribe((s, prev) => {
       if (s.qualityPinned !== prev.qualityPinned) {
         this.lastSwitch = performance.now()
-        this.apply(s.qualityPinned ?? this.autoTier())
+        this.apply(s.qualityPinned ?? s.autoQuality)
       }
     })
   }
 
   sample(bytes: number, ms: number) {
     netMeter.sample(bytes, ms, this.engine.currentTier())
-    if (useStore.getState().qualityPinned) return
     const now = performance.now()
     if (now - this.lastSwitch < SWITCH_COOLDOWN_MS) return
     const next = this.autoTier()
+    // Auto's pick is tracked even while pinned — the menu's Auto row shows it.
+    useStore.getState().setAutoQuality(next)
+    if (useStore.getState().qualityPinned) return
     if (next !== this.engine.currentTier()) {
       this.lastSwitch = now
       this.apply(next)

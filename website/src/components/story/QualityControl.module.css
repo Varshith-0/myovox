@@ -98,3 +98,15 @@
   color: var(--ink-faint);
   letter-spacing: 0.12em;
 }
+
+/* Right-hand cluster on the Auto row: the resolved tier + the tick. */
+.side {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tick {
+  flex: none;
+  color: var(--ink);
+}

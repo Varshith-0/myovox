@@ -46,6 +46,8 @@ export interface AppState {
   qualityPinned: Tier | null
   /** The tier actually being fetched right now (auto- or user-selected). */
   activeQuality: Tier
+  /** What auto would pick right now — shown beside the menu's Auto row. */
+  autoQuality: Tier
   /** Bumped to ask the PlayButton to (re)start hands-free playback — the seam the
    *  One Breath's end-card "Replay" uses without reaching into PlayButton internals. */
   playNonce: number
@@ -62,6 +64,7 @@ export interface AppState {
   setMediaLoading: (loading: boolean, reason?: 'network' | 'preparing') => void
   setQualityPinned: (tier: Tier | null) => void
   setActiveQuality: (tier: Tier) => void
+  setAutoQuality: (tier: Tier) => void
   requestPlay: () => void
   setEndCardShown: (shown: boolean) => void
 }
@@ -78,6 +81,7 @@ export const useStore = create<AppState>((set) => ({
   mediaLoadReason: 'preparing',
   qualityPinned: readPinnedQuality(),
   activeQuality: '540',
+  autoQuality: '540',
   playNonce: 0,
   endCardShown: false,
 
@@ -110,6 +114,8 @@ export const useStore = create<AppState>((set) => ({
     }),
   setActiveQuality: (activeQuality) =>
     set((s) => (s.activeQuality === activeQuality ? s : { ...s, activeQuality })),
+  setAutoQuality: (autoQuality) =>
+    set((s) => (s.autoQuality === autoQuality ? s : { ...s, autoQuality })),
   requestPlay: () => set((s) => ({ ...s, playNonce: s.playNonce + 1 })),
   setEndCardShown: (endCardShown) =>
     set((s) => (s.endCardShown === endCardShown ? s : { ...s, endCardShown })),

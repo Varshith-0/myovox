@@ -5,13 +5,14 @@ import styles from './QualityControl.module.css'
 
 /**
  * YouTube-style animation quality control. The pill shows the tier actually in
- * use (e.g. "720p"); the menu lists the fixed ladder — no "Auto" row. The row in
- * use is marked, and carries an `auto` tag while adaptive. Picking a row pins
- * that quality absolutely (a weak connection then just shows the loader more);
- * tapping the already-pinned row unpins it, returning to adaptive.
+ * use (e.g. "720p" — never the word "auto"). The menu leads with an Auto row
+ * whose note shows what auto resolves to right now, followed by the fixed
+ * ladder; the selection carries a tick. Picking a tier pins it absolutely
+ * (a weak connection then just shows the loader more); Auto is the default.
  */
 export function QualityControl() {
   const active = useStore((s) => s.activeQuality)
+  const auto = useStore((s) => s.autoQuality)
   const pinned = useStore((s) => s.qualityPinned)
   const setPinned = useStore((s) => s.setQualityPinned)
 
@@ -33,29 +34,38 @@ export function QualityControl() {
     <div className={styles.group} ref={groupRef}>
       {open && (
         <div className={styles.menu} role="menu" aria-label="Animation quality">
-          {TIERS.map((t) => {
-            const isActive = t === active
-            const isPinned = t === pinned
-            return (
-              <button
-                key={t}
-                type="button"
-                role="menuitemradio"
-                aria-checked={isActive}
-                className={`${styles.item} ${isActive ? styles.itemActive : ''}`}
-                onClick={() => {
-                  // Tap the pinned quality again → back to adaptive.
-                  setPinned(isPinned ? null : t)
-                  setOpen(false)
-                }}
-              >
-                <span>{t}p</span>
-                {isActive && (
-                  <span className={styles.note}>{isPinned ? 'pinned' : 'auto'}</span>
-                )}
-              </button>
-            )
-          })}
+          <button
+            type="button"
+            role="menuitemradio"
+            aria-checked={pinned === null}
+            className={`${styles.item} ${pinned === null ? styles.itemActive : ''}`}
+            onClick={() => {
+              setPinned(null)
+              setOpen(false)
+            }}
+          >
+            <span>Auto</span>
+            <span className={styles.side}>
+              <span className={styles.note}>{auto}p</span>
+              {pinned === null && <Tick />}
+            </span>
+          </button>
+          {TIERS.map((t) => (
+            <button
+              key={t}
+              type="button"
+              role="menuitemradio"
+              aria-checked={t === pinned}
+              className={`${styles.item} ${t === pinned ? styles.itemActive : ''}`}
+              onClick={() => {
+                setPinned(t)
+                setOpen(false)
+              }}
+            >
+              <span>{t}p</span>
+              {t === pinned && <Tick />}
+            </button>
+          ))}
         </div>
       )}
       <button
@@ -67,7 +77,7 @@ export function QualityControl() {
         aria-label={`Animation quality ${active}p${pinned ? '' : ' (automatic)'}. Click to choose.`}
         title={
           pinned
-            ? `Quality pinned to ${active}p — tap it again in the menu for automatic`
+            ? `Quality set to ${active}p`
             : `Quality ${active}p, chosen automatically for your connection`
         }
       >
@@ -75,6 +85,25 @@ export function QualityControl() {
         <span className={styles.value}>{active}p</span>
       </button>
     </div>
+  )
+}
+
+function Tick() {
+  return (
+    <svg
+      className={styles.tick}
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 12.5 10 18.5 20 6" />
+    </svg>
   )
 }
 
