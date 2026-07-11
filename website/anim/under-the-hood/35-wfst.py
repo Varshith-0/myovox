@@ -413,3 +413,6 @@ class WordMap(Scene):
             run_time=0.22,
         )
         self.wait(0.25)
+
+        # --- concept payoff: the 'you just learned' card ---
+        learned_card(self, "a WFST", "the cheapest legal path from sounds to words", aside="weighted finite-state transducer")

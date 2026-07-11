@@ -329,3 +329,6 @@ class BothWays(Scene):
                   glow_ans.animate.set_opacity(0.0), run_time=0.35)
         self.remove(glow_ans)
         self.wait(0.25)
+
+        # --- concept payoff: the 'you just learned' card ---
+        learned_card(self, "bidirectional", "read the recording both ways at once", aside="vs. causal")

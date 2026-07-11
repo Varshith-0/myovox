@@ -305,3 +305,6 @@ class AlignmentProblem(Scene):
         )
         self.play(FadeOut(glow_payoff), run_time=0.18)
         self.wait(0.3)
+
+        # --- concept payoff: the 'you just learned' card ---
+        learned_card(self, "the alignment problem", "you know the labels — not their timing")

@@ -279,3 +279,6 @@ class Teacher(Scene):
         dist_val.clear_updaters()
         bar.clear_updaters()
         self.wait(0.33)
+
+        # --- concept payoff: the 'you just learned' card ---
+        learned_card(self, "contrastive learning", "pull each moment to its match, push rivals away", aside="InfoNCE")

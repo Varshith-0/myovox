@@ -373,5 +373,3 @@ export const STAGES: readonly Stage[] = [
     'A cinematic finale: one last EMG signal traces across the dark, shatters into a cloud of particles, and they stream together to spell THE END — which ignites with a light-sweep and a halo, then holds steady as faint motes hang in the dark.',
   ),
 ] as const
-
-export const STAGE_COUNT = STAGES.length

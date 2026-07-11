@@ -288,6 +288,9 @@ class Chooser(Scene):
                   FadeIn(sub_line), run_time=0.45)
         self.wait(0.4)
 
+        # --- concept payoff: the 'you just learned' card ---
+        learned_card(self, "reranking", "a language model picks the best candidate", aside="rescoring")
+
 
 if __name__ == "__main__":
     pass

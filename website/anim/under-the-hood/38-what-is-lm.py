@@ -249,3 +249,6 @@ class WhatIsLm(Scene):
                   FadeIn(chip_big, shift=UP * 0.06),
                   Create(div), run_time=0.55)
         self.wait(0.85)
+
+        # --- concept payoff: the 'you just learned' card ---
+        learned_card(self, "a language model", "it guesses which word likely comes next")

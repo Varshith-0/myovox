@@ -303,3 +303,6 @@ class Sounds(Scene):
             run_time=0.7,
         )
         self.wait(0.6)
+
+        # --- concept payoff: the 'you just learned' card ---
+        learned_card(self, "phonemes", "the ~40 sounds words are built from")

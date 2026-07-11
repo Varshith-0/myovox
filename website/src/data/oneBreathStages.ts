@@ -90,5 +90,3 @@ export const ONE_BREATH_STAGES: readonly Stage[] = [
     'That’s the whole idea, in one breath.',
   ),
 ] as const
-
-export const ONE_BREATH_STAGE_COUNT = ONE_BREATH_STAGES.length

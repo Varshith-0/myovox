@@ -327,3 +327,6 @@ class SoundsToWordsSearch(Scene):
                         flash_radius=1.6, time_width=0.4),
                   run_time=0.55)
         self.wait(0.65)
+
+        # --- concept payoff: the 'you just learned' card ---
+        learned_card(self, "search", "sweep the map for the lowest-cost path", aside="beam search")

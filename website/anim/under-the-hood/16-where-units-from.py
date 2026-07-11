@@ -353,3 +353,6 @@ class WhereUnitsFrom(Scene):
             run_time=0.5,
         )
         self.wait(0.3)
+
+        # --- concept payoff: the 'you just learned' card ---
+        learned_card(self, "self-supervised learning", "learn from raw data by predicting hidden parts")

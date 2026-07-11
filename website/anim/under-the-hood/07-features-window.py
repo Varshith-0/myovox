@@ -318,3 +318,6 @@ class Windows(Scene):
         self.play(FadeIn(sub, shift=UP * 0.1), run_time=0.38)
 
         self.wait(0.3)
+
+        # --- concept payoff: the 'you just learned' card ---
+        learned_card(self, "framing", "chop the stream into overlapping snapshots", aside="windowing")

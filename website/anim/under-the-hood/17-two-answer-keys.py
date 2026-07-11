@@ -343,3 +343,6 @@ class TwoAnswerKeys(Scene):
                        18, INK_FAINT).move_to([0, -2.4, 0])
         self.play(FadeIn(handoff, shift=UP * 0.1), run_time=0.5)
         self.wait(0.5)
+
+        # --- concept payoff: the 'you just learned' card ---
+        learned_card(self, "multi-task learning", "learn two answer keys at once")

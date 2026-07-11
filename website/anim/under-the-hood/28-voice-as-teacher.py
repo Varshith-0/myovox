@@ -362,3 +362,6 @@ class VoiceAsTeacher(Scene):
                   Flash([0, 0.4, 0], color=WHITE, line_length=0.2, num_lines=14,
                         flash_radius=1.5, time_width=0.4), run_time=0.55)
         self.wait(0.55)
+
+        # --- concept payoff: the 'you just learned' card ---
+        learned_card(self, "cross-modal distillation", "copy knowledge from voice into muscle")

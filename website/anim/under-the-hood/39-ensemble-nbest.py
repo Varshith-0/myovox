@@ -340,6 +340,9 @@ class ManyGuesses(Scene):
         # final poster hold
         self.wait(0.35)
 
+        # --- concept payoff: the 'you just learned' card ---
+        learned_card(self, "an n-best list", "keep dozens of candidates, not just one", aside="oracle = the best you could pick")
+
 
 if __name__ == "__main__":
     pass

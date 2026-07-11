@@ -307,3 +307,6 @@ class EveryPairGrid(Scene):
                   portrait_g.animate.set_opacity(0.0), run_time=0.3)
         self.remove(portrait_g)
         self.wait(0.35)
+
+        # --- concept payoff: the 'you just learned' card ---
+        learned_card(self, "the covariance matrix", "every sensor pair's agreement, in one grid")

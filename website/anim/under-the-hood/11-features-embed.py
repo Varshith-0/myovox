@@ -368,3 +368,6 @@ class Fingerprint(Scene):
         self.play(FadeOut(scan), Indicate(fp_card, scale_factor=1.06, color=INK),
                   run_time=0.25)
         self.wait(0.2)
+
+        # --- concept payoff: the 'you just learned' card ---
+        learned_card(self, "an embedding", "squeeze a big grid into a short fingerprint")
