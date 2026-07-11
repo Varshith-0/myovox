@@ -3,7 +3,7 @@
    only the buttons are interactive. */
 .bar {
   position: fixed;
-  bottom: calc(clamp(1.1rem, 3.5vh, 2rem) + var(--safe-b));
+  bottom: var(--bar-bottom);
   left: 50%;
   transform: translateX(-50%);
   z-index: var(--z-nav);

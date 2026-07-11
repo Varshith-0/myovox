@@ -3,7 +3,7 @@
 .wrap {
   position: fixed;
   left: 50%;
-  bottom: calc(clamp(4.5rem, 12vh, 8rem) + var(--safe-b));
+  bottom: max(calc(clamp(4.5rem, 12vh, 8rem) + var(--safe-b)), var(--bar-clear));
   transform: translate(-50%, 12px);
   z-index: var(--z-nav);
   width: min(92vw, 34rem);

@@ -9,6 +9,10 @@
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-r: env(safe-area-inset-right, 0px);
   --safe-l: env(safe-area-inset-left, 0px);
+  /* fixed play-bar geometry: its bottom offset, and the minimum clearance
+     (offset + 44px bar + gap) that anything anchored above it must keep */
+  --bar-bottom: calc(clamp(1.1rem, 3.5vh, 2rem) + var(--safe-b));
+  --bar-clear: calc(var(--bar-bottom) + 44px + 0.75rem);
   /* ---- Color: pure monochrome ------------------------------------ */
   --bg: #030303; /* matches the baked-in black of the Manim animation frames */
   --bg-raise: #0b0b0c;

@@ -4,7 +4,7 @@
 .wrap {
   position: fixed;
   left: 50%;
-  bottom: clamp(5rem, 9vh, 7rem);
+  bottom: max(clamp(5rem, 9vh, 7rem), var(--bar-clear));
   transform: translateX(-50%);
   width: min(56ch, 90vw);
   z-index: var(--z-nav);
@@ -55,7 +55,7 @@
 @media (max-width: 600px) {
   .wrap {
     width: min(56ch, 86vw);
-    bottom: clamp(4.5rem, 8vh, 6rem);
+    bottom: max(clamp(4.5rem, 8vh, 6rem), var(--bar-clear));
   }
   .line {
     font-size: var(--t-body);

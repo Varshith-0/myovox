@@ -7,14 +7,15 @@
   justify-content: flex-end;
   align-items: center;
   text-align: center;
-  padding: 0 clamp(1.25rem, 5vw, 3rem) clamp(3rem, 9vh, 7rem);
+  padding: 0 clamp(1.25rem, 5vw, 3rem) max(clamp(3rem, 9vh, 7rem), var(--bar-clear));
   pointer-events: none;
 }
 
 /* Voice on: the word-synced subtitles occupy the lower band, so bottom-anchored
    captions lift clear of them. (Top captions — Act-2 — are unaffected.) */
 .lifted {
-  padding-bottom: clamp(11.5rem, 26vh, 16rem);
+  /* keep the 6.5rem subtitle band even when --bar-clear pushes the subtitles up */
+  padding-bottom: max(clamp(11.5rem, 26vh, 16rem), calc(var(--bar-clear) + 6.5rem));
 }
 
 /* Caption pinned to the top — frees the lower frame for a labelled figure
@@ -59,10 +60,10 @@
     gap: var(--space-1);
   }
   .wrap {
-    padding-bottom: clamp(5rem, 14vh, 7rem);
+    padding-bottom: max(clamp(5rem, 14vh, 7rem), var(--bar-clear));
   }
   .lifted {
-    padding-bottom: clamp(9.5rem, 24vh, 12rem);
+    padding-bottom: max(clamp(9.5rem, 24vh, 12rem), calc(var(--bar-clear) + 5rem));
   }
 }
 
@@ -199,7 +200,7 @@
   position: fixed; /* outside the caption wrap — unaffected by its title-card transform */
   z-index: var(--z-content);
   pointer-events: none;
-  bottom: clamp(5rem, 8vh, 6.5rem); /* clear of the fixed control bar below it */
+  bottom: max(clamp(5rem, 8vh, 6.5rem), var(--bar-clear)); /* clear of the fixed control bar below it */
   left: 50%;
   transform: translateX(-50%);
   will-change: opacity;
