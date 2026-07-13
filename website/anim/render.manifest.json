@@ -52,16 +52,16 @@
     { "seq": 49, "file": "under-the-hood/49-thanks.py", "class": "Thanks", "id": "thanks" },
     { "seq": 50, "file": "under-the-hood/50-end.py", "class": "End", "id": "end" },
 
-    { "seq": 101, "file": "one-breath/01-spark.py", "class": "Spark", "id": "one-breath-spark" },
-    { "seq": 102, "file": "one-breath/02-sensors.py", "class": "Sensors", "id": "one-breath-sensors" },
-    { "seq": 103, "file": "one-breath/03-fingerprints.py", "class": "Fingerprints", "id": "one-breath-fingerprints" },
-    { "seq": 104, "file": "one-breath/04-reader.py", "class": "Reader", "id": "one-breath-reader" },
-    { "seq": 105, "file": "one-breath/05-words.py", "class": "Words", "id": "one-breath-words" },
-    { "seq": 106, "file": "one-breath/06-chooser.py", "class": "Chooser", "id": "one-breath-chooser" },
-    { "seq": 107, "file": "one-breath/07-score.py", "class": "Score", "id": "one-breath-score" },
-    { "seq": 108, "file": "one-breath/08-foundation.py", "class": "Foundation", "id": "one-breath-foundation" },
-    { "seq": 109, "file": "one-breath/09-silent.py", "class": "Silent", "id": "one-breath-silent" },
-    { "seq": 110, "file": "one-breath/10-end.py", "class": "OneBreathEnd", "id": "one-breath-end" }
+    { "seq": 101, "file": "one-breath/01-spark.py", "class": "Spark", "id": "spark" },
+    { "seq": 102, "file": "one-breath/02-sensors.py", "class": "Sensors", "id": "sensors" },
+    { "seq": 103, "file": "one-breath/03-fingerprints.py", "class": "Fingerprints", "id": "fingerprints" },
+    { "seq": 104, "file": "one-breath/04-reader.py", "class": "Reader", "id": "reader" },
+    { "seq": 105, "file": "one-breath/05-words.py", "class": "Words", "id": "words" },
+    { "seq": 106, "file": "one-breath/06-chooser.py", "class": "Chooser", "id": "chooser" },
+    { "seq": 107, "file": "one-breath/07-score.py", "class": "Score", "id": "score" },
+    { "seq": 108, "file": "one-breath/08-foundation.py", "class": "Foundation", "id": "foundation" },
+    { "seq": 109, "file": "one-breath/09-silent.py", "class": "Silent", "id": "silent" },
+    { "seq": 110, "file": "one-breath/10-end.py", "class": "OneBreathEnd", "id": "end" }
   ],
   "og": { "file": "og-card.py", "class": "OG", "out": "public/og.png", "size": "1200x630" }
 }

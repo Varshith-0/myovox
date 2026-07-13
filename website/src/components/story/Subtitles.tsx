@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useStages } from '@/story/StagesContext'
 import { useStore } from '@/store/useStore'
 import { narration } from '@/store/narration'
 import { animDir, assetUrl } from '@/lib/asset'
@@ -14,6 +15,7 @@ import styles from './Subtitles.module.css'
  */
 
 export function Subtitles() {
+  const stages = useStages()
   const on = useStore((s) => s.subtitlesOn)
   // One Breath's end-card owns the lower third when it's up — don't overlap it.
   const endCardShown = useStore((s) => s.endCardShown)
@@ -37,8 +39,10 @@ export function Subtitles() {
         setCues(cached)
         return
       }
+      const stage = stages.find((s) => s.id === clipId)
+      if (!stage) return
       try {
-        const res = await fetch(assetUrl(`${animDir(clipId)}/captions/${clipId}.json`))
+        const res = await fetch(assetUrl(`${animDir(stage)}/captions/${clipId}.json`))
         const data = res.ok ? ((await res.json()).cues as Cue[]) : []
         cache.current.set(clipId, data)
         if (!cancelled && idRef.current === clipId) {
@@ -75,7 +79,7 @@ export function Subtitles() {
       cancelled = true
       cancelAnimationFrame(raf)
     }
-  }, [on])
+  }, [on, stages])
 
   if (!on || endCardShown || cueIdx < 0 || cueIdx >= cues.length) return null
   const cue = cues[cueIdx]

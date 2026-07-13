@@ -73,8 +73,9 @@ export function NarrationLayer() {
 
       // Fetch the active clip and its immediate neighbours only.
       for (const [id, audio] of audioMap) {
-        if (Math.abs((index.get(id) ?? -1) - stageIndex) <= 1) {
-          const url = assetUrl(`${animDir(id)}/audio/${id}.mp3`)
+        const i = index.get(id) ?? -1
+        if (Math.abs(i - stageIndex) <= 1) {
+          const url = assetUrl(`${animDir(stages[i])}/audio/${id}.mp3`)
           if (audio.getAttribute('src') !== url) audio.setAttribute('src', url)
         }
       }

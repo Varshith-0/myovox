@@ -2,7 +2,8 @@
 # Render the Story clips listed in render.manifest.json.
 #
 #   ./render.sh         # render all 50 scenes
-#   ./render.sh <id>    # render one scene by clip id  (e.g. ./render.sh hero)
+#   ./render.sh <id>    # render one scene by clip id  (e.g. ./render.sh hero);
+#                       # ids shared across chapters take <chapter>/<id> (e.g. one-breath/end)
 #   ./render.sh og      # render the social card -> ../public/og.png
 #
 # Each scene runs:  manim -qh <file> <class>  ->  encode.sh <file> <class> <id>,
@@ -56,7 +57,10 @@ import json, sys
 m = json.load(open(sys.argv[1]))
 target = sys.argv[2]
 for s in m["scenes"]:
-    if target in ("all", s["id"]):
+    # ids repeat across chapters ("end", "silent", ...); a bare id renders every
+    # chapter that has it, "<chapter>/<id>" picks one.
+    chapter = s["file"].split("/")[0]
+    if target in ("all", s["id"], f'{chapter}/{s["id"]}'):
         print(f'{s["file"]}\t{s["class"]}\t{s["id"]}')
 PYEOF
 )

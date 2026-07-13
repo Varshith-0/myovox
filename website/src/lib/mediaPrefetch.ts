@@ -27,10 +27,10 @@ export function startMediaPrefetch(): void {
       // instantly drawable; the crisp frames load on demand while scrubbing.
       const clips = [...ONE_BREATH_STAGES, ...STAGES]
       const urls = clips.flatMap((s) => [
-        `${animDir(s.id)}/scrub/${s.id}/strip.webp`,
+        `${animDir(s)}/scrub/${s.id}/strip.webp`,
         s.media.poster,
-        `${animDir(s.id)}/audio/${s.id}.mp3`,
-        `${animDir(s.id)}/captions/${s.id}.json`,
+        `${animDir(s)}/audio/${s.id}.mp3`,
+        `${animDir(s)}/captions/${s.id}.json`,
       ])
       for (const url of urls) {
         try {

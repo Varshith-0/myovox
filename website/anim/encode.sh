@@ -12,7 +12,7 @@ MEDIA="${MEDIA_DIR:-/tmp/emg_media}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 file="$1"; cls="$2"; id="$3"
-case "$id" in one-breath-*) chapter=one-breath;; *) chapter=under-the-hood;; esac
+chapter="$(basename "$(dirname "$file")")"   # scenes live in anim/<chapter>/
 VIDEO_DIR="$HERE/../public/anim/$chapter/video/1080"
 POSTER_DIR="$HERE/../public/anim/$chapter/posters"
 stem="$(basename "$file" .py)"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Render per-stage narration MP3s with edge-tts (free Microsoft neural voices).
 
-Reads the canonical spoken script from ``src/data/narration.json`` (id -> text)
+Reads the canonical spoken script from ``src/data/narration.json`` (chapter -> id -> text)
 and writes ``public/anim/<chapter>/audio/<id>.mp3`` — one clip per stage, dropped next to the
 Manim ``.mp4``s so GitHub Pages serves them as plain static assets. The browser
 never calls a TTS service; we pre-render here, exactly like the video clips.
@@ -9,6 +9,7 @@ never calls a TTS service; we pre-render here, exactly like the video clips.
     pip install edge-tts
     python scripts/narrate.py                       # render every stage
     python scripts/narrate.py ctc wfst              # render only these ids
+    python scripts/narrate.py one-breath/end        # disambiguate ids shared across chapters
     python scripts/narrate.py --voice en-US-EmmaMultilingualNeural
     python scripts/narrate.py --rate +0%            # default pace
 
@@ -88,15 +89,14 @@ def build_cues(text: str, timings: list[dict]) -> list[dict]:
     return out
 
 
-async def render(stage_id: str, text: str, voice: str, rate: str, pitch: str) -> None:
-    """Write audio/<id>.mp3 and a captions/<id>.json track of sentence cues.
+async def render(chapter: str, stage_id: str, text: str, voice: str, rate: str, pitch: str) -> None:
+    """Write <chapter>/audio/<id>.mp3 and a <chapter>/captions/<id>.json track of sentence cues.
 
     We stream rather than ``save()`` so we can capture the WordBoundary events
     the voice emits — each gives a word and its start offset (in 100-nanosecond
     units). Those are folded into punctuated sentence cues the site shows one at
     a time, with the spoken word lit in step.
     """
-    chapter = "one-breath" if stage_id.startswith("one-breath-") else "under-the-hood"
     dest = OUT / chapter / "audio" / f"{stage_id}.mp3"
     caps_dest = OUT / chapter / "captions" / f"{stage_id}.json"
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -125,16 +125,23 @@ async def main() -> None:
     ap.add_argument("--pitch", default=DEFAULT_PITCH, help=f"pitch, e.g. +0Hz (default: {DEFAULT_PITCH})")
     args = ap.parse_args()
 
-    script: dict[str, str] = json.loads(SCRIPT.read_text(encoding="utf-8"))
-    ids = args.ids or list(script.keys())
-    unknown = [i for i in ids if i not in script]
+    # narration.json is chapter -> id -> text; ids repeat across chapters, so a
+    # bare id renders every chapter that has it. Use <chapter>/<id> to pick one.
+    script: dict[str, dict[str, str]] = json.loads(SCRIPT.read_text(encoding="utf-8"))
+    all_clips = [(ch, sid) for ch, clips in script.items() for sid in clips]
+    clips = all_clips if not args.ids else [
+        (ch, sid) for ch, sid in all_clips
+        if sid in args.ids or f"{ch}/{sid}" in args.ids
+    ]
+    known = {sid for _, sid in all_clips} | {f"{ch}/{sid}" for ch, sid in all_clips}
+    unknown = [i for i in args.ids if i not in known]
     if unknown:
-        sys.exit(f"unknown stage id(s): {', '.join(unknown)}\nknown: {', '.join(script)}")
+        sys.exit(f"unknown stage id(s): {', '.join(unknown)}\nknown: {', '.join(sorted(known))}")
 
     print(f"voice: {args.voice}   rate: {args.rate}   pitch: {args.pitch}")
-    for stage_id in ids:
-        await render(stage_id, script[stage_id], args.voice, args.rate, args.pitch)
-    print(f"done — {len(ids)} clip(s) → {OUT.relative_to(ROOT)}")
+    for chapter, stage_id in clips:
+        await render(chapter, stage_id, script[chapter][stage_id], args.voice, args.rate, args.pitch)
+    print(f"done — {len(clips)} clip(s) → {OUT.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
