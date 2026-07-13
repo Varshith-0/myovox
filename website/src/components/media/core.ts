@@ -18,8 +18,6 @@ export const MEDIA_CONFIG = {
   /** Show the "rendering…" overlay only after the active clip has been un-drawable
    *  this long — so a real stall triggers it but brief in-scroll gaps don't flash it. */
   loaderShowAfterMs: 200,
-  /** Hard cap: auto-dismiss the overlay this long after it appears, no matter what. */
-  loaderMaxMs: 1000,
   /** Canvas backing scale cap. 3 = render at full density on DPR-3 phones (no
    *  2x→3x upscale blur); the source tier is chosen separately by pickTier. */
   maxDpr: 3,

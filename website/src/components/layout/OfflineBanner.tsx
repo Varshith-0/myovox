@@ -25,7 +25,7 @@ export function OfflineBanner() {
   return (
     <div className={styles.banner} role="status" aria-live="polite">
       <span className={styles.dot} />
-      You’re offline — some clips may not load.
+      You’re offline. Some clips may not load.
     </div>
   )
 }

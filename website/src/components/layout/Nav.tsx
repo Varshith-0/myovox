@@ -15,7 +15,7 @@ export function Nav() {
       {isHome ? (
         <span aria-hidden="true" />
       ) : (
-        <NavLink to="/" className={styles.brand} aria-label={`${SITE.title} — home`}>
+        <NavLink to="/" className={styles.brand} aria-label={`${SITE.title} home`}>
           <LogoMark className={styles.mark} size={24} duration={12} />
           <span className={styles.wordmark}>{SITE.brand}</span>
         </NavLink>

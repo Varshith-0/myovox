@@ -13,8 +13,8 @@ export function CodePage() {
         <span className="label">Open source</span>
         <h1 className={`display ${styles.title}`}>Code</h1>
         <p className={styles.lede}>
-          Everything here — the EMG-to-text pipeline, this website, and the technical report — is
-          open source under the MIT license, with one idempotent command to reproduce every number.
+          Everything here is open source under the MIT license: the EMG-to-text pipeline, this
+          website, and the technical report. One idempotent command reproduces every number.
 
         </p>
         <a className={styles.repo} href={SITE.repoUrl} target="_blank" rel="noreferrer noopener">

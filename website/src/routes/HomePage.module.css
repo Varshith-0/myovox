@@ -4,11 +4,16 @@
  */
 
 .hero {
-  min-height: 100dvh;
+  /* Exactly one viewport, never scrollable: the lockup is vw/vh-capped and the
+     spacing compresses on short screens (media queries below) instead of
+     overflowing. `safe center` keeps the top visible if it ever gets tight. */
+  height: 100dvh;
+  overflow: clip;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  justify-content: safe center;
   padding: calc(var(--nav-h) + var(--space-8)) var(--space-6) var(--space-16);
   background: var(--bg-sink);
   text-align: center;
@@ -81,25 +86,24 @@
   color: var(--ink-dim);
 }
 
-.stats {
+/* The abstract: two sentences that carry the whole claim, set in the site's
+   reading serif so it speaks in the same voice as the story itself. */
+.abstract {
   animation-delay: 0.95s;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
+  max-width: min(38em, 92vw);
   margin-top: var(--space-6);
-  font-size: var(--t-sm);
-  font-family: var(--font-mono);
-  color: var(--ink-faint);
-  letter-spacing: 0.06em;
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 40, 'wght' 380;
+  font-size: var(--t-lead);
+  line-height: 1.6;
+  color: var(--ink-dim);
+  text-wrap: pretty;
 }
 
-.dot {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: var(--ink-ghost);
+.abstract em {
+  font-style: italic;
+  color: var(--ink);
+  text-shadow: var(--glow-text);
 }
 
 .cta {
@@ -124,4 +128,45 @@
   border-color: var(--line-bright);
   box-shadow: var(--glow-soft);
   letter-spacing: 0.24em;
+}
+
+/* ---- Short screens: compress spacing so the hero never scrolls ---- */
+@media (max-height: 760px) {
+  .hero {
+    padding-top: calc(var(--nav-h) + var(--space-2));
+    padding-bottom: var(--space-6);
+  }
+  .abstract {
+    margin-top: var(--space-4);
+  }
+  .cta {
+    margin-top: var(--space-6);
+  }
+}
+
+/* Landscape phones: everything tightens one more notch so the full lockup,
+   abstract, and button still share the single viewport. */
+@media (max-height: 520px) {
+  .hero {
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-3);
+  }
+  .traceWrap {
+    margin-top: 0;
+  }
+  .trace {
+    height: 44px;
+  }
+  .tagline {
+    margin-top: 0;
+  }
+  .abstract {
+    margin-top: var(--space-2);
+    font-size: var(--t-sm);
+    max-width: min(56em, 92vw);
+  }
+  .cta {
+    margin-top: var(--space-3);
+    padding: 0.6em 1.6em;
+  }
 }

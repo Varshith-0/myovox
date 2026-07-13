@@ -16,6 +16,10 @@ const state = {
   playing: false,
   /** The active clip has played to its end (drives the stage handoff). */
   ended: false,
+  /** Audio can't sound right now (autoplay blocked, or the clip failed to load).
+   *  While true, hands-free playback paces by constant velocity instead of this
+   *  (stalled) playhead, so the story advances instead of skipping sections. */
+  blocked: false,
 }
 
 export const narration = state

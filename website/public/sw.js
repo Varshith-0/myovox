@@ -24,7 +24,8 @@ self.addEventListener('message', (event) => {
   event.waitUntil(
     caches.open(CACHE).then(async (cache) => {
       for (const req of await cache.keys()) {
-        if (!req.url.includes(`v=${keep}`)) await cache.delete(req)
+        // Exact ?v= match — a substring test would let one build id shadow another.
+        if (new URL(req.url).searchParams.get('v') !== keep) await cache.delete(req)
       }
     }),
   )
@@ -43,7 +44,10 @@ async function serveMedia(request) {
   if (!full) {
     // Re-fetch by URL without the Range header → a cacheable 200 with the whole body.
     const res = await fetch(request.url)
-    if (!res.ok || res.status === 206) return fetch(request)
+    // A 206 means the server ignored the full-body request — pass the original
+    // (ranged) request through instead. Other errors return as-is, no second trip.
+    if (res.status === 206) return fetch(request)
+    if (!res.ok) return res
     await cache.put(request.url, res.clone())
     full = res
   }

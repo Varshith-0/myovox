@@ -137,6 +137,8 @@
 
 .sub {
   max-width: 40rem;
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 40, 'wght' 380;
   font-size: var(--t-body);
   line-height: 1.65;
   color: var(--ink-dim);

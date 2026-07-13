@@ -164,7 +164,10 @@ export function MediaLayer() {
                 if (el) posters.current.set(vs.stage.id, el)
                 else posters.current.delete(vs.stage.id)
               }}
-              src={assetUrl(vs.media.poster)}
+              // Loaded on approach, not on mount: updateStageVisibility promotes
+              // data-src → src once the stage is within the visibility ring.
+              data-src={assetUrl(vs.media.poster)}
+              decoding="async"
               className={`${styles.media} ${fitClass}${fallbackClass}`}
               alt={vs.media.alt ?? vs.stage.caption}
             />

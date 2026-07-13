@@ -189,9 +189,9 @@ export function useMediaScrubber({
     // the engine finishes its async setup), never per-frame.
     let windowEngine: unknown = null
     let windowActive = -1
-    // Loader is strictly time-bounded: shows after a real stall, hard-dismisses
-    // ≤ loaderMaxMs later no matter what (the strip makes longer stalls impossible
-    // short of total network failure — and then the poster/black is the fallback).
+    // Loader shows after a real stall and stays up until a frame actually draws —
+    // on a cold first visit even the strip takes seconds to arrive, and a bare
+    // title on black reads as broken.
     let stallStart = 0
     // Write the "rendering…" flag to the store only when it flips (never per-frame).
     // When it flips ON, also diagnose why (weak pipe vs outran the preloader) and
@@ -236,10 +236,7 @@ export function useMediaScrubber({
         stallStart = 0
       }
       const stalledMs = stallStart ? performance.now() - stallStart : 0
-      syncLoading(
-        stalledMs > MEDIA_CONFIG.loaderShowAfterMs &&
-          stalledMs < MEDIA_CONFIG.loaderShowAfterMs + MEDIA_CONFIG.loaderMaxMs,
-      )
+      syncLoading(stalledMs > MEDIA_CONFIG.loaderShowAfterMs)
 
       raf = requestAnimationFrame(tick)
     }

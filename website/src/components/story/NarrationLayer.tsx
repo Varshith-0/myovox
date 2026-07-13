@@ -46,6 +46,23 @@ export function NarrationLayer() {
   useEffect(() => {
     const audioMap = audios.current
     let raf = 0
+    // The clip switched before its metadata arrived — align to the scroll once
+    // the duration is known, so a cold Play never rewinds to the sentence start.
+    let alignNeeded = false
+    // play()'s outcome is the autoplay-block / broken-clip signal. While blocked,
+    // {@link PlayButton} paces by constant velocity instead of this playhead.
+    const tryPlay = (audio: HTMLAudioElement) => {
+      audio.play().then(
+        () => {
+          narration.blocked = false
+        },
+        () => {
+          narration.blocked = true
+        },
+      )
+    }
+    const scrollMatchedTime = (id: string, duration: number) =>
+      clamp01(localProgressFor(id)) * duration
     const tick = () => {
       const { stageIndex, narrationOn, playing, volume, playSpeed, mediaLoading } =
         useStore.getState()
@@ -73,44 +90,61 @@ export function NarrationLayer() {
         }
         voiced.current = target
         const next = target ? audioMap.get(target) : undefined
-        if (next) {
+        if (next && target) {
           const dur = next.duration
-          next.currentTime =
-            target && Number.isFinite(dur) && dur > 0 ? clamp01(localProgressFor(target)) * dur : 0
+          alignNeeded = !(Number.isFinite(dur) && dur > 0)
+          next.currentTime = alignNeeded ? 0 : scrollMatchedTime(target, dur)
           next.volume = clamp01(volume)
           next.playbackRate = playSpeed
-          next.play().catch(() => {})
+          tryPlay(next)
+        } else {
+          alignNeeded = false
+          narration.blocked = false
+        }
+      }
+
+      const cur = voiced.current ? audioMap.get(voiced.current) : undefined
+      if (shouldPlay && voiced.current && cur) {
+        cur.volume = clamp01(volume)
+        cur.playbackRate = playSpeed
+        const dur = Number.isFinite(cur.duration) ? cur.duration : 0
+        if (alignNeeded && dur > 0) {
+          cur.currentTime = scrollMatchedTime(voiced.current, dur)
+          alignNeeded = false
+        }
+        // Video-player behavior: when the animation's frames aren't ready
+        // (mediaLoading), the sound pauses with the picture and resumes when
+        // it's back — the voice never talks over a black canvas.
+        if (mediaLoading) {
+          if (!cur.paused) cur.pause()
+        } else if (cur.paused && !cur.ended) {
+          // A blocked clip re-aligns to the scroll before each retry, so the
+          // moment a user gesture unlocks audio the voice joins mid-sentence
+          // instead of yanking the story back to where the block began.
+          if (narration.blocked && dur > 0) {
+            const t = scrollMatchedTime(voiced.current, dur)
+            if (Math.abs(cur.currentTime - t) > 0.25) cur.currentTime = t
+          }
+          tryPlay(cur)
         }
       }
 
       // Publish the playhead for the subtitles. In Play the audio is the clock;
-      // while reading (no audio), subtitles follow the SCROLL position mapped
-      // onto the active section's caption track, so captions are on by default.
-      if (shouldPlay && voiced.current) {
-        const cur = audioMap.get(voiced.current)
-        if (cur) {
-          cur.volume = clamp01(volume)
-          cur.playbackRate = playSpeed
-          // Video-player behavior: when the animation's frames aren't ready
-          // (mediaLoading), the sound pauses with the picture and resumes when
-          // it's back — the voice never talks over a black canvas.
-          if (mediaLoading) {
-            if (!cur.paused) cur.pause()
-          } else if (cur.paused && !cur.ended) {
-            cur.play().catch(() => {})
-          }
-        }
+      // while reading — or while audio is blocked — subtitles follow the SCROLL
+      // position mapped onto the active section's caption track, so captions
+      // stay live (and on by default) even when the voice can't sound.
+      if (shouldPlay && voiced.current && cur && !narration.blocked) {
         narration.activeId = voiced.current
-        narration.time = cur ? cur.currentTime : 0
-        narration.duration = cur && Number.isFinite(cur.duration) ? cur.duration : 0
-        narration.playing = !!cur && !cur.paused && !cur.ended
-        narration.ended = !!cur && cur.ended
+        narration.time = cur.currentTime
+        narration.duration = Number.isFinite(cur.duration) ? cur.duration : 0
+        narration.playing = !cur.paused && !cur.ended
+        narration.ended = cur.ended
       } else {
         const sid = activeId && hasNarration(activeId) ? activeId : null
         const audio = sid ? audioMap.get(sid) : undefined
         const dur = audio && Number.isFinite(audio.duration) ? audio.duration : 0
         narration.activeId = sid
-        narration.time = sid && dur > 0 ? clamp01(localProgressFor(sid)) * dur : 0
+        narration.time = sid && dur > 0 ? scrollMatchedTime(sid, dur) : 0
         narration.duration = dur
         narration.playing = false
         narration.ended = false
@@ -122,6 +156,7 @@ export function NarrationLayer() {
     return () => {
       cancelAnimationFrame(raf)
       for (const a of audioMap.values()) a.pause()
+      narration.blocked = false
     }
   }, [stages, index, hasNarration])
 

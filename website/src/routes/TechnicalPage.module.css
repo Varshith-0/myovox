@@ -88,6 +88,8 @@
 }
 
 .p {
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 40, 'wght' 380;
   color: var(--ink-dim);
   line-height: 1.75;
   margin-top: var(--space-4);
@@ -95,6 +97,8 @@
 
 .ul,
 .ol {
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 40, 'wght' 380;
   margin: var(--space-4) 0;
   padding-left: var(--space-6);
   color: var(--ink-dim);
@@ -129,6 +133,8 @@
   margin: var(--space-6) 0;
   padding-left: var(--space-4);
   border-left: 2px solid var(--line-strong);
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 40, 'wght' 380;
   color: var(--ink-faint);
   font-style: italic;
 }

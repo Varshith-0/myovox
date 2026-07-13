@@ -53,9 +53,14 @@ interface ClipState {
   meta: ClipMeta;
   strip?: ImageBitmap;
   stripInflight?: boolean;
+  /** The strip came back as an HTTP error — permanent for this build, never re-asked. */
+  stripFailed?: boolean;
   frames: Map<number, ImageBitmap>;
   /** Previous-tier frames kept as fallback across a tier switch. */
   stale: Map<number, ImageBitmap>;
+  /** Frame indices that came back as HTTP errors — never re-requested (the draw
+   *  loop would otherwise refetch a missing frame every RAF). */
+  failed: Set<number>;
   inflight: Set<number>;
   lastIndex: number;
   active: boolean;
@@ -126,6 +131,7 @@ export class ScrubEngine {
       }
       cs.frames.clear();
       cs.inflight.clear();
+      cs.failed.clear(); // failures are per-tier URLs — the new tier gets a clean slate
     }
   }
 
@@ -219,7 +225,7 @@ export class ScrubEngine {
     if (!meta) return null;
     const cs: ClipState = {
       id, meta,
-      frames: new Map(), stale: new Map(), inflight: new Set(),
+      frames: new Map(), stale: new Map(), failed: new Set(), inflight: new Set(),
       lastIndex: 0, active: false, abort: new AbortController(),
     };
     this.clips.set(id, cs);
@@ -235,21 +241,21 @@ export class ScrubEngine {
   }
 
   private async loadStrip(cs: ClipState) {
-    if (cs.strip || cs.stripInflight) return;
+    if (cs.strip || cs.stripInflight || cs.stripFailed) return;
     cs.stripInflight = true;
     try {
       const url = `${this.cfg.assetBase}/${this.cfg.chapter}/scrub/${cs.id}/strip.webp`;
       const res = await fetch(versioned(url, this.cfg.version), { signal: cs.abort.signal });
-      if (!res.ok) return;
+      if (!res.ok) { cs.stripFailed = true; return; } // missing render — don't re-ask every stage change
       const bmp = await createImageBitmap(await res.blob());
       if (cs.abort.signal.aborted) { bmp.close(); return; }
       cs.strip = bmp;
-    } catch { /* leave it; loader is time-bounded */ }
+    } catch { /* transient network error — retried on the next window move */ }
     finally { cs.stripInflight = false; }
   }
 
   private async loadFrame(cs: ClipState, i: number) {
-    if (cs.frames.has(i) || cs.inflight.has(i)) return;
+    if (cs.frames.has(i) || cs.inflight.has(i) || cs.failed.has(i)) return;
     cs.inflight.add(i);
     const tier = this.tier; // captured: a switch mid-flight lands in stale-safe territory
     try {
@@ -257,7 +263,7 @@ export class ScrubEngine {
       const url = `${this.cfg.assetBase}/${this.cfg.chapter}/scrub/${cs.id}/${tier}/${name}.webp`;
       const t0 = performance.now();
       const res = await fetch(versioned(url, this.cfg.version), { signal: cs.abort.signal });
-      if (!res.ok) throw new Error(String(res.status));
+      if (!res.ok) { cs.failed.add(i); return; } // missing frame — stale/strip covers it
       const blob = await res.blob();
       this.cfg.onSample?.(blob.size, Math.max(1, performance.now() - t0));
       const bmp = await createImageBitmap(blob);
@@ -266,7 +272,7 @@ export class ScrubEngine {
       cs.stale.get(i)?.close();
       cs.stale.delete(i);
       this.evict(cs);
-    } catch { /* leave to stale/strip */ }
+    } catch { /* transient network error — leave to stale/strip, retried on a later draw */ }
     finally { cs.inflight.delete(i); }
   }
 

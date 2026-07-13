@@ -21,8 +21,8 @@ export function MediaLoader() {
   // high tier) or the reader simply outran the preloader.
   const text =
     reason === 'network'
-      ? `Weak connection — loading the ${quality}p animation…`
-      : 'Preparing animation — one moment'
+      ? `Weak connection. Loading the ${quality}p animation…`
+      : 'Preparing animation, one moment'
 
   return (
     <div className={styles.loader} role="status" aria-live="polite">

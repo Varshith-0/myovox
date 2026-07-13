@@ -38,7 +38,9 @@
 
 .fine {
   max-width: var(--measure);
-  font-size: var(--t-sm);
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 40, 'wght' 380;
+  font-size: var(--t-body);
   color: var(--ink-faint);
   line-height: 1.7;
 }

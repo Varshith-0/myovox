@@ -84,12 +84,12 @@ function DevScrollHooks() {
 /** Per-route document title (client-side routing doesn't change it on its own) — so
  *  shared links and browser tabs read meaningfully instead of all saying the same thing. */
 const ROUTE_TITLES: Record<string, string> = {
-  '/': 'MYOVOX — speech begins before sound',
-  '/story': 'Myovox — reading speech from the muscles of the face',
-  '/story/one-breath': 'In One Breath — Myovox',
-  '/story/under-the-hood': 'Under the Hood — Myovox',
-  '/technical': 'Technical report — Myovox',
-  '/code': 'Code — Myovox',
+  '/': 'MYOVOX · speech begins before sound',
+  '/story': 'Myovox · reading speech from the muscles of the face',
+  '/story/one-breath': 'In One Breath · Myovox',
+  '/story/under-the-hood': 'Under the Hood · Myovox',
+  '/technical': 'Technical report · Myovox',
+  '/code': 'Code · Myovox',
 }
 function DocumentTitle() {
   const { pathname } = useLocation()
@@ -99,7 +99,9 @@ function DocumentTitle() {
   return null
 }
 
-/** Reset scroll + story state on route change (the router keeps the offset). */
+/** Reset scroll + story state on route change (the router keeps the offset).
+ *  Playback stops too: leaving a story mid-Play must not leave `playing` armed,
+ *  or the next story mount would start scrolling without a fresh gesture. */
 function ScrollReset() {
   const { pathname } = useLocation()
   const lenis = useLenis()
@@ -107,6 +109,7 @@ function ScrollReset() {
     if (lenis) lenis.scrollTo(0, { immediate: true })
     else window.scrollTo(0, 0)
     scroll.progress = 0
+    useStore.getState().setPlaying(false)
     useStore.getState().setStageIndex(0)
     ScrollTrigger.refresh()
   }, [pathname, lenis])

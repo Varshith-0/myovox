@@ -144,11 +144,12 @@
 }
 
 .cardDesc {
-  font-family: var(--font-mono);
-  font-size: var(--t-sm);
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 40, 'wght' 380;
+  font-size: var(--t-body);
   line-height: 1.6;
   color: var(--ink-dim);
-  max-width: 32ch;
+  max-width: 34ch;
   margin: 0 auto;
 }
 
@@ -165,8 +166,9 @@
 /* How-to note beneath the cards — both play themselves or scroll at your pace. */
 .note {
   max-width: 46ch;
-  font-family: var(--font-mono);
-  font-size: var(--t-sm);
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 40, 'wght' 380;
+  font-size: var(--t-body);
   line-height: 1.6;
   color: var(--ink-faint);
   animation: riseIn 0.6s var(--ease-out) 0.34s backwards;

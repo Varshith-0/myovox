@@ -210,12 +210,11 @@ export function HomePage() {
 
       <p className={`${styles.tagline} ${styles.rise} label`}>Reading Speech From Facial Muscles</p>
 
-      <p className={`${styles.stats} ${styles.rise}`}>
-        <span>18.53% Word Error Rate</span>
-        <span className={styles.dot} aria-hidden="true" />
-        <span>Open Vocabulary</span>
-        <span className={styles.dot} aria-hidden="true" />
-        <span>No Microphone Required</span>
+      <p className={`${styles.abstract} ${styles.rise}`}>
+        Say a sentence in perfect silence, and it still comes back as text. Thirty-one
+        sensors read the electricity of your facial muscles, no microphone anywhere, and
+        decode open, unscripted vocabulary at <em>18.5% word error</em>, down from a
+        published baseline of 51%.
       </p>
 
       <button

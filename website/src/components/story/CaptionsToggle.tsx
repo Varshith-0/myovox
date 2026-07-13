@@ -18,7 +18,7 @@ export function CaptionsToggle() {
         className={styles.btn}
         aria-pressed={on}
         aria-label={on ? 'Turn subtitles off' : 'Turn subtitles on'}
-        title={on ? 'Subtitles on — click to hide' : 'Subtitles off — click to show'}
+        title={on ? 'Subtitles on. Click to hide.' : 'Subtitles off. Click to show.'}
         onClick={() => setSubtitlesOn(!on)}
       >
         <CcGlyph on={on} />

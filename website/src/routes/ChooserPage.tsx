@@ -37,7 +37,7 @@ export function ChooserPage() {
     <main className={`${styles.page} ${leaving ? styles.leaving : ''}`}>
       <header className={styles.head}>
         <p className={styles.tagline}>{SITE.tagline}</p>
-        <p className={styles.prompt}>Two ways in — pick your depth.</p>
+        <p className={styles.prompt}>Two ways in. Pick your depth.</p>
       </header>
 
       <div className={styles.cards}>
@@ -51,7 +51,7 @@ export function ChooserPage() {
           <span className={styles.badge}>10 chapters · a short watch</span>
           <span className={styles.cardTitle}>In One Breath</span>
           <span className={styles.cardDesc}>
-            The whole story, in one breath. A short, jargon-free watch — what happens, why it
+            The whole story, in one breath. A short, jargon-free watch: what happens, why it
             works, and why it matters. The complete picture, in under two minutes.
           </span>
           <span className={styles.cta}>Watch in one breath →</span>
@@ -73,7 +73,7 @@ export function ChooserPage() {
       </div>
 
       <p className={styles.note}>
-        Either one narrates itself, hands-free — or just scroll to move through it at your own
+        Either one narrates itself, hands-free, or just scroll to move through it at your own
         pace. Your scroll is the remote.
       </p>
 

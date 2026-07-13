@@ -21,7 +21,7 @@ export function SpeakerControl() {
         className={styles.btn}
         aria-pressed={on}
         aria-label={on ? 'Turn narration off' : 'Turn narration on'}
-        title={on ? 'Narration on — plays during Play' : 'Narration off — click to listen during Play'}
+        title={on ? 'Narration on. Plays during Play.' : 'Narration off. Click to listen during Play.'}
         onClick={() => setNarrationOn(!on)}
       >
         <SpeakerGlyph on={on} />

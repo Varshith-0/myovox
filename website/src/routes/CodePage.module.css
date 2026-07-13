@@ -22,6 +22,8 @@
 
 .lede {
   max-width: var(--measure);
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 40, 'wght' 380;
   color: var(--ink-dim);
   font-size: var(--t-lead);
   line-height: 1.6;
@@ -98,6 +100,8 @@
 
 .authorBio {
   max-width: var(--measure);
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 40, 'wght' 380;
   color: var(--ink-dim);
   font-size: var(--t-lead);
   line-height: 1.7;

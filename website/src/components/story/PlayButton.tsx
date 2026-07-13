@@ -21,6 +21,8 @@ import styles from './PlayButton.module.css'
  *    the active section's progress equals its clip's playhead, so voice,
  *    animation, and subtitles stay locked and a long line is never cut off. When
  *    a clip ends, we step firmly into the next section so the story can't stall.
+ *    If the audio can't sound (autoplay blocked without a gesture, clip missing),
+ *    pacing falls back to the constant rate until it can.
  *
  * Play state lives in the store so the engine and subtitles can react to it.
  */
@@ -85,7 +87,10 @@ export function PlayButton({ autoPlay = false }: { autoPlay?: boolean }) {
       const max = maxScroll()
       const onLast = st.stageIndex >= stageCount - 1
       const activeId = stages[st.stageIndex]?.id
-      const useNarrationClock = st.narrationOn && !onLast && !!activeId
+      // While audio can't sound (autoplay blocked without a gesture, or the clip
+      // failed to load), fall back to the constant-velocity clock so playback
+      // advances smoothly instead of stall-skipping section by section.
+      const useNarrationClock = st.narrationOn && !onLast && !!activeId && !narration.blocked
 
       const stepNarrationSynced = () => {
         if (!activeId) return false
@@ -193,6 +198,10 @@ export function PlayButton({ autoPlay = false }: { autoPlay?: boolean }) {
       if (useStore.getState().playing) stop()
     }
     const onKey = (e: KeyboardEvent) => {
+      // Keys on a focused control belong to the control: Space activates the
+      // button itself (pausing here too would undo the click it triggers), and
+      // arrows on the volume slider adjust volume, not scroll.
+      if (e.target instanceof Element && e.target.closest('button, input')) return
       if (useStore.getState().playing && PAUSE_KEYS.includes(e.key)) stop()
     }
     window.addEventListener('wheel', onUser, { passive: true })

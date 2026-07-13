@@ -35,7 +35,7 @@ export interface AppState {
   volume: number
   /** Hands-free playback is running (auto-advancing the story). */
   playing: boolean
-  /** Playback speed multiplier (1×–5×) — scales both scroll and the voice. */
+  /** Playback speed multiplier (1×–3×) — scales both scroll and the voice. */
   playSpeed: number
   /** The active clip's frames aren't ready to draw yet (fast-scrolled past the
    *  preload window) — drives the "rendering…" overlay and gates Play. */

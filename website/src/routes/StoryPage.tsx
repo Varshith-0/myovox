@@ -41,7 +41,7 @@ export function StoryExperience({
 
   return (
     <StagesProvider stages={stages}>
-      <h1 className="sr-only">EMG to Text — reading speech from the muscles of the face</h1>
+      <h1 className="sr-only">EMG to Text: reading speech from the muscles of the face</h1>
       <MediaLayer />
       <MediaLoader />
       <div ref={scroller}>
