@@ -13,5 +13,5 @@ const BASE = import.meta.env.BASE_URL
 /** Resolve a BASE_URL-relative asset path to a cache-busted URL. */
 export const assetUrl = (path: string): string => `${BASE}${path.replace(/^\//, '')}?v=${VER}`
 
-/** Chapter folder under anim/ for a stage (its media src starts `anim/<chapter>/`). */
-export const animDir = (stage: Stage): string => stage.media.src.split('/', 2).join('/')
+/** Chapter folder under anim/ for a stage. */
+export const animDir = (stage: Stage): string => `anim/${stage.media.chapter}`

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Re-encode a Manim render for smooth scroll-scrubbing and emit a poster.
 #   usage: encode.sh <scene_file.py> <SceneClass> <out-id>
-# Produces website/public/anim/<chapter>/video/1080/<out-id>.mp4 (scrub-friendly GOP: a
-# keyframe every 12 frames so seeks stay cheap without the ~5-10x bloat of all-intra, no
-# audio) + <chapter>/posters/<out-id>.webp. Run after the high-quality (`-qh` => 1080p30)
-# render. MEDIA_DIR overrides the manim media dir (default /tmp/emg_media).
+# Produces website/anim/masters/<chapter>/<out-id>.mp4 (the 1080p master encode-scrub.sh
+# samples into webp scrub frames — never shipped to the site, so it lives outside public/)
+# + public/anim/<chapter>/posters/<out-id>.webp. Run after the high-quality (`-qh` =>
+# 1080p30) render. MEDIA_DIR overrides the manim media dir (default /tmp/emg_media).
 set -euo pipefail
 
 MENV="${MENV:-${CONDA_PREFIX:-$HOME/.conda/envs/emgmanim}}"
@@ -13,7 +13,7 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 file="$1"; cls="$2"; id="$3"
 chapter="$(basename "$(dirname "$file")")"   # scenes live in anim/<chapter>/
-VIDEO_DIR="$HERE/../public/anim/$chapter/video/1080"
+VIDEO_DIR="$HERE/masters/$chapter"
 POSTER_DIR="$HERE/../public/anim/$chapter/posters"
 stem="$(basename "$file" .py)"
 src="$MEDIA/videos/$stem/1080p30/$cls.mp4"

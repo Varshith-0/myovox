@@ -36,7 +36,7 @@
     }
   },
   "fingerprints": {
-    "frames": 80,
+    "frames": 79,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -126,7 +126,7 @@
     }
   },
   "silent": {
-    "frames": 93,
+    "frames": 92,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -144,7 +144,7 @@
     }
   },
   "spark": {
-    "frames": 80,
+    "frames": 79,
     "fps": 12,
     "tiers": {
       "1080": 1920,

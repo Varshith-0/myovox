@@ -46,6 +46,14 @@
   border-left-color: var(--line-bright);
 }
 
+/* The section currently under the nav line. */
+.tocLinkActive,
+.tocLinkActive:hover {
+  color: var(--ink);
+  border-left-color: var(--ink);
+  text-shadow: var(--glow-text);
+}
+
 /* ---- Article (reading column) ------------------------------------ */
 .article {
   background: rgba(3, 3, 3, 0.55);
@@ -79,12 +87,53 @@
   scroll-margin-top: calc(var(--nav-h) + var(--space-4));
 }
 
+/* Glossary/FAQ category dividers: letterspaced small caps on a hairline, as in the PDF. */
 .h3 {
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-top: var(--space-12);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--line);
+  scroll-margin-top: calc(var(--nav-h) + var(--space-4));
+}
+
+/* A glossary term, and an FAQ question: the run-in heading of the block below it. */
+.h4 {
   font-family: var(--font-display);
-  font-variation-settings: 'opsz' 40, 'wght' 460;
-  font-size: var(--t-h3);
+  font-variation-settings: 'opsz' 40, 'wght' 520;
+  font-size: var(--t-body);
+  color: var(--ink);
+  margin-top: var(--space-6);
+  scroll-margin-top: calc(var(--nav-h) + var(--space-4));
+}
+
+/* The definition sits directly under its term, not floated away from it. */
+.h4 + .p {
+  margin-top: var(--space-1);
+}
+
+/* A table caption: "Table 3. The emg2speech General Corpus." */
+.h5 {
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+  font-weight: 600;
   color: var(--ink);
   margin-top: var(--space-8);
+  scroll-margin-top: calc(var(--nav-h) + var(--space-4));
+}
+.h5 + .p {
+  margin-top: var(--space-1);
+  font-size: var(--t-sm);
+  color: var(--ink-faint);
+}
+
+/* A bare jump target: carries an id, occupies no space. */
+.anchor {
+  scroll-margin-top: calc(var(--nav-h) + var(--space-4));
 }
 
 .p {
@@ -129,6 +178,21 @@
   border-bottom-color: var(--ink);
 }
 
+/* In-page jumps to a glossary term or a cross-referenced section. The report is
+   dense with them, so they stay quiet until hovered — as they are in the PDF,
+   where the same links are printed black. */
+.jump {
+  color: inherit;
+  border-bottom: 1px dotted var(--line-strong);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+.jump:hover {
+  color: var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+
 .quote {
   margin: var(--space-6) 0;
   padding-left: var(--space-4);
@@ -158,12 +222,15 @@
   font-family: var(--font-mono);
   font-size: var(--t-sm);
 }
+/* Cells wrap. The report's widest table is seven columns of system names, and
+   holding those on one line pushed the measurements themselves out of view;
+   the numeric cells contain no spaces, so they never wrap regardless. */
 .table :global(th),
 .table :global(td) {
   padding: 0.55rem 0.85rem;
   text-align: left;
   border-bottom: 1px solid var(--line);
-  white-space: nowrap;
+  vertical-align: baseline;
 }
 .table :global(th) {
   color: var(--ink);

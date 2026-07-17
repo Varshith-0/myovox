@@ -79,7 +79,7 @@ export function MediaLayer() {
   // tier from the canvas's device-pixel width, and pull every clip's tiny strip
   // so the whole story is instantly scrubbable. Destroyed on unmount so a route
   // change frees all decoded frames.
-  const chapter = clipStages[0]?.media.src.split('/')[1] ?? ''
+  const chapter = clipStages[0]?.media.chapter ?? ''
   useEffect(() => {
     if (reduced || !chapter) return
     let alive = true

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # encode-scrub.sh — the offline half of the "scrub with images, not video-seek" fix.
 #
-# For every existing 1080 clip it produces, alongside your current MP4/poster,
+# For every 1080p master in website/anim/masters/<chapter>/ it produces
 # one directory of crisp scrub frames per quality tier (the YouTube-style ladder):
 #   scrub/<id>/1080/0001.webp …  1920px wide
 #   scrub/<id>/720/0001.webp …   1280px
@@ -35,6 +35,7 @@ WEBP_CL=6             # compression_level 0–6 (slower encode, smaller files; f
 # ---------------------------------------------------------------------------
 
 ROOT="website/public/anim"
+MASTERS="website/anim/masters"
 FORCE=0; DRY=0
 for a in "${@:-}"; do
   case "$a" in
@@ -66,24 +67,24 @@ tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 tot_frames=0; nclips=0
 
 shopt -s nullglob
-clips=("$ROOT"/*/video/1080/*.mp4)
-[ ${#clips[@]} -gt 0 ] || { echo "no 1080 mp4s under $ROOT (run from repo root)" >&2; exit 1; }
+clips=("$MASTERS"/*/*.mp4)
+[ ${#clips[@]} -gt 0 ] || { echo "no 1080 mp4s under $MASTERS (run from repo root)" >&2; exit 1; }
 
 # the top tier's frame dir doubles as the "is this clip done?" marker
 top_label="${TIERS%%:*}"
 
 for f in "${clips[@]}"; do
-  chapter="$(basename "$(dirname "$(dirname "$(dirname "$f")")")")"
+  chapter="$(basename "$(dirname "$f")")"
   id="$(basename "$f" .mp4)"
   dur="$(probe format=duration "$f")"
   w="$(probe stream=width "$f")"
   h="$(probe stream=height "$f")"
-  n="$(python3 -c "import math;print(math.ceil(float('$dur')*$SCRUB_FPS))")"
   ch="$(python3 -c "print(round($STRIP_W*$h/$w))")"
   out="$ROOT/$chapter/scrub/$id"
 
   if [ "$DRY" = 1 ]; then
-    # encode ONE mid-clip frame per tier, measure real bytes, project to n frames
+    # encode ONE mid-clip frame per tier, measure real bytes, project to ~n frames
+    n="$(python3 -c "import math;print(math.ceil(float('$dur')*$SCRUB_FPS))")"
     mid="$(python3 -c "print(max(0.0, float('$dur')/2))")"
     line="$(printf '%-30s %6.1fs  n=%3d ' "$chapter/$id" "$dur" "$n")"
     for t in $TIERS; do
@@ -98,8 +99,9 @@ for f in "${clips[@]}"; do
     continue
   fi
 
-  if [ "$FORCE" = 0 ] && [ -f "$out/strip.webp" ] && [ -d "$out/$top_label" ] \
-     && [ "$(ls -1 "$out/$top_label" 2>/dev/null | wc -l | tr -d ' ')" -ge "$n" ]; then
+  # strip.webp is generated LAST (after every tier), so its presence after the
+  # up-front rm -rf marks a fully finished clip — no frame-count guess needed.
+  if [ "$FORCE" = 0 ] && [ -f "$out/strip.webp" ]; then
     echo "skip (done): $chapter/$id"
   else
     rm -rf "$out"; mkdir -p "$out"
@@ -112,8 +114,11 @@ for f in "${clips[@]}"; do
     done
     ffmpeg -v error -i "$f" -vf "fps=$strip_fps,scale=$STRIP_W:-2,tile=${STRIP_N}x1" -frames:v 1 -y "$out/strip.png"
     webp "$out/strip.png"
-    echo "done: $chapter/$id  (n=$n)"
+    echo "done: $chapter/$id"
   fi
+  # frames = what ffmpeg actually emitted (ceil(dur*fps) projects one too many,
+  # which made the site request a missing last frame per clip)
+  n="$(ls -1 "$out/$top_label" | wc -l | tr -d ' ')"
   tiers_field="$(echo "$TIERS" | tr ' ' ',')"
   printf "%s\t%s\t%d\t%d\t%s\t%d\t%d\t%d\n" \
     "$chapter" "$id" "$n" "$SCRUB_FPS" "$tiers_field" "$STRIP_N" "$STRIP_W" "$ch" >> "$tmp/manifest.tsv"

@@ -55,8 +55,8 @@ the produced numbers next to the paper targets (`python -m myovox.report`).
 
 **Honest finding.** Reranking is exhausted: the binding constraint is the EMG acoustic PER (~20.9%),
 not the language model — the correct words are absent from the acoustic posteriors, so no reranker can
-close the gap to the 9.30 n-best oracle. `<10%` WER is not reached. (See `docs/technical_report.md`;
-its Section 3 baseline is historical context — this repo reproduces the 26.14 + 18.53 numbers.)
+close the gap to the 9.30 n-best oracle. `<10%` WER is not reached. (See `view.pdf`;
+its Section 4 baseline is historical context — this repo reproduces the 26.14 + 18.53 numbers.)
 
 ---
 
@@ -69,7 +69,7 @@ myovox/
 ├── configs/                       # all hyperparameters (one YAML per stage)
 │   ├── conformer.yaml  augmented.yaml  teacher_conv.yaml  teacher_bilstm.yaml
 │   └── ssl_features.yaml  nbest.yaml  lift.yaml  offline.yaml
-├── docs/technical_report.md       # method, results, limitations
+├── view.pdf                       # the technical report: method, results, limitations
 ├── src/                           # the `myovox` package (pyproject maps myovox -> src/)
 │   ├── config.py                  # SINGLE source of truth: paths + ALL constants + YAML loader
 │   ├── paths.py  log.py  runlog.py  reproduce.py  report.py

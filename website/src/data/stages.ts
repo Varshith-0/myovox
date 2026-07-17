@@ -10,13 +10,14 @@
 
 /**
  * What renders behind a stage's caption: a Manim clip scrubbed by the stage's
- * local scroll. `src` and `poster` are paths *relative to BASE_URL* (e.g.
- * `anim/under-the-hood/video/1080/ctc.mp4`); the MediaLayer resolves them via {@link assetUrl}. `poster` is
- * shown for reduced-motion / while loading; `alt` is a one-sentence description of
- * the animation for assistive tech.
+ * local scroll. `chapter` names the asset folder under `anim/` holding the
+ * stage's scrub frames, audio and captions. `poster` is a path *relative to
+ * BASE_URL*, resolved via {@link assetUrl} and shown for reduced-motion /
+ * while loading; `alt` is a one-sentence description of the animation for
+ * assistive tech.
  */
 export interface StageMedia {
-  readonly src: string
+  readonly chapter: string
   readonly poster: string
   readonly fit?: 'contain' | 'cover'
   readonly alt?: string
@@ -57,7 +58,7 @@ function act2(id: string, rail: string, caption: string, alt: string, sub?: stri
     caption,
     sub,
     media: {
-      src: `anim/under-the-hood/video/1080/${id}.mp4`,
+      chapter: 'under-the-hood',
       poster: `anim/under-the-hood/posters/${id}.webp`,
       fit: 'contain',
       alt,

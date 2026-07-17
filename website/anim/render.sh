@@ -7,7 +7,7 @@
 #   ./render.sh og      # render the social card -> ../public/og.png
 #
 # Each scene runs:  manim -qh <file> <class>  ->  encode.sh <file> <class> <id>,
-# producing ../public/anim/<chapter>/video/1080/<id>.mp4 + <chapter>/posters/<id>.webp.
+# producing anim/masters/<chapter>/<id>.mp4 + ../public/anim/<chapter>/posters/<id>.webp.
 # Narration (<chapter>/audio/<id>.mp3 + <chapter>/captions/<id>.json) is generated
 # separately by ../scripts/narrate.py.
 #

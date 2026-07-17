@@ -9,7 +9,9 @@ short, scroll-scrubbed animation on black. Three pages:
 - **Code** (`/code`) — curated implementation snippets + the repository link.
 
 It accompanies the [myovox](https://github.com/Varshith-0/myovox) pipeline (surface-EMG speech
-decoding, **18.53% word error rate**). Every number shown is drawn from `docs/technical_report.md`.
+decoding, **18.53% word error rate**). Every number shown is drawn from the technical report
+(`myovox.tex`, compiled to `view.pdf`); the Technical page is generated from that same source, so the
+site and the paper cannot drift apart.
 
 ## Stack
 
@@ -31,14 +33,14 @@ Other scripts: `npm run build` · `npm run preview` · `npm run typecheck` · `n
 
 The Story is a sequence of pre-rendered [Manim](https://www.manim.community/) clips. Each scene is a
 Python file in [`anim/`](anim/) (`01-hero.py … 50-end.py`, in story order, plus the shared
-`style.py`); it renders to `public/anim/video/1080/<id>.mp4` + `anim/posters/<id>.webp`, where `<id>` is the kebab-case
-clip id referenced from `src/data/stages.ts`. Every clip is an **all-keyframe (intra-only) MP4**, so
-`currentTime` seeks are frame-exact and cost one hardware decode. `encode-videos.sh` produces a
-second resolution tier (`public/anim/video/540/<id>.mp4`) for phones/standard displays; large retina
-screens play the 1080p originals. At runtime the `MediaLayer` preloads the near clips' videos, and
-each animation frame seeks the active clip to its **scroll-mapped time** and draws the decoded frame
-to a single `<canvas>` — nothing decodes on the main thread, so the picture stays glued to the
-scroll however fast it moves, and held memory is just the decoder's own few-frame buffer. The
+`style.py`); it renders to `anim/masters/<chapter>/<id>.mp4` + `public/anim/<chapter>/posters/<id>.webp`, where `<id>` is the kebab-case
+clip id referenced from `src/data/stages.ts`. The rendered 1080p MP4s are author-time masters:
+`encode-scrub.sh` samples them into **pre-decoded WebP scrub frames** per quality tier
+(`public/anim/<chapter>/scrub/<id>/{1080,720,540,360,240}/`, plus a tiny 12-frame `strip.webp`
+baseline and a `scrub.manifest.json`). At runtime the `MediaLayer` draws the frame matching each
+stage's **scroll-mapped progress** to a single `<canvas>` — no `<video>` seeking, so the picture
+stays glued to the scroll however fast it moves, and the quality controller picks the tier the
+measured network can sustain (YouTube-style auto ladder). The
 `anim/posters/<id>.webp` (each clip's final frame) is the static image for reduced motion. A service
 worker (`public/sw.js`) caches every anim asset whole (serving byte-ranges by slicing the cached
 body), and `src/lib/mediaPrefetch.ts` trickle-fetches the active tier after load — repeat visits
@@ -48,17 +50,17 @@ The author-time pipeline lives entirely in `anim/`:
 
 ```bash
 cd anim
-./render.sh            # render all 50 scenes -> anim/video/1080/<id>.mp4 + posters/<id>.webp
+./render.sh            # render all 50 scenes -> anim/masters/<chapter>/<id>.mp4 + posters/<id>.webp
 ./render.sh hero       # render one scene by clip id
 ./render.sh og         # render the social card -> public/og.png
-./encode-videos.sh     # the 540p tier -> public/anim/video/540/<id>.mp4
+./encode-scrub.sh      # scrub frames -> public/anim/<chapter>/scrub/<id>/<tier>/*.webp
 ```
 
 [`anim/render.manifest.json`](anim/render.manifest.json) is the authoritative
 `file → scene class → clip id` map (story order matches `src/data/stages.ts`); `render.sh` reads it,
-runs `manim -qh` then `encode.sh` (scrub-friendly GOP + emits the poster). `encode-videos.sh` runs
-after, reading the encoded `.mp4`s (no manim env needed) to produce the 540p tier served to smaller
-screens. Narration is generated separately:
+runs `manim -qh` then `encode.sh` (emits the mp4 master + poster). `encode-scrub.sh` runs after,
+reading the encoded `.mp4`s (no manim env needed) to produce the tiered scrub frames the site
+serves. Narration is generated separately:
 
 ```bash
 python scripts/narrate.py            # all stages, from src/data/narration.json (the spoken-script source)
@@ -67,6 +69,31 @@ python scripts/narrate.py hero why   # specific stages -> anim/audio/<id>.mp3 + 
 
 `render.sh` defaults to a base anaconda install (`MENV=/opt/anaconda3`) that provides `manim` +
 `ffmpeg`; override `MENV` / `MEDIA_DIR` for another environment.
+
+## The Technical page
+
+`src/content/technical_report.md` is **generated** — never hand-edit it. Edit `../myovox.tex` (the
+report source, also what compiles to `view.pdf`) and regenerate:
+
+```bash
+python scripts/tex2md.py             # ../myovox.tex -> src/content/technical_report.md
+```
+
+`hyperref` makes the report a link graph, and the page reproduces all of it: `\glref` → glossary
+entry, `\citep` → bibliography, `\ref` → section, table, or FAQ question. Markdown has no equivalent,
+so every jump target becomes a heading and every reference becomes a link to that heading's slug —
+`slugify()` in `tex2md.py` mirrors the one in `TechnicalPage.tsx` exactly. Two conventions carry the
+targets markdown cannot express on its own:
+
+- **Table captions are headings** (`##### Table 4. Baseline reproduction.`), which both numbers them
+  as the PDF does and gives `Table~\ref` something to link to.
+- **`[](#ref-3)` — a link with no text — is a bare anchor**, not a link. `TechnicalPage.tsx` renders
+  it as `<span id>`. It is how a reference list item gets an id for `\citep` to reach.
+
+The script refuses to write if any TeX survives conversion, if any link would land on an anchor that
+does not exist, or if the citations and the reference list disagree. The six tables are transcribed
+in the script (LaTeX `tabular` does not map onto GFM automatically) — **edit them there** if the tex's
+tables change; their captions and footnotes still come from the tex, so links inside them stay live.
 
 ## Architecture
 
@@ -85,7 +112,7 @@ src/
   store/                  useStore (zustand UI state) · scroll (hot-path progress) · narration (audio playhead)
   data/                   stages.ts (the narrative spine) · site.ts ·
                           narration.ts (+ narration.json — the spoken-script source for narrate.py)
-  content/                technical_report.md · snippets.ts
+  content/                technical_report.md — GENERATED from ../../myovox.tex, do not hand-edit
   styles/                 tokens.css · globals.css
 ```
 

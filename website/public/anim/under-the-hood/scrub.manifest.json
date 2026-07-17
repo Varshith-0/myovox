@@ -1,6 +1,6 @@
 {
   "alignment-problem": {
-    "frames": 227,
+    "frames": 226,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -18,7 +18,7 @@
     }
   },
   "approach": {
-    "frames": 139,
+    "frames": 138,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -36,7 +36,7 @@
     }
   },
   "arc": {
-    "frames": 165,
+    "frames": 164,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -126,7 +126,7 @@
     }
   },
   "credits": {
-    "frames": 151,
+    "frames": 150,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -234,7 +234,7 @@
     }
   },
   "ensemble-nbest": {
-    "frames": 217,
+    "frames": 216,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -342,7 +342,7 @@
     }
   },
   "frozen-lock-how": {
-    "frames": 163,
+    "frames": 162,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -378,7 +378,7 @@
     }
   },
   "heads": {
-    "frames": 183,
+    "frames": 182,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -468,7 +468,7 @@
     }
   },
   "landscape": {
-    "frames": 122,
+    "frames": 121,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -486,7 +486,7 @@
     }
   },
   "memorize-trap": {
-    "frames": 149,
+    "frames": 148,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -504,7 +504,7 @@
     }
   },
   "muscles": {
-    "frames": 156,
+    "frames": 155,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -522,7 +522,7 @@
     }
   },
   "rerank": {
-    "frames": 188,
+    "frames": 187,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -630,7 +630,7 @@
     }
   },
   "targets-phon": {
-    "frames": 206,
+    "frames": 205,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -756,7 +756,7 @@
     }
   },
   "wfst": {
-    "frames": 189,
+    "frames": 188,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -774,7 +774,7 @@
     }
   },
   "what-is-a-net": {
-    "frames": 168,
+    "frames": 167,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -792,7 +792,7 @@
     }
   },
   "what-is-attention": {
-    "frames": 195,
+    "frames": 194,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -810,7 +810,7 @@
     }
   },
   "what-is-convolution": {
-    "frames": 153,
+    "frames": 152,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -828,7 +828,7 @@
     }
   },
   "what-is-lm": {
-    "frames": 181,
+    "frames": 180,
     "fps": 12,
     "tiers": {
       "1080": 1920,
@@ -864,7 +864,7 @@
     }
   },
   "where-units-from": {
-    "frames": 242,
+    "frames": 241,
     "fps": 12,
     "tiers": {
       "1080": 1920,

@@ -1,4 +1,4 @@
-"""Print the produced numbers next to the paper targets (docs/technical_report.md), with
+"""Print the produced numbers next to the paper targets (view.pdf), with
 PASS/FAIL per row. Run at the end of run.sh.
 
   python -m myovox.report --tag liftx
@@ -42,7 +42,7 @@ def main():
     ap.add_argument("--acoustic-logits", default=str(RESULTS_DIR / "conf_l9_logits.pt"))
     args = ap.parse_args()
 
-    print("\n================ myovox — produced vs paper (docs/technical_report.md) ================")
+    print("\n================ myovox — produced vs paper (view.pdf) ================")
     print(f"{'system':40s} {'WER':>8} {'target':>8} {'PER':>8} {'target':>8}  status")
     all_pass = True
 

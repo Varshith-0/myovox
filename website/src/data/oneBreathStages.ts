@@ -18,7 +18,7 @@ function oneBreath(id: string, rail: string, caption: string, alt: string, sub?:
     caption,
     sub,
     media: {
-      src: `anim/one-breath/video/1080/${id}.mp4`,
+      chapter: 'one-breath',
       poster: `anim/one-breath/posters/${id}.webp`,
       fit: 'contain',
       alt,
