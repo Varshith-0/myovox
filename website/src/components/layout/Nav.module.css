@@ -7,9 +7,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 clamp(1rem, 4vw, 2.5rem);
-  background: linear-gradient(to bottom, rgba(3, 3, 3, 0.7), rgba(3, 3, 3, 0));
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  /* No backdrop-filter: the nav floats over a canvas that repaints while
+     scrubbing, and re-blurring that region every frame is a mobile GPU killer.
+     A slightly deeper gradient reads the same over the black story pages. */
+  background: linear-gradient(to bottom, rgba(3, 3, 3, 0.88), rgba(3, 3, 3, 0));
   mask-image: linear-gradient(to bottom, #000 60%, transparent);
 }
 

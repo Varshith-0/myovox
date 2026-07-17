@@ -76,16 +76,17 @@
   animation: rise 0.9s var(--ease-out) both;
 }
 
+/* Opacity + transform only (compositor-driven): animating a blur filter here
+   re-rasterized the caption every frame right at the stage handoff, when the
+   scrubber is busiest. */
 @keyframes rise {
   from {
     opacity: 0;
     transform: translateY(24px);
-    filter: blur(7px);
   }
   to {
     opacity: 1;
     transform: none;
-    filter: none;
   }
 }
 

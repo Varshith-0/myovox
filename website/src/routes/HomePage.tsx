@@ -92,24 +92,30 @@ function drawTrace(
   const ampScale = (height / 2) * 0.82 * entrance
 
   ctx.clearRect(0, 0, width, height)
-  ctx.beginPath()
+  const line = new Path2D()
   const step = Math.max(1.25, width / 900)
   for (let px = 0; px <= width; px += step) {
     const x = px / width
     // The trace fades in from the center outward on entrance.
     const reveal = clamp01(entrance * 2.2 - Math.abs(x - 0.5) * 2)
     const y = midY - signalAt(x, t, bursts, follower) * ampScale * reveal
-    if (px === 0) ctx.moveTo(px, y)
-    else ctx.lineTo(px, y)
+    if (px === 0) line.moveTo(px, y)
+    else line.lineTo(px, y)
   }
   const dpr = Math.min(window.devicePixelRatio || 1, 2)
-  ctx.strokeStyle = 'rgba(245, 244, 241, 0.92)'
-  ctx.lineWidth = 1.3 * dpr
   ctx.lineJoin = 'round'
   ctx.lineCap = 'round'
-  ctx.shadowColor = 'rgba(245, 244, 241, 0.6)'
-  ctx.shadowBlur = 7 * dpr
-  ctx.stroke()
+  // Glow = the same path stroked wide and faint underneath — shadowBlur here
+  // was rasterized on the CPU every frame and visibly janked weaker devices.
+  ctx.strokeStyle = 'rgba(245, 244, 241, 0.14)'
+  ctx.lineWidth = 7 * dpr
+  ctx.stroke(line)
+  ctx.strokeStyle = 'rgba(245, 244, 241, 0.3)'
+  ctx.lineWidth = 3.4 * dpr
+  ctx.stroke(line)
+  ctx.strokeStyle = 'rgba(245, 244, 241, 0.92)'
+  ctx.lineWidth = 1.3 * dpr
+  ctx.stroke(line)
 }
 
 export function HomePage() {

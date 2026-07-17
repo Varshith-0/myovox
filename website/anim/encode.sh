@@ -42,6 +42,20 @@ elif command -v cwebp >/dev/null 2>&1; then
 else
   echo "WARN: no webp encoder (ffmpeg libwebp or cwebp) — poster not updated" >&2
 fi
-rm -f "$poster_png"
+# Pre-blurred fallback poster (posters/blur/<id>.webp): the site fades it in as
+# ambience while scrub frames load. Blur + darken are baked here, offline — a
+# runtime CSS blur() cost a full-viewport GPU blur on every frame of the fade.
+blur_dir="$POSTER_DIR/blur"
+mkdir -p "$blur_dir"
+blur_png="$(mktemp -t posterblur).png"
+"$FFMPEG" -y -i "$poster_png" \
+  -vf "scale=96:-2,gblur=sigma=2,colorchannelmixer=rr=0.85:gg=0.85:bb=0.85" \
+  "$blur_png" >/dev/null 2>&1
+if "$FFMPEG" -hide_banner -encoders 2>/dev/null | grep -q libwebp; then
+  "$FFMPEG" -y -i "$blur_png" "$blur_dir/$id.webp" >/dev/null 2>&1
+elif command -v cwebp >/dev/null 2>&1; then
+  cwebp -quiet -q 62 "$blur_png" -o "$blur_dir/$id.webp" >/dev/null 2>&1
+fi
+rm -f "$poster_png" "$blur_png"
 
 echo "encoded:"; du -h "$VIDEO_DIR/$id.mp4" "$poster"

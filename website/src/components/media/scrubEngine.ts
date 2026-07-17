@@ -165,7 +165,8 @@ export class ScrubEngine {
     if (!cs) return { drawn: false, crisp: false };
 
     const n = cs.meta.frames;
-    const i = clamp(Math.round(local * (n - 1)), 0, n - 1);
+    const pos = clamp(local, 0, 1) * (n - 1);
+    const i = clamp(Math.round(pos), 0, n - 1);
     const dir = Math.sign(i - cs.lastIndex) || 1;
     cs.lastIndex = i;
 
@@ -175,16 +176,35 @@ export class ScrubEngine {
       this.loadFrame(cs, clamp(i - dir, 0, n - 1));
     }
 
-    const l1 = cs.frames.get(i) ?? cs.stale.get(i);
-    if (l1) {
+    // Cross-dissolve the two frames bracketing the scroll position, so the 12fps
+    // frame sampling reads as continuous motion instead of visible 12fps steps.
+    const i0 = clamp(Math.floor(pos), 0, n - 1);
+    const i1 = clamp(i0 + 1, 0, n - 1);
+    const a = cs.frames.get(i0) ?? cs.stale.get(i0) ?? null;
+    const b = i1 !== i0 ? (cs.frames.get(i1) ?? cs.stale.get(i1) ?? null) : null;
+    const base = a ?? b;
+    if (base) {
+      // Quantized so a parked scroll position yields a stable key — an unchanged
+      // frame is never re-blitted, so an idle page does zero canvas work.
+      const alpha = a && b ? Math.round((pos - i0) * 32) / 32 : 0;
+      const over = a && b ? b : null;
+      if (this.sameDraw(id, base, over, alpha, dstW, dstH, fit, alignTop))
+        return { drawn: true, crisp: true };
       ctx.clearRect(0, 0, dstW, dstH);
-      this.blit(ctx, l1, 0, 0, l1.width, l1.height, dstW, dstH, fit, alignTop);
+      this.blit(ctx, base, 0, 0, base.width, base.height, dstW, dstH, fit, alignTop);
+      if (over && alpha > 0) {
+        ctx.globalAlpha = alpha;
+        this.blit(ctx, over, 0, 0, over.width, over.height, dstW, dstH, fit, alignTop);
+        ctx.globalAlpha = 1;
+      }
       return { drawn: true, crisp: true };
     }
 
     if (cs.strip) {
       const { cols, rows, n: sn } = cs.meta.strip;
       const si = clamp(Math.round(local * (sn - 1)), 0, sn - 1);
+      if (this.sameDraw(id, cs.strip, null, si, dstW, dstH, fit, alignTop))
+        return { drawn: true, crisp: false };
       const cw = cs.strip.width / cols;
       const chh = cs.strip.height / rows;
       const sx = (si % cols) * cw;
@@ -195,6 +215,24 @@ export class ScrubEngine {
     }
 
     return { drawn: false, crisp: false };
+  }
+
+  /** The last blit's identity — bitmaps compared by reference, so a newly decoded
+   *  (sharper) frame for the same index changes the key and forces a redraw. */
+  private lastDraw: {
+    id: string; a: ImageBitmap; b: ImageBitmap | null; alpha: number;
+    w: number; h: number; fit: Fit; top: boolean;
+  } | null = null;
+
+  private sameDraw(
+    id: string, a: ImageBitmap, b: ImageBitmap | null, alpha: number,
+    w: number, h: number, fit: Fit, top: boolean,
+  ): boolean {
+    const d = this.lastDraw;
+    const same = !!d && d.id === id && d.a === a && d.b === b && d.alpha === alpha &&
+      d.w === w && d.h === h && d.fit === fit && d.top === top;
+    if (!same) this.lastDraw = { id, a, b, alpha, w, h, fit, top };
+    return same;
   }
 
   prefetchAllStrips(ids: string[]) {

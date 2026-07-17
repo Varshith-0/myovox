@@ -78,8 +78,7 @@
 
 .ghost {
   color: var(--ink-dim);
-  background: rgba(11, 11, 12, 0.66);
-  backdrop-filter: blur(10px);
+  background: rgba(11, 11, 12, 0.82);
   border: 1px solid var(--line-strong);
 }
 .ghost:hover {

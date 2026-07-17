@@ -157,6 +157,12 @@ export function MediaLayer() {
       {clipStages.map((vs) => {
         const fitClass = vs.media.fit === 'cover' ? styles.cover : styles.contain
         const fallbackClass = reduced ? '' : ` ${styles.posterFallback}`
+        // Normal mode shows the poster only as blurred ambience — serve a tiny
+        // pre-blurred variant (baked offline by encode.sh) instead of paying for
+        // a full-viewport blur() filter on the GPU every frame it fades.
+        const posterPath = reduced
+          ? vs.media.poster
+          : vs.media.poster.replace('posters/', 'posters/blur/')
         return (
           <div key={vs.stage.id} className={styles.stage}>
             <img
@@ -166,7 +172,7 @@ export function MediaLayer() {
               }}
               // Loaded on approach, not on mount: updateStageVisibility promotes
               // data-src → src once the stage is within the visibility ring.
-              data-src={assetUrl(vs.media.poster)}
+              data-src={assetUrl(posterPath)}
               decoding="async"
               className={`${styles.media} ${fitClass}${fallbackClass}`}
               alt={vs.media.alt ?? vs.stage.caption}

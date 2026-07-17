@@ -73,8 +73,9 @@
 /* Normal-mode poster fallback: the clip's final frame blurred into ambience,
    shown only while the active clip has no drawable video frame yet — visual
    content instead of a bare title on black, without spoiling the composition.
-   Fades out as the live canvas reveals. */
+   Fades out as the live canvas reveals. The blur + darken are baked into the
+   tiny posters/blur/ asset offline (see encode.sh) — a runtime blur() filter
+   here cost a full-viewport GPU blur on every frame of the fade. */
 .posterFallback {
-  filter: blur(26px) brightness(0.85);
   transform: scale(1.08);
 }

@@ -15,8 +15,7 @@
   align-items: center;
   justify-content: center;
   padding: 0.5rem 0.72rem;
-  background: rgba(11, 11, 12, 0.66);
-  backdrop-filter: blur(10px);
+  background: rgba(11, 11, 12, 0.82);
   border: 1px solid var(--line-strong);
   border-radius: 2rem;
   color: var(--ink-dim);
@@ -66,8 +65,7 @@
   pointer-events: none;
   border: 1px solid var(--line-strong);
   border-radius: 1.2rem;
-  background: rgba(11, 11, 12, 0.66);
-  backdrop-filter: blur(10px);
+  background: rgba(11, 11, 12, 0.82);
   transition: opacity var(--dur-fast) var(--ease-out);
 }
 
