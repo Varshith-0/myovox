@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useStages } from '@/story/StagesContext'
 import { useStore } from '@/store/useStore'
-import { assetUrl, ASSET_VERSION } from '@/lib/asset'
+import { assetUrl, ASSET_VERSION, MEDIA_BASE } from '@/lib/asset'
 import styles from './MediaLayer.module.css'
 import { useMediaScrubber } from './useMediaScrubber'
 import { ScrubEngine, loadChapterManifest } from './scrubEngine'
@@ -84,7 +84,7 @@ export function MediaLayer() {
     if (reduced || !chapter) return
     let alive = true
     ;(async () => {
-      const assetBase = `${import.meta.env.BASE_URL}anim`
+      const assetBase = `${MEDIA_BASE}anim`
       let manifest
       try {
         manifest = await loadChapterManifest(assetBase, chapter, ASSET_VERSION)

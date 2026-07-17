@@ -26,6 +26,8 @@ const SWITCH_COOLDOWN_MS = 4000
  * encode dry-run medians). Refined live by scaling the measured frame size.
  */
 const PRIOR_FRAME_BYTES: Record<Tier, number> = {
+  '2160': 45_000, // extrapolated from 1080 at width^1.6 until a real sample lands
+  '1440': 24_000,
   '1080': 15_000,
   '720': 9_000,
   '540': 6_500,
@@ -96,6 +98,7 @@ export class QualityController {
 
   constructor(engine: ScrubEngine) {
     this.engine = engine
+    useStore.getState().setAvailableTiers(engine.availableTiers())
     const cap = engine.viewportCap()
     const auto = initialTier(cap)
     useStore.getState().setAutoQuality(auto)

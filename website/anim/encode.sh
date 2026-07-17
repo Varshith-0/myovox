@@ -16,8 +16,15 @@ chapter="$(basename "$(dirname "$file")")"   # scenes live in anim/<chapter>/
 VIDEO_DIR="$HERE/masters/$chapter"
 POSTER_DIR="$HERE/../public/anim/$chapter/posters"
 stem="$(basename "$file" .py)"
-src="$MEDIA/videos/$stem/1080p30/$cls.mp4"
-[ -f "$src" ] || { echo "ERROR: render not found: $src (did you run -qh?)"; exit 1; }
+# Prefer the highest-res render present (manim -qk → 2160p60, -qp → 1440p60,
+# -qh → 1080p30/60 depending on config). encode-scrub.sh then emits exactly the
+# quality tiers the chosen master can fill — never upscaled.
+src=""
+for q in 2160p60 2160p30 1440p60 1440p30 1080p60 1080p30; do
+  cand="$MEDIA/videos/$stem/$q/$cls.mp4"
+  [ -f "$cand" ] && { src="$cand"; break; }
+done
+[ -n "$src" ] || { echo "ERROR: no render under $MEDIA/videos/$stem/ (did you run -qh, or -qk for 4K?)"; exit 1; }
 
 FFMPEG="$MENV/bin/ffmpeg"
 

@@ -26,10 +26,17 @@ FFMPEG="$MENV/bin/ffmpeg"
 MANIFEST="$HERE/render.manifest.json"
 target="${1:-all}"
 
+# Render quality flag (manim): -qh = 1080p, -qp = 1440p60, -qk = 4K.
+# encode.sh picks the highest-res render present and encode-scrub.sh emits only
+# the tiers that master can fill, so QUALITY alone controls the site's ladder.
+# NOTE: -qk (4K) pushes public/anim past GitHub Pages' 1GB site limit — use it
+# only after moving the anim assets to an external host.
+QUALITY="${QUALITY:--qh}"
+
 render_scene() { # file class id
   local file="$1" cls="$2" id="$3"
   echo ">> $id  ($file :: $cls)"
-  PYTHONPATH="$HERE" "$MANIM" -qh --media_dir "$MEDIA_DIR" "$HERE/$file" "$cls"
+  PYTHONPATH="$HERE" "$MANIM" "$QUALITY" --media_dir "$MEDIA_DIR" "$HERE/$file" "$cls"
   MENV="$MENV" MEDIA_DIR="$MEDIA_DIR" "$HERE/encode.sh" "$file" "$cls" "$id"
 }
 

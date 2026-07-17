@@ -38,5 +38,8 @@ __pycache__/
 # repo-root .gitignore excludes via "data/". Force it back into tracking.
 !src/data/
 
-# Temporary placeholder Manim clips (underscore-prefixed); the real clips are committed.
-public/anim/_*
+# Rendered media is NOT in git: public/anim lives in R2 (deploy-media.sh) and
+# on the render machine; anim/masters are regenerable from the scene files.
+# The committed .anim-version carries the media content hash for CI builds.
+public/anim/
+anim/masters/

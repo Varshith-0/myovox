@@ -10,6 +10,12 @@
  */
 const CACHE = 'myovox-media'
 
+// When the media lives on a CDN (VITE_ASSET_BASE), the page registers this SW
+// as sw.js?media=<origin> so cross-origin anim/ fetches are cached too. The
+// CDN must send CORS headers (R2 bucket CORS policy) or responses would be
+// opaque and unusable.
+const MEDIA_ORIGIN = new URL(self.location.href).searchParams.get('media') || ''
+
 self.addEventListener('install', () => self.skipWaiting())
 
 self.addEventListener('activate', (event) => {
@@ -33,7 +39,8 @@ self.addEventListener('message', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url)
-  if (url.origin !== location.origin || !url.pathname.includes('/anim/')) return
+  const mediaHost = url.origin === location.origin || url.origin === MEDIA_ORIGIN
+  if (!mediaHost || !url.pathname.includes('/anim/')) return
   // Any failure (quota exceeded, cache API oddity) falls back to plain network.
   event.respondWith(serveMedia(event.request).catch(() => fetch(event.request)))
 })

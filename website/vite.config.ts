@@ -1,65 +1,93 @@
-import { createHash } from 'node:crypto'
-import { readdirSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { existsSync, readFileSync, rmSync } from 'node:fs'
 import { fileURLToPath, URL } from 'node:url'
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+import { animContentHash } from './scripts/anim-hash.mjs'
+
+/** Production media CDN (Cloudflare R2, public bucket). Mirror of MEDIA_CDN in
+ *  src/lib/asset.ts — the build plugins (strip/preconnect) need it too. Override
+ *  with VITE_ASSET_BASE; set it to '' to serve media from GitHub Pages again. */
+const MEDIA_CDN = 'https://pub-4fbe1a04dad243c99f4f8b006f26ed79.r2.dev/'
 
 /**
  * Static site for GitHub Pages. `base` MUST match the repo so assets resolve
  * under https://<user>.github.io/<repo>/. Override at build time with
  * `VITE_BASE=/ npm run build` for a user-site / custom-domain deploy.
- * Every asset reference in code uses `import.meta.env.BASE_URL`, never a
- * hard-coded leading-slash path, so it stays correct under any base.
+ *
+ * The heavy anim/ media is served from a CDN when VITE_ASSET_BASE is set
+ * (committed default in .env.production → R2). The media tree is NOT in git;
+ * it lives on the render machine (public/anim) and in R2 (deploy-media.sh).
  */
 
 /**
  * Cache-bust id for the anim assets (?v=<id> on every clip/poster/frame URL).
- * A CONTENT hash of public/anim, not a per-build timestamp: the renders are
- * immutable, so a deploy that didn't re-render anything keeps the same id —
- * the media service worker's cache (hundreds of MB of scrub frames) survives
- * the deploy instead of being pruned and re-downloaded on every visit. Any
- * re-render changes the hash and invalidates cleanly.
+ * A CONTENT hash, not a per-build timestamp, so a deploy that didn't re-render
+ * anything keeps every cache (browser, edge, service worker) warm. Live tree
+ * when present (render machine); the committed .anim-version elsewhere (CI).
  */
-function animContentHash(dir: string): string {
-  const h = createHash('sha1')
-  const walk = (d: string) => {
-    const entries = readdirSync(d, { withFileTypes: true }).sort((a, b) =>
-      a.name < b.name ? -1 : 1,
-    )
-    for (const e of entries) {
-      const p = join(d, e.name)
-      if (e.isDirectory()) walk(p)
-      else {
-        h.update(p.slice(dir.length))
-        h.update(readFileSync(p))
-      }
-    }
-  }
-  walk(dir)
-  return h.digest('hex').slice(0, 12)
+function buildId(): string {
+  const animDir = fileURLToPath(new URL('./public/anim', import.meta.url))
+  if (existsSync(animDir)) return animContentHash(animDir)
+  const versionFile = fileURLToPath(new URL('./.anim-version', import.meta.url))
+  if (existsSync(versionFile)) return readFileSync(versionFile, 'utf8').trim()
+  return 'dev'
 }
 
-export default defineConfig(({ command }) => ({
-  base: process.env.VITE_BASE ?? '/myovox/',
-  plugins: [react()],
-  define: {
-    // Dev busts per page-load instead (see asset.ts), so skip hashing ~0.5GB
-    // of frames on every dev-server start.
-    __BUILD_ID__: JSON.stringify(
-      command === 'build'
-        ? animContentHash(fileURLToPath(new URL('./public/anim', import.meta.url)))
-        : 'dev',
-    ),
-  },
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
+/** With media on the CDN, public/anim must not ride along in the Pages
+ *  artifact (it would blow GitHub Pages' 1GB limit): drop it after copy. */
+function stripAnimWhenCdn(assetBase: string): Plugin {
+  return {
+    name: 'strip-anim-when-cdn',
+    apply: 'build',
+    closeBundle() {
+      if (!assetBase) return
+      rmSync(fileURLToPath(new URL('./dist/anim', import.meta.url)), {
+        recursive: true,
+        force: true,
+      })
+      console.log('\nstrip-anim-when-cdn: dist/anim removed (media served from VITE_ASSET_BASE)')
     },
-  },
-  build: {
-    target: 'es2022',
-    sourcemap: false,
-    chunkSizeWarningLimit: 1200,
-  },
-}))
+  }
+}
+
+/** Open the CDN connection (DNS/TLS) before the first frame fetch needs it. */
+function preconnectMedia(assetBase: string): Plugin {
+  return {
+    name: 'preconnect-media',
+    transformIndexHtml() {
+      if (!assetBase) return []
+      return [
+        {
+          tag: 'link',
+          attrs: { rel: 'preconnect', href: new URL(assetBase).origin, crossorigin: '' },
+          injectTo: 'head-prepend' as const,
+        },
+      ]
+    },
+  }
+}
+
+export default defineConfig(({ command }) => {
+  // Media base for the build-time plugins. Prod build → CDN unless overridden;
+  // '' (empty) opts back into serving anim/ from the Pages artifact.
+  const assetBase =
+    process.env.VITE_ASSET_BASE ?? (command === 'build' ? MEDIA_CDN : '')
+  return {
+    base: process.env.VITE_BASE ?? '/myovox/',
+    plugins: [react(), stripAnimWhenCdn(assetBase), preconnectMedia(assetBase)],
+    define: {
+      // Dev busts per page-load instead (see asset.ts) — skip the hash work.
+      __BUILD_ID__: JSON.stringify(command === 'build' ? buildId() : 'dev'),
+    },
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+      },
+    },
+    build: {
+      target: 'es2022',
+      sourcemap: false,
+      chunkSizeWarningLimit: 1200,
+    },
+  }
+})

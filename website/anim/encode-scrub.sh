@@ -25,8 +25,10 @@ set -euo pipefail
 # ---- config (tune, then re-run) -------------------------------------------
 SCRUB_FPS=12          # sampled frames/sec; 10–15 is visually identical to 30 WHILE dragging
 # Quality ladder: "label:width". Labels are the height names the site shows (…p);
-# widths assume 16:9. The masters are 1080p, so 1080 is the top (no upscaled 2160).
-TIERS="1080:1920 720:1280 540:960 360:640 240:426"
+# widths assume 16:9. Per clip, only tiers the master can fill are emitted —
+# NEVER upscaled — so 2160/1440 appear once a scene is re-rendered at 4K
+# (manim -qk) and the site's manifest-driven ladder picks them up automatically.
+TIERS="2160:3840 1440:2560 1080:1920 720:1280 540:960 360:640 240:426"
 STRIP_N=12            # frames in the tiny always-loaded baseline strip
 STRIP_W=240           # per-cell width of that strip (px)
 WEBP_Q=72             # libwebp quality (0–100)
@@ -70,9 +72,6 @@ shopt -s nullglob
 clips=("$MASTERS"/*/*.mp4)
 [ ${#clips[@]} -gt 0 ] || { echo "no 1080 mp4s under $MASTERS (run from repo root)" >&2; exit 1; }
 
-# the top tier's frame dir doubles as the "is this clip done?" marker
-top_label="${TIERS%%:*}"
-
 for f in "${clips[@]}"; do
   chapter="$(basename "$(dirname "$f")")"
   id="$(basename "$f" .mp4)"
@@ -82,12 +81,22 @@ for f in "${clips[@]}"; do
   ch="$(python3 -c "print(round($STRIP_W*$h/$w))")"
   out="$ROOT/$chapter/scrub/$id"
 
+  # Tiers THIS master can honestly fill (width <= master's) — never upscale.
+  clip_tiers=""
+  for t in $TIERS; do
+    tw="${t##*:}"
+    [ "$tw" -le "$w" ] && clip_tiers="$clip_tiers $t"
+  done
+  clip_tiers="${clip_tiers# }"
+  [ -n "$clip_tiers" ] || { echo "skip (master narrower than every tier): $chapter/$id" >&2; continue; }
+  clip_top="${clip_tiers%%:*}"   # best emitted tier; its dir holds the frame count
+
   if [ "$DRY" = 1 ]; then
     # encode ONE mid-clip frame per tier, measure real bytes, project to ~n frames
     n="$(python3 -c "import math;print(math.ceil(float('$dur')*$SCRUB_FPS))")"
     mid="$(python3 -c "print(max(0.0, float('$dur')/2))")"
     line="$(printf '%-30s %6.1fs  n=%3d ' "$chapter/$id" "$dur" "$n")"
-    for t in $TIERS; do
+    for t in $clip_tiers; do
       lbl="${t%%:*}"; tw="${t##*:}"
       ffmpeg -v quiet -ss "$mid" -i "$f" -vf "scale=$tw:-2" -frames:v 1 -y "$tmp/s.png"; webp "$tmp/s.png"
       p=$(( $(fsize "$tmp/s.webp") * n ))
@@ -106,7 +115,7 @@ for f in "${clips[@]}"; do
   else
     rm -rf "$out"; mkdir -p "$out"
     strip_fps="$(python3 -c "print(($STRIP_N+2)/float('$dur'))")"   # oversample so tile always fills
-    for t in $TIERS; do
+    for t in $clip_tiers; do
       lbl="${t%%:*}"; tw="${t##*:}"
       mkdir -p "$out/$lbl"
       ffmpeg -v error -i "$f" -vf "fps=$SCRUB_FPS,scale=$tw:-2" -y "$out/$lbl/%04d.png"
@@ -118,8 +127,8 @@ for f in "${clips[@]}"; do
   fi
   # frames = what ffmpeg actually emitted (ceil(dur*fps) projects one too many,
   # which made the site request a missing last frame per clip)
-  n="$(ls -1 "$out/$top_label" | wc -l | tr -d ' ')"
-  tiers_field="$(echo "$TIERS" | tr ' ' ',')"
+  n="$(ls -1 "$out/$clip_top" | wc -l | tr -d ' ')"
+  tiers_field="$(echo "$clip_tiers" | tr ' ' ',')"
   printf "%s\t%s\t%d\t%d\t%s\t%d\t%d\t%d\n" \
     "$chapter" "$id" "$n" "$SCRUB_FPS" "$tiers_field" "$STRIP_N" "$STRIP_W" "$ch" >> "$tmp/manifest.tsv"
 done

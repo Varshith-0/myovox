@@ -6,7 +6,7 @@
  * updates never trigger React re-renders. Components subscribe with selectors.
  */
 import { create } from 'zustand'
-import type { Tier } from '@/components/media/scrubEngine'
+import { TIERS, type Tier } from '@/components/media/scrubEngine'
 
 const QUALITY_KEY = 'myovox-quality'
 
@@ -14,7 +14,7 @@ const QUALITY_KEY = 'myovox-quality'
 function readPinnedQuality(): Tier | null {
   try {
     const v = localStorage.getItem(QUALITY_KEY)
-    return v === '1080' || v === '720' || v === '540' || v === '360' || v === '240' ? v : null
+    return v && (TIERS as readonly string[]).includes(v) ? (v as Tier) : null
   } catch {
     return null
   }
@@ -48,6 +48,9 @@ export interface AppState {
   activeQuality: Tier
   /** What auto would pick right now — shown beside the menu's Auto row. */
   autoQuality: Tier
+  /** Tiers the current chapter's renders actually provide — the menu's ladder.
+   *  (1440/2160 appear only once the masters are re-rendered at that size.) */
+  availableTiers: readonly Tier[]
   /** Bumped to ask the PlayButton to (re)start hands-free playback — the seam the
    *  One Breath's end-card "Replay" uses without reaching into PlayButton internals. */
   playNonce: number
@@ -65,6 +68,7 @@ export interface AppState {
   setQualityPinned: (tier: Tier | null) => void
   setActiveQuality: (tier: Tier) => void
   setAutoQuality: (tier: Tier) => void
+  setAvailableTiers: (tiers: readonly Tier[]) => void
   requestPlay: () => void
   setEndCardShown: (shown: boolean) => void
 }
@@ -82,6 +86,7 @@ export const useStore = create<AppState>((set) => ({
   qualityPinned: readPinnedQuality(),
   activeQuality: '540',
   autoQuality: '540',
+  availableTiers: TIERS,
   playNonce: 0,
   endCardShown: false,
 
@@ -116,6 +121,8 @@ export const useStore = create<AppState>((set) => ({
     set((s) => (s.activeQuality === activeQuality ? s : { ...s, activeQuality })),
   setAutoQuality: (autoQuality) =>
     set((s) => (s.autoQuality === autoQuality ? s : { ...s, autoQuality })),
+  setAvailableTiers: (availableTiers) =>
+    set((s) => (s.availableTiers === availableTiers ? s : { ...s, availableTiers })),
   requestPlay: () => set((s) => ({ ...s, playNonce: s.playNonce + 1 })),
   setEndCardShown: (endCardShown) =>
     set((s) => (s.endCardShown === endCardShown ? s : { ...s, endCardShown })),

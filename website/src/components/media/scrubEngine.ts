@@ -7,12 +7,17 @@
 // old tier's decoded frames are kept as a stale fallback so the picture never
 // drops to the strip while the new tier streams in.
 
-/** The quality ladder, best first. Labels are the height names the UI shows (…p). */
-export const TIERS = ['1080', '720', '540', '360', '240'] as const
+/** The full quality ladder, best first. Labels are the height names the UI shows
+ *  (…p). A tier is only ever FETCHED if the clip's manifest lists it — the encode
+ *  script never upscales, so 1440/2160 exist only for clips whose master render
+ *  actually has the pixels (see availableTiers / tierFor). */
+export const TIERS = ['2160', '1440', '1080', '720', '540', '360', '240'] as const
 export type Tier = (typeof TIERS)[number]
 
 /** Tier widths (px) — mirrors encode-scrub.sh; the manifest carries the real values. */
 export const TIER_WIDTHS: Record<Tier, number> = {
+  '2160': 3840,
+  '1440': 2560,
   '1080': 1920,
   '720': 1280,
   '540': 960,
@@ -87,6 +92,12 @@ export class ScrubEngine {
   private clips = new Map<string, ClipState>();
   private tier: Tier = '540';
   private cap: Tier = '1080';
+  /** Canvas device px width — frames wider than this are decoded downscaled to
+   *  it (identical on-screen pixels, bounded memory: a pinned 2160 tier on a
+   *  laptop would otherwise hold ~33MB of RGBA per 4K frame). */
+  private devicePx = 1920;
+  /** Tiers that exist in at least one clip's render, best first. */
+  private avail: Tier[] = [...TIERS];
 
   configure(cfg: ScrubConfig) {
     this.cfg = {
@@ -96,11 +107,23 @@ export class ScrubEngine {
       leadAhead: 6,
       ...cfg,
     };
+    const seen = new Set<string>();
+    for (const meta of Object.values(cfg.manifest)) {
+      for (const label of Object.keys(meta.tiers)) seen.add(label);
+    }
+    const avail = TIERS.filter((t) => seen.has(t));
+    if (avail.length) this.avail = avail;
+  }
+
+  /** The ladder restricted to tiers some clip actually has (for the quality menu). */
+  availableTiers(): readonly Tier[] {
+    return this.avail;
   }
 
   /** Highest tier worth fetching for this display (no point exceeding device px). */
   setViewport(cssWidth: number, dpr: number) {
     const devicePx = cssWidth * dpr;
+    this.devicePx = Math.max(1, Math.round(devicePx));
     let cap: Tier = TIERS[0];
     for (const t of TIERS) {
       if (TIER_WIDTHS[t] >= devicePx) cap = t; // TIERS is best-first; keep tightening
@@ -109,7 +132,10 @@ export class ScrubEngine {
   }
 
   viewportCap(): Tier {
-    return this.cap;
+    // Never report a cap above what the renders provide — auto would "pick" a
+    // tier no clip can serve and the UI pill would lie about what's on screen.
+    const best = this.avail[0] ?? TIERS[0];
+    return TIERS.indexOf(this.cap) >= TIERS.indexOf(best) ? this.cap : best;
   }
 
   currentTier(): Tier {
@@ -292,10 +318,24 @@ export class ScrubEngine {
     finally { cs.stripInflight = false; }
   }
 
+  /** The tier to fetch for THIS clip: the engine tier, clamped to the nearest
+   *  tier the clip's render actually has (per-clip — a 1080p master among 4K
+   *  ones simply serves its best instead of 404ing down to the strip). */
+  private tierFor(cs: ClipState): Tier {
+    const start = TIERS.indexOf(this.tier);
+    for (let k = start; k < TIERS.length; k++) {
+      if (cs.meta.tiers[TIERS[k]]) return TIERS[k];
+    }
+    for (let k = start - 1; k >= 0; k--) {
+      if (cs.meta.tiers[TIERS[k]]) return TIERS[k];
+    }
+    return this.tier;
+  }
+
   private async loadFrame(cs: ClipState, i: number) {
     if (cs.frames.has(i) || cs.inflight.has(i) || cs.failed.has(i)) return;
     cs.inflight.add(i);
-    const tier = this.tier; // captured: a switch mid-flight lands in stale-safe territory
+    const tier = this.tierFor(cs); // captured: a switch mid-flight lands in stale-safe territory
     try {
       const name = String(i + 1).padStart(4, '0'); // ffmpeg %04d is 1-based
       const url = `${this.cfg.assetBase}/${this.cfg.chapter}/scrub/${cs.id}/${tier}/${name}.webp`;
@@ -304,14 +344,25 @@ export class ScrubEngine {
       if (!res.ok) { cs.failed.add(i); return; } // missing frame — stale/strip covers it
       const blob = await res.blob();
       this.cfg.onSample?.(blob.size, Math.max(1, performance.now() - t0));
-      const bmp = await createImageBitmap(blob);
-      if (cs.abort.signal.aborted || tier !== this.tier) { bmp.close(); return; }
+      const bmp = await this.decodeFrame(blob, cs.meta.tiers[tier] ?? TIER_WIDTHS[tier]);
+      if (cs.abort.signal.aborted || tier !== this.tierFor(cs)) { bmp.close(); return; }
       cs.frames.set(i, bmp);
       cs.stale.get(i)?.close();
       cs.stale.delete(i);
       this.evict(cs);
     } catch { /* transient network error — leave to stale/strip, retried on a later draw */ }
     finally { cs.inflight.delete(i); }
+  }
+
+  /** Decode capped at the canvas's device px (never upscaled): what's drawn is
+   *  pixel-identical, but memory stays bounded no matter how high the tier. */
+  private async decodeFrame(blob: Blob, srcWidth: number): Promise<ImageBitmap> {
+    if (srcWidth > this.devicePx) {
+      try {
+        return await createImageBitmap(blob, { resizeWidth: this.devicePx, resizeQuality: 'high' });
+      } catch { /* older Safari: no resize options — fall through to full decode */ }
+    }
+    return createImageBitmap(blob);
   }
 
   private evict(cs: ClipState) {

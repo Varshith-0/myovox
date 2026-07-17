@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from '@/store/useStore'
-import { TIERS } from '@/components/media/scrubEngine'
 import styles from './QualityControl.module.css'
 
 /**
@@ -15,6 +14,8 @@ export function QualityControl() {
   const auto = useStore((s) => s.autoQuality)
   const pinned = useStore((s) => s.qualityPinned)
   const setPinned = useStore((s) => s.setQualityPinned)
+  // Only tiers the current chapter's renders provide — no upscaled fake options.
+  const tiers = useStore((s) => s.availableTiers)
 
   const [open, setOpen] = useState(false)
   const groupRef = useRef<HTMLDivElement>(null)
@@ -50,7 +51,7 @@ export function QualityControl() {
               {pinned === null && <Tick />}
             </span>
           </button>
-          {TIERS.map((t) => (
+          {tiers.map((t) => (
             <button
               key={t}
               type="button"

@@ -10,15 +10,20 @@
  */
 import { STAGES } from '@/data/stages'
 import { ONE_BREATH_STAGES } from '@/data/oneBreathStages'
-import { animDir, assetUrl, ASSET_VERSION } from '@/lib/asset'
+import { animDir, assetUrl, ASSET_VERSION, MEDIA_ORIGIN } from '@/lib/asset'
 
 export function startMediaPrefetch(): void {
   if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return
   const connection = (navigator as { connection?: { saveData?: boolean } }).connection
   if (connection?.saveData) return
 
+  // The ?media= param tells the SW which CDN origin also counts as anim media
+  // (and re-installs the SW when the media host changes — exactly when needed).
+  const swUrl = `${import.meta.env.BASE_URL}sw.js${
+    MEDIA_ORIGIN ? `?media=${encodeURIComponent(MEDIA_ORIGIN)}` : ''
+  }`
   navigator.serviceWorker
-    .register(`${import.meta.env.BASE_URL}sw.js`)
+    .register(swUrl)
     .then(() => navigator.serviceWorker.ready)
     .then(async (registration) => {
       registration.active?.postMessage({ keepVersion: ASSET_VERSION })

@@ -35,6 +35,10 @@ jobs:
           cache: npm
           cache-dependency-path: website/package-lock.json
       - run: npm ci
+      # Media (anim/) is served from Cloudflare R2 — the CDN url is a compiled-in
+      # default (MEDIA_CDN in src/lib/asset.ts + vite.config.ts), so CI needs no
+      # secrets. The media tree is NOT in git: sync it with website/deploy-media.sh
+      # (which refreshes the committed .anim-version cache-bust id) before pushing.
       - run: npm run build
 
       - name: Show build output summary
