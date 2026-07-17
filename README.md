@@ -29,8 +29,8 @@ bash scripts/run.sh                    # full pipeline FROM SCRATCH (trains ever
 
 `scripts/run.sh` inlines the environment (GPU 0, editable install, HF cache, CPU decode pool) and runs the
 whole chain. **Every step is idempotent** — it is skipped if its output exists, so a crashed run
-resumes where it stopped. It requires the `varshith` tmux session for the long run. It ends by printing
-the produced numbers next to the paper targets (`python -m myovox.report`).
+resumes where it stopped. Run it inside a tmux/screen session so the long run survives logout. It ends
+by printing the produced numbers next to the paper targets (`python -m myovox.report`).
 
 ### Which file produces which number
 
@@ -87,6 +87,8 @@ myovox/
 
 ## Data & checkpoints (not committed — fetch from OSF; see `scripts/setup.sh`)
 
+Make `data/` and `checkpoints/` at the repo root and drop each file at the path shown:
+
 ```
 OSF osf.io/65vbx → data/GeneralCorpusData/   (DATA.pkl, textLABELS.pkl, audio, ...)
 OSF osf.io/bgh7t → data/wfst_decoder/ckptsLargeVocb/lang_phone/  (HLG.pt, lexicon, tokens)
@@ -95,9 +97,20 @@ checkpoints/baseline/epoch_30.pt   → upstream front-end warm-start SEED (a req
 checkpoints/main/ssl_wl_l9.pt      → precomputed WavLM-L9 features (17 GB; run.sh re-extracts if absent)
 ```
 
+Easiest is the browser: open `osf.io/65vbx` and `osf.io/bgh7t`, hit "Download as zip", unzip into the
+paths above. Or use the CLI — `pip install osfclient`, then `osf -p 65vbx clone <dir>` (it lands under
+`<dir>/osfstorage/`, so move the files up). The two `checkpoints/*.pt` seeds are from the upstream
+emg2speech release; `scripts/setup.sh` echoes the exact paths.
+
 Runtime ~15–25 h on one 12 GB GPU; ~40 GB disk for the WavLM cache + intermediate logits. **What to do
 when a step fails:** just re-run `bash scripts/run.sh` — completed steps are skipped (idempotent). Per-run
 configs + metrics are written under `outputs/runs/<name>/`.
+
+## Something not adding up?
+
+Numbers wobble within ±0.5 WER (see below). If one is off by more than that, a step breaks, or an
+instruction here is wrong, [open an issue](https://github.com/Varshith-0/myovox/issues) — paste the
+command, the output, and your setup (GPU, CUDA/torch, k2 version).
 
 ## Provenance & license
 
