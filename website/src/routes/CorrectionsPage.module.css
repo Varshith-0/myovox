@@ -1,0 +1,92 @@
+/* A letter in the middle of the page: the report's translucent card, narrowed to
+   a readable measure and centered, so the errata reads as a signed note rather
+   than another report section. Serif body throughout, matching the whole site. */
+.page {
+  position: relative;
+  z-index: var(--z-content);
+  display: flex;
+  justify-content: center;
+  padding: calc(var(--nav-h) + var(--space-16)) clamp(1.25rem, 5vw, 2.5rem) var(--space-24);
+}
+
+.letter {
+  width: 100%;
+  max-width: 640px;
+  background: rgba(3, 3, 3, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: clamp(1.75rem, 5vw, 3.5rem);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-bottom: var(--space-8);
+  margin-bottom: var(--space-8);
+  border-bottom: 1px solid var(--line);
+}
+
+.title {
+  font-size: var(--t-h2);
+  color: var(--ink);
+  text-shadow: var(--glow-text);
+}
+
+.p {
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 40, 'wght' 380;
+  color: var(--ink-dim);
+  line-height: 1.75;
+  margin-top: var(--space-4);
+}
+
+.list {
+  margin-top: var(--space-6);
+  padding-left: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.item {
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 40, 'wght' 380;
+  color: var(--ink-dim);
+  line-height: 1.75;
+  padding-left: var(--space-2);
+}
+
+.item strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--ink);
+}
+
+.link {
+  color: var(--ink);
+  border-bottom: 1px solid var(--line-strong);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.link:hover {
+  border-bottom-color: var(--ink);
+}
+
+.sign {
+  margin-top: var(--space-12);
+}
+
+.name {
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 50, 'wght' 440;
+  font-size: var(--t-lead);
+  color: var(--ink);
+  margin-top: var(--space-1);
+}

@@ -27,6 +27,9 @@ const TechnicalPage = lazy(() =>
   import('@/routes/TechnicalPage').then((m) => ({ default: m.TechnicalPage })),
 )
 const CodePage = lazy(() => import('@/routes/CodePage').then((m) => ({ default: m.CodePage })))
+const CorrectionsPage = lazy(() =>
+  import('@/routes/CorrectionsPage').then((m) => ({ default: m.CorrectionsPage })),
+)
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -90,6 +93,7 @@ const ROUTE_TITLES: Record<string, string> = {
   '/story/under-the-hood': 'Under the Hood · Myovox',
   '/technical': 'Technical report · Myovox',
   '/code': 'Code · Myovox',
+  '/corrections': 'Corrections & Errata · Myovox',
 }
 function DocumentTitle() {
   const { pathname } = useLocation()
@@ -168,6 +172,7 @@ export default function App() {
                 />
                 <Route path="/technical" element={<TechnicalPage />} />
                 <Route path="/code" element={<CodePage />} />
+                <Route path="/corrections" element={<CorrectionsPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>

@@ -15,7 +15,8 @@ import styles from './Layout.module.css'
  */
 export function Layout({ children }: { children: ReactNode }) {
   const { pathname } = useLocation()
-  const showFooter = pathname === '/technical' || pathname === '/code'
+  const showFooter =
+    pathname === '/technical' || pathname === '/code' || pathname === '/corrections'
   return (
     <>
       <a

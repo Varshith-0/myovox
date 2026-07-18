@@ -164,11 +164,28 @@ export function TechnicalPage() {
     [lenis],
   )
 
-  // A deep link (/technical#hlg) lands before the article has rendered.
+  // A deep link (/technical#hlg) lands before the article has rendered, and the
+  // syntax highlighter keeps shifting layout for a while after — so a single scroll
+  // aims at a stale position, missing targets low in the report (e.g. an FAQ answer).
+  // Re-scroll until the target's absolute position stops moving, then stop.
   useEffect(() => {
     if (!window.location.hash) return
     const id = window.location.hash.slice(1)
-    const t = setTimeout(() => goto(id), 100)
+    let lastY = -1
+    let tries = 0
+    let t = 0
+    const settle = () => {
+      const el = document.getElementById(id)
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET
+        goto(id)
+        if (Math.abs(y - lastY) <= 2 || tries >= 12) return // layout settled
+        lastY = y
+      }
+      tries += 1
+      t = window.setTimeout(settle, 120)
+    }
+    t = window.setTimeout(settle, 100)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lenis])

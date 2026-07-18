@@ -20,4 +20,5 @@ export const NAV_LINKS: readonly NavLinkDef[] = [
   { to: '/story', label: 'Story', end: true },
   { to: '/technical', label: 'Technical' },
   { to: '/code', label: 'Code' },
+  { to: '/corrections', label: 'Corrections' },
 ] as const
